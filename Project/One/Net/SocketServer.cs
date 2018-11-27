@@ -1,6 +1,6 @@
 ﻿namespace One.Net
 {
-    class Server
+    class SocketServer
     {
     }
 }
