@@ -7,15 +7,43 @@ namespace One.Net
 {
     class SocketServer
     {
+        /// <summary>
+        /// 最大连接数
+        /// </summary>
         private int m_numConnections;   // the maximum number of connections the sample is designed to handle simultaneously 
+
+        /// <summary>
+        /// 缓冲区大小
+        /// </summary>
         private int m_receiveBufferSize;// buffer size to use for each socket I/O operation 
+
+        /// <summary>
+        /// 缓冲区管理器
+        /// </summary>
         BufferManager m_bufferManager;  // represents a large reusable set of buffers for all socket operations
         const int opsToPreAlloc = 2;    // read, write (don't alloc buffer space for accepts)
+
+        /// <summary>
+        /// 监听的端口
+        /// </summary>
         Socket listenSocket;            // the socket used to listen for incoming connection requests
-                                        // pool of reusable SocketAsyncEventArgs objects for write, read and accept socket operations
-        SocketAsyncEventArgsPool m_readWritePool;
+
+        /// <summary>
+        /// 异步套接字操作池
+        /// </summary>
+        SocketAsyncEventArgsPool m_readWritePool; // pool of reusable SocketAsyncEventArgs objects for write, read and accept socket operations
+
+        /// <summary>
+        /// 服务器收到的总字节数
+        /// </summary>
         int m_totalBytesRead;           // counter of the total # bytes received by the server
+
+        /// <summary>
+        /// 连接的客户端总数
+        /// </summary>
         int m_numConnectedSockets;      // the total number of clients connected to the server 
+
+
         Semaphore m_maxNumberAcceptedClients;
 
         // Create an uninitialized server instance.  

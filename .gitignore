@@ -1,3 +1,12 @@
 /Project/One/bin
 /Project/One/obj
 /Project/.vs
+/ClientDemo/OneClientDemo/One.Client.csproj
+/ClientDemo/OneClientDemo/One.Client.meta
+/ClientDemo/OneClientDemo/One.csproj
+/ClientDemo/OneClientDemo/OneClientDemo.sln
+/ClientDemo/OneClientDemo/.vs
+/ClientDemo/OneClientDemo/Library
+/ClientDemo/OneClientDemo/obj
+/ClientDemo/OneClientDemo/Temp
+/ClientDemo/OneClientDemo/Assembly-CSharp.csproj
