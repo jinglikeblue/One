@@ -85,7 +85,7 @@ namespace One.Net
             {
                 //Pre-allocate a set of reusable SocketAsyncEventArgs
                 readWriteEventArg = new SocketAsyncEventArgs();
-                readWriteEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);
+                readWriteEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(IO_Completed);               
                 readWriteEventArg.UserToken = new AsyncUserToken();
 
                 // assign a byte buffer from the buffer pool to the SocketAsyncEventArg object
@@ -104,6 +104,7 @@ namespace One.Net
         // for connection requests on</param>
         public void Start(IPEndPoint localEndPoint)
         {
+            Console.WriteLine(string.Format("Start Lisening {0}", localEndPoint.ToString()));
             // create the socket which listens for incoming connections
             listenSocket = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             listenSocket.Bind(localEndPoint);
@@ -128,14 +129,14 @@ namespace One.Net
             if (acceptEventArg == null)
             {
                 acceptEventArg = new SocketAsyncEventArgs();
-                acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(AcceptEventArg_Completed);
+                acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(AcceptEventArg_Completed);                
             }
             else
             {
                 // socket must be cleared since the context object is being reused
-                acceptEventArg.AcceptSocket = null;
+                acceptEventArg.AcceptSocket = null;                
             }
-
+            
             m_maxNumberAcceptedClients.WaitOne();
             bool willRaiseEvent = listenSocket.AcceptAsync(acceptEventArg);
             if (!willRaiseEvent)
@@ -153,7 +154,7 @@ namespace One.Net
         }
 
         private void ProcessAccept(SocketAsyncEventArgs e)
-        {
+        {            
             Interlocked.Increment(ref m_numConnectedSockets);
             Console.WriteLine("Client connection accepted. There are {0} clients connected to the server",
                 m_numConnectedSockets);
@@ -187,9 +188,9 @@ namespace One.Net
                     break;
                 case SocketAsyncOperation.Send:
                     ProcessSend(e);
-                    break;
+                    break;                    
                 default:
-                    throw new ArgumentException("The last operation completed on the socket was not a receive or send");
+                    throw new ArgumentException(string.Format("The last operation completed on the socket was not a receive or send : {0}", e.LastOperation));
             }
 
         }
@@ -210,11 +211,18 @@ namespace One.Net
 
                 //echo the data received back to the client
                 e.SetBuffer(e.Offset, e.BytesTransferred);
+
+                //bool willRaiseEvent = token.Socket.ReceiveAsync(e);
+                //if (!willRaiseEvent)
+                //{
+                //    ProcessReceive(e);
+                //}
+
                 bool willRaiseEvent = token.Socket.SendAsync(e);
                 if (!willRaiseEvent)
                 {
                     ProcessSend(e);
-                }
+                }               
 
             }
             else

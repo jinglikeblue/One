@@ -1,4 +1,6 @@
-﻿using System;
+﻿using One.Net;
+using System;
+using System.Net;
 using System.Threading;
 
 namespace One
@@ -6,22 +8,22 @@ namespace One
     class Program
     {
         static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-
+        {           
             new Program();
         }
 
         public Program()
         {
-            MainLoop();
+            SocketServer ss = new SocketServer(1000, 4096);
+            ss.Init();
+            ss.Start(new IPEndPoint(IPAddress.Parse("0.0.0.0"), 1875));
+            //MainLoop();
         }
 
         void MainLoop()
         {
             while (true)
-            {
-                Console.WriteLine(DateTime.UtcNow.Second.ToString());
+            {                
                 Thread.Sleep(1000);
             }
         }
