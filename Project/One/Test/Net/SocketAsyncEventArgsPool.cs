@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 
-namespace One.Net
+namespace One.Test.Net
 {
     internal class SocketAsyncEventArgsPool
     {

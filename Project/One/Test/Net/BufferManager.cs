@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 
-namespace One.Net
+namespace One.Test.Net
 {
     class BufferManager
     {
