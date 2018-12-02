@@ -7,7 +7,8 @@ namespace One
     class Program
     {
         static void Main(string[] args)
-        {           
+        {
+            ByteArray.defaultBufferSize = 4096;
             new Program();
         }
 

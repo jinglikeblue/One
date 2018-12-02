@@ -9,7 +9,7 @@ namespace One.Net
     {
         static public void Enter(Socket socketClient)
         {
-            new Client(socketClient);
+            new Client(socketClient, 4096);
         }
     }
 }

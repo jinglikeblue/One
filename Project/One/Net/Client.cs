@@ -24,13 +24,14 @@ namespace One.Net
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
-        public Client(Socket socket)
+        public Client(Socket socket, ushort bufferSize)
         {
             Console.WriteLine("A client has been connected");
 
             _socket = socket;
 
-            _buffer = new byte[4096];
+            _pp = new ProtocolProcess();
+            _buffer = new byte[bufferSize];
 
             _receiveEA = new SocketAsyncEventArgs();            
             _sendEA = new SocketAsyncEventArgs();
@@ -90,23 +91,26 @@ namespace One.Net
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
-                int used = _pp.Unpack(_buffer);
+                int used = _pp.Unpack(_buffer, _bufferAvailable);
+
+                //将处理的数据发回去，测试用
+                byte[] temp = new byte[used];
+                Array.Copy(_buffer, temp, used);
+                Send(temp);
+
                 if(used > 0)
                 {
-                    //将还没有使用的数据移动到数据开头
-                    Array.Copy
+                    _bufferAvailable = _bufferAvailable - used;
+                    if (0 != _bufferAvailable)
+                    {
+                        //将还没有使用的数据移动到数据开头
+                        byte[] newBytes = new byte[_buffer.Length];
+                        Array.Copy(_buffer, used, newBytes, 0, _bufferAvailable);
+                        _buffer = newBytes;
+                    }
                 }
 
-                //将读取的数据写入到缓存中              
-                //Array.Copy(e.Buffer,e.Offset,_buffer,)
-
-                //byte[] ba = new byte[e.BytesTransferred];
-                //Array.Copy(e.Buffer, e.Offset, ba, 0, e.BytesTransferred);
-
-                StartReceive();
-
-
-                //Send(ba);                             
+                StartReceive();                           
             }
             else
             {

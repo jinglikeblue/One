@@ -4,6 +4,6 @@
     {
         byte[] Pack(IProtocolBody body);
 
-        int Unpack(byte[] buf);
+        int Unpack(byte[] buf, int available);
     }
 }
