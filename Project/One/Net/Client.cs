@@ -9,7 +9,13 @@ namespace One.Net
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
         Socket _socket;
-        byte[] _buffer;
+
+        ByteArray _ba;
+
+        /// <summary>
+        /// 是否客户端已关闭
+        /// </summary>
+        public bool isClosed { get; private set; } = false;
 
         public Client(Socket socket)
         {
@@ -17,10 +23,10 @@ namespace One.Net
 
             _socket = socket;
 
-            _buffer = new byte[4096];
+            _ba = new ByteArray(4096);
 
             _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.SetBuffer(_buffer, 0, _buffer.Length);
+            _receiveEA.SetBuffer(_ba.Available, 0, _buffer.Length);
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);            
             _sendEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
@@ -54,7 +60,7 @@ namespace One.Net
 
         public void Send(byte[] bytes)
         {
-            _sendEA.SetBuffer(bytes);
+            _sendEA.SetBuffer(bytes, 0, bytes.Length);
             
             bool willRaiseEvent = _socket.SendAsync(_sendEA);
             if (!willRaiseEvent)
@@ -63,37 +69,53 @@ namespace One.Net
             }
         }
 
+        /// <summary>
+        /// 处理接收到的消息（多线程事件）
+        /// </summary>
+        /// <param name="e"></param>
         private void ProcessReceive(SocketAsyncEventArgs e)
         {            
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {                               
                 Console.WriteLine("Thread[{0}]: The server has read a total of {1} bytes", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred);
 
-                byte[] ba = new byte[e.BytesTransferred];
+                //将读取的数据写入到缓存中              
+                Array.Copy(e.Buffer,e.Offset,_buffer,)
 
-                Array.Copy(e.Buffer, e.Offset, ba, 0, e.BytesTransferred);
-                Send(ba);
+                //byte[] ba = new byte[e.BytesTransferred];
+                //Array.Copy(e.Buffer, e.Offset, ba, 0, e.BytesTransferred);
+
                 StartReceive();
+
+
+                //Send(ba);                             
             }
             else
             {
-                Close();
+                Shutdown();
             }
         }
 
+        /// <summary>
+        /// 处理发送的消息回调（多线程事件）
+        /// </summary>
+        /// <param name="e"></param>
         private void ProcessSend(SocketAsyncEventArgs e)
         {
             if (e.SocketError == SocketError.Success)
             {
-                Console.WriteLine("Thread[{0}]: Send data success!", Thread.CurrentThread.ManagedThreadId);
+                Console.WriteLine("Thread[{0}]: send {1} bytes!", Thread.CurrentThread.ManagedThreadId, e.Buffer.Length);
             }
             else
             {
-                Close();
+                Shutdown();
             }
         }
 
-        public void Close()
+        /// <summary>
+        /// 关闭客户端连接
+        /// </summary>
+        void Shutdown()
         {
             try
             {
@@ -103,6 +125,14 @@ namespace One.Net
             catch (Exception) { }
             _socket.Close();
             Console.WriteLine("A client has been disconnected");
+        }
+
+        /// <summary>
+        /// 关闭客户端
+        /// </summary>
+        public void Close()
+        {
+            isClosed = true;
         }
     }
 }

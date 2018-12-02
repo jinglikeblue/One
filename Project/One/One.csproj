@@ -6,4 +6,8 @@
     <StartupObject>One.Program</StartupObject>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
 </Project>
