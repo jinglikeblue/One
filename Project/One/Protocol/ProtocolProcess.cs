@@ -10,9 +10,25 @@ namespace One.Protocol
     /// 协议处理器  
     /// 协议包结构为 | ushort：协议数据长度 | 协议数据 |
     /// </summary>
-    class ProtocolProcess : IProtocolProcess
-    {
-        public Queue<ProtocolBody> pbList = new Queue<ProtocolBody>();
+    public class ProtocolProcess : IProtocolProcess
+    {       
+        List<ProtocolBody> _pbList = new List<ProtocolBody>();
+
+        public void ReceiveProtocols(Action<ProtocolBody> onReceiveProtocol)
+        {
+            List<ProtocolBody> pbList = new List<ProtocolBody>();
+            
+            lock (_pbList)
+            {
+                pbList.AddRange(_pbList);
+                _pbList.Clear();
+            }
+
+            for(int i = 0; i < pbList.Count; i++)
+            {
+                onReceiveProtocol(pbList[i]);
+            }
+        }
 
         /// <summary>
         /// 解包协议数据
@@ -45,8 +61,12 @@ namespace One.Protocol
             byte[] protocolData = ba.ReadBytes(protocolSize);
             ProtocolBody pb = new ProtocolBody();
             pb.Unserialize(protocolData);
-            //协议加入收到的协议队列
-            pbList.Enqueue(pb);
+
+            lock (_pbList)
+            {
+                //协议加入收到的协议队列
+                _pbList.Add(pb);
+            }
 
             //记录使用协议长度
             used += ByteArray.USHORT_SIZE + protocolData.Length;

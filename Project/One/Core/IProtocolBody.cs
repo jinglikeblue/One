@@ -3,7 +3,7 @@
     /// <summary>
     /// 协议数据体
     /// </summary>
-    interface IProtocolBody
+    public interface IProtocolBody
     {
         /// <summary>
         /// 反序列化协议数据

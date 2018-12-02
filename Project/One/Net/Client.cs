@@ -17,7 +17,10 @@ namespace One.Net
         /// </summary>
         int _bufferAvailable = 0;
 
-        ProtocolProcess _pp;
+        /// <summary>
+        /// 协议处理器
+        /// </summary>
+        public ProtocolProcess protocolProcess { get; }
 
         /// <summary>
         /// 是否客户端已关闭
@@ -30,7 +33,7 @@ namespace One.Net
 
             _socket = socket;
 
-            _pp = new ProtocolProcess();
+            protocolProcess = new ProtocolProcess();
             _buffer = new byte[bufferSize];
 
             _receiveEA = new SocketAsyncEventArgs();            
@@ -89,14 +92,9 @@ namespace One.Net
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
-                int used = _pp.Unpack(_buffer, _bufferAvailable);
+                int used = protocolProcess.Unpack(_buffer, _bufferAvailable);
 
-                Console.WriteLine("bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
-
-                //将处理的数据发回去，测试用
-                byte[] temp = new byte[used];
-                Array.Copy(_buffer, temp, used);
-                Send(temp);
+                Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
                 if(used > 0)
                 {
@@ -147,6 +145,7 @@ namespace One.Net
             catch (Exception) { }
             _socket.Close();
             Console.WriteLine("A client has shutdown");
+            ClientManager.Exit(this);
         }
 
         /// <summary>
