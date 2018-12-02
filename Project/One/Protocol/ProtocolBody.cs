@@ -25,7 +25,7 @@ namespace One.Protocol
         {
             ByteArray ba = new ByteArray(protocolData);
             value = ba.ReadString();
-            Console.WriteLine("{0}: 收到的内容：{1}", Thread.CurrentThread.ManagedThreadId, value);
+            //Console.WriteLine("{0}: 收到的内容：{1}", Thread.CurrentThread.ManagedThreadId, value);
         }
     }
 

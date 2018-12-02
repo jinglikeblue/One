@@ -86,12 +86,12 @@ namespace One.Net
         {            
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {                               
-                Console.WriteLine("Thread[{0}]: The server has read a total of {1} bytes", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred);
-
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
                 int used = _pp.Unpack(_buffer, _bufferAvailable);
+
+                Console.WriteLine("bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
                 //将处理的数据发回去，测试用
                 byte[] temp = new byte[used];

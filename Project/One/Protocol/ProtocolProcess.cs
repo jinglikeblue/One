@@ -22,11 +22,12 @@ namespace One.Protocol
         public int Unpack(byte[] buffer, int available)
         {
             ByteArray ba = new ByteArray(buffer, available);
-            Unpack(ba);
-            return ba.Pos;
+            int used = 0;
+            Unpack(ba, ref used);
+            return used;
         }
 
-        public void Unpack(ByteArray ba)
+        void Unpack(ByteArray ba, ref int used)
         {
             if(ba.ReadEnableSize < ByteArray.USHORT_SIZE)
             {
@@ -47,8 +48,11 @@ namespace One.Protocol
             //协议加入收到的协议队列
             pbList.Enqueue(pb);
 
+            //记录使用协议长度
+            used += ByteArray.USHORT_SIZE + protocolData.Length;
+
             //迭代下一个粘连包
-            Unpack(ba);
+            Unpack(ba, ref used);
         }
 
         /// <summary>
