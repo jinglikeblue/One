@@ -5,11 +5,22 @@ using System.Text;
 
 namespace One.Net
 {
-    class ClientManager
+    public class ClientManager
     {
+        public static event EventHandler<Client> onClientEnterHandler;
+        public static event EventHandler<Client> onClientExitHandler;
+        //public Action<Client> onClientEnter;
+        //public Action<Client> onClientExit;
+
         static public void Enter(Socket socketClient)
+        {            
+            Client client = new Client(socketClient, 4096);
+            onClientEnterHandler?.Invoke(null, client);
+        }
+
+        static public void Exit(Client client)
         {
-            new Client(socketClient, 4096);
+            onClientExitHandler?.Invoke(null, client);
         }
     }
 }

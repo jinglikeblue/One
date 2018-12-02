@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace One.Net
 {
-    class Client
+    public class Client
     {
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
@@ -26,7 +26,7 @@ namespace One.Net
 
         public Client(Socket socket, ushort bufferSize)
         {
-            Console.WriteLine("A client has been connected");
+            Console.WriteLine("Thread [{0}]: A client has been connected", Thread.CurrentThread.ManagedThreadId);
 
             _socket = socket;
 
@@ -146,7 +146,7 @@ namespace One.Net
             // throws if client process has already closed
             catch (Exception) { }
             _socket.Close();
-            Console.WriteLine("A client has been disconnected");
+            Console.WriteLine("A client has shutdown");
         }
 
         /// <summary>

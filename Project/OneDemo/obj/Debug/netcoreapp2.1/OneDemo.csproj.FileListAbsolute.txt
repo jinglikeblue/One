@@ -1,0 +1,14 @@
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\OneDemo.deps.json
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\OneDemo.runtimeconfig.json
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\OneDemo.runtimeconfig.dev.json
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\OneDemo.dll
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\OneDemo.pdb
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.csprojAssemblyReference.cache
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.csproj.CoreCompileInputs.cache
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.AssemblyInfoInputs.cache
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.AssemblyInfo.cs
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.dll
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.pdb
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\One.dll
+E:\projects\One\Project\OneDemo\bin\Debug\netcoreapp2.1\One.pdb
+E:\projects\One\Project\OneDemo\obj\Debug\netcoreapp2.1\OneDemo.csproj.CopyComplete

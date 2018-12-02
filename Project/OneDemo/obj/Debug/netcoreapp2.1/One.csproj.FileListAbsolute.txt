@@ -1,0 +1,11 @@
+E:\projects\One\Project\One\bin\Debug\netcoreapp2.1\One.deps.json
+E:\projects\One\Project\One\bin\Debug\netcoreapp2.1\One.runtimeconfig.json
+E:\projects\One\Project\One\bin\Debug\netcoreapp2.1\One.runtimeconfig.dev.json
+E:\projects\One\Project\One\bin\Debug\netcoreapp2.1\One.dll
+E:\projects\One\Project\One\bin\Debug\netcoreapp2.1\One.pdb
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.csprojAssemblyReference.cache
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.csproj.CoreCompileInputs.cache
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.AssemblyInfoInputs.cache
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.AssemblyInfo.cs
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.dll
+E:\projects\One\Project\One\obj\Debug\netcoreapp2.1\One.pdb

@@ -5,25 +5,20 @@ using System.Net.Sockets;
 
 namespace One.Net
 {
-    class SocketServer: IServer
+    public class SocketServer: IServer
     {
         /// <summary>
         /// 监听的端口
         /// </summary>
-        Socket socket;
-
-        public SocketServer()
-        {
-
-        }
+        Socket _socket;
 
         public void Start(string host, int port)
         {
             Console.WriteLine(string.Format("Start Lisening {0}:{1}", host, port));
 
-            socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(new IPEndPoint(IPAddress.Parse(host), port));
-            socket.Listen(100);
+            _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            _socket.Bind(new IPEndPoint(IPAddress.Parse(host), port));
+            _socket.Listen(100);
             StartAccept(null);
         }
 
@@ -43,7 +38,7 @@ namespace One.Net
                 e.AcceptSocket = null;
             }
             
-            bool willRaiseEvent = socket.AcceptAsync(e);
+            bool willRaiseEvent = _socket.AcceptAsync(e);
             if (!willRaiseEvent)
             {
                 ProcessAccept(e);
