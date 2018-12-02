@@ -16,4 +16,8 @@
     <ProjectReference Include="..\One\One.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="BaseProtocol\" />
+  </ItemGroup>
+
 </Project>

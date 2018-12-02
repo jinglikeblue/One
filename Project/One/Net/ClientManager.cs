@@ -31,14 +31,14 @@ namespace One.Net
         /// </summary>
         public static event EventHandler<Client> onClientExitHandler;
 
-        static internal void Enter(Socket socketClient)
+        internal static void Enter(Socket socketClient)
         {
             Interlocked.Increment(ref _clientCount);
             Client client = new Client(socketClient, 4096);
             onClientEnterHandler?.Invoke(null, client);
         }
 
-        static internal void Exit(Client client)
+        internal static void Exit(Client client)
         {
             Interlocked.Decrement(ref _clientCount);
             onClientExitHandler?.Invoke(null, client);
