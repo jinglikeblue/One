@@ -1,8 +1,6 @@
 ﻿using One.Net;
-using OneDemo;
 using OneDemo.Managers;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace OneDemo
@@ -15,6 +13,8 @@ namespace OneDemo
             new Program();
         }
 
+        ThreadSyncActions _tsa = new ThreadSyncActions();
+
         public Program()
         {            
             new SocketServer().Start("0.0.0.0", 1875);
@@ -25,42 +25,25 @@ namespace OneDemo
             new Thread(LogicThraed).Start();
 
             Console.WriteLine("Thread [{0}]:Press any key to terminate the server process....", Thread.CurrentThread.ManagedThreadId); 
-            Console.ReadKey();
-            //SocketServer ss = new SocketServer(1000, 4096);
-            //ss.Init();
-            //ss.Start(new IPEndPoint(IPAddress.Parse("0.0.0.0"), 1875));
-            
+            Console.ReadKey();            
         }
 
         private void OnClientEnter(object sender, Client e)
         {
-            AddSyncAction(()=> {
+            _tsa.AddToSyncAction(()=> {
                 UserMgr.Ins.Enter(e);
-                Console.WriteLine("Thread [{0}]:enter", Thread.CurrentThread.ManagedThreadId);
-            });
-            
-            
+                //Console.WriteLine("Thread [{0}]:enter", Thread.CurrentThread.ManagedThreadId);
+            });            
         }
 
         private void OnClientExit(object sender, Client e)
         {
-            AddSyncAction(() =>
+            _tsa.AddToSyncAction(() =>
             {
                 UserMgr.Ins.Exit(e);
-                Console.WriteLine("Thread [{0}]:exit", Thread.CurrentThread.ManagedThreadId);
+                //Console.WriteLine("Thread [{0}]:exit", Thread.CurrentThread.ManagedThreadId);
             });
         }
-
-        List<Action> logicSyncActionList = new List<Action>();
-
-        public void AddSyncAction(Action action)
-        {
-            lock(logicSyncActionList)
-            {
-                logicSyncActionList.Add(action);
-            }
-        }
-
         
         /// <summary>
         /// 逻辑线程
@@ -69,32 +52,34 @@ namespace OneDemo
         {
             Console.WriteLine("Thread [{0}]:Logic Start", Thread.CurrentThread.ManagedThreadId);
 
+            //long last = DateTime.UtcNow.ToFileTimeUtc() / 10000;
+            //long ms = 0;
+            //long maxDetal = 0;
+
+            int delay = 1000 / 30;
+
             while (true)
             {
-                RunSyncActions();
+                //long now = DateTime.UtcNow.ToFileTimeUtc() / 10000;
+                //long detal = now - last;
+                //last = now;
+                //if (detal > maxDetal)
+                //{
+                //    maxDetal = detal;
+                //}
+                //ms += detal;                
+                //if (ms >= 1000)
+                //{
+                //    Console.WriteLine("Time [{0}]",  maxDetal);
+                //    ms = 0;
+                //    maxDetal = 0;
+                //}
+
+                _tsa.RunSyncActions();
 
                 UserMgr.Ins.Update();
 
-                Thread.Sleep(1000 / 30);
-            }
-        }
-
-        /// <summary>
-        /// 执行线程同步方法清单
-        /// </summary>
-        void RunSyncActions()
-        {
-            List<Action> actionList = new List<Action>();
-            actionList.Clear();
-            lock (logicSyncActionList)
-            {
-                actionList.AddRange(logicSyncActionList);
-                logicSyncActionList.Clear();
-            }
-
-            for (int i = 0; i < actionList.Count; i++)
-            {
-                actionList[i].Invoke();
+                Thread.Sleep(delay);
             }
         }
     }

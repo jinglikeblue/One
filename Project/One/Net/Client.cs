@@ -72,6 +72,11 @@ namespace One.Net
 
         public void Send(byte[] bytes)
         {
+            if(null == _socket)
+            {
+                return;
+            }
+
             _sendEA.SetBuffer(bytes, 0, bytes.Length);
             
             bool willRaiseEvent = _socket.SendAsync(_sendEA);
@@ -94,7 +99,7 @@ namespace One.Net
                 //协议处理器处理协议数据
                 int used = protocolProcess.Unpack(_buffer, _bufferAvailable);
 
-                Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
+                //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
                 if(used > 0)
                 {
@@ -124,7 +129,7 @@ namespace One.Net
         {
             if (e.SocketError == SocketError.Success)
             {
-                Console.WriteLine("Thread[{0}]: send {1} bytes!", Thread.CurrentThread.ManagedThreadId, e.Buffer.Length);
+                //Console.WriteLine("Thread[{0}]: send {1} bytes!", Thread.CurrentThread.ManagedThreadId, e.Buffer.Length);
             }
             else
             {
@@ -144,6 +149,8 @@ namespace One.Net
             // throws if client process has already closed
             catch (Exception) { }
             _socket.Close();
+            _socket = null;
+            _buffer = null;
             Console.WriteLine("A client has shutdown");
             ClientManager.Exit(this);
         }

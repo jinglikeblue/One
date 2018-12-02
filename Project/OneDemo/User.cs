@@ -11,14 +11,14 @@ namespace OneDemo
     {
         public Client client { get; }
 
-        bool _isDestroy = false;
+        bool _destroyFlag = false;
 
         /// <summary>
         /// 标记为要销毁对象
         /// </summary>
         public void MarkDestroy()
         {
-            _isDestroy = true;
+            _destroyFlag = true;
         }
 
         public User(Client client)
@@ -26,15 +26,20 @@ namespace OneDemo
             this.client = client;            
         }
 
-        public void Update()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>返回false表示不再存活</returns>
+        public bool Update()
         {
-            if(_isDestroy)
+            if(_destroyFlag)
             {
                 Destroy();
-                return;
+                return false;
             }
 
             client.protocolProcess.ReceiveProtocols(OnReceiveProtocol);
+            return true;
         }
 
         /// <summary>
@@ -48,7 +53,7 @@ namespace OneDemo
 
         public void Destroy()
         {
-            UserMgr.Ins.RemoveUser(this);
+            
         }
     }    
 }

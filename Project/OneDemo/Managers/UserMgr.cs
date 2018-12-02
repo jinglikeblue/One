@@ -1,7 +1,5 @@
 ﻿using One.Net;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OneDemo.Managers
 {
@@ -10,7 +8,7 @@ namespace OneDemo.Managers
         public static UserMgr Ins { get; private set; } = new UserMgr();
 
         HashSet<User> _userSet = new HashSet<User>();
-        Dictionary<Client, User> _c2uDic = new Dictionary<Client, User>();
+        Dictionary<Client, User> _c2uDic = new Dictionary<Client, User>();        
 
         public void Enter(Client client)
         {
@@ -27,17 +25,23 @@ namespace OneDemo.Managers
             }            
         }
 
-        public void RemoveUser(User user)
-        {
-            _userSet.Remove(user);
-            _c2uDic.Remove(user.client);            
-        }
-
         public void Update()
         {
-            foreach(var user in _userSet)
+            HashSet<User> destroySet = new HashSet<User>();
+
+            foreach (var user in _userSet)
             {
-                user.Update();
+                if(false == user.Update())
+                {
+                    destroySet.Add(user);
+                }
+            }
+
+            //清除要删除的对象
+            foreach(var user in destroySet)
+            {
+                _userSet.Remove(user);
+                _c2uDic.Remove(user.client);
             }
         }
     }
