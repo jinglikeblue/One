@@ -6,5 +6,6 @@ namespace One.Core
 {
     interface IProtocolBody
     {
+        byte[] Serialize();
     }
 }

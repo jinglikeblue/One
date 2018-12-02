@@ -2,8 +2,8 @@
 {
     interface IProtocolProcess
     {
-        void Pack(IProtocolBody body);
+        byte[] Pack(IProtocolBody body);
 
-        void Unpack(byte[] buf);
+        int Unpack(byte[] buf);
     }
 }

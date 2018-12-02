@@ -76,17 +76,20 @@ namespace One.Net
         int _pos = 0;
 
         /// <summary>
-        /// 有效字节大小次奥
-        /// </summary>
-        int _available = 0;
-
-        /// <summary>
         /// 目前有效字节大小
         /// </summary>
-        public int Available
+        public int Available { get; private set; } = 0;
+
+        /// <summary>
+        /// 剩余可写入的数据长度
+        /// </summary>
+        public int WriteEnableSize
         {
-            get { return _available; }
-        }        
+            get
+            {
+                return Size - Available;
+            }
+        }
 
         /// <summary>
         /// 将数据转为字节数组导出
@@ -111,7 +114,7 @@ namespace One.Net
 
         public ByteArray(int bufferSize, bool isBigEndian = true)
         {                       
-            Init(new byte[Available], isBigEndian);            
+            Init(new byte[bufferSize], isBigEndian);            
         }
 
         void Init(byte[] bytes, bool isBigEndian = true)
@@ -126,10 +129,11 @@ namespace One.Net
         }
 
         /// <summary>
-        /// 充值指针位置
+        /// 重置对象的数据，指针和可读数据都会被初始化
         /// </summary>
         public void Reset()
         {
+            Available = 0;
             SetPos(0);
         }
 
@@ -206,7 +210,7 @@ namespace One.Net
         public void Write(byte v)
         {
             Bytes[_pos] = v;
-            _available += 1;
+            Available += 1;
             MovePos(1);
         }
 
@@ -225,7 +229,7 @@ namespace One.Net
         public void Write(byte[] sourceBytes, int sourceIndex, int length)
         {
             Array.Copy(sourceBytes, sourceIndex, Bytes, _pos, length);
-            _available += length;
+            Available += length;
             MovePos(length);
         }
 

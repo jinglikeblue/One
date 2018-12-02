@@ -1,4 +1,5 @@
-﻿using System;
+﻿using One.Protocol;
+using System;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -10,7 +11,13 @@ namespace One.Net
         SocketAsyncEventArgs _sendEA;
         Socket _socket;
 
-        ByteArray _ba;
+        byte[] _buffer;
+        /// <summary>
+        /// 缓冲区可用字节长度
+        /// </summary>
+        int _bufferAvailable = 0;
+
+        ProtocolProcess _pp;
 
         /// <summary>
         /// 是否客户端已关闭
@@ -23,10 +30,9 @@ namespace One.Net
 
             _socket = socket;
 
-            _ba = new ByteArray(4096);
+            _buffer = new byte[4096];
 
-            _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.SetBuffer(_ba.Available, 0, _buffer.Length);
+            _receiveEA = new SocketAsyncEventArgs();            
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);            
             _sendEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
@@ -50,7 +56,9 @@ namespace One.Net
         }
 
         void StartReceive()
-        {            
+        {
+            _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
+
             bool willRaiseEvent = _socket.ReceiveAsync(_receiveEA);
             if (!willRaiseEvent)
             {
@@ -79,8 +87,18 @@ namespace One.Net
             {                               
                 Console.WriteLine("Thread[{0}]: The server has read a total of {1} bytes", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred);
 
+                _bufferAvailable += e.BytesTransferred;
+
+                //协议处理器处理协议数据
+                int used = _pp.Unpack(_buffer);
+                if(used > 0)
+                {
+                    //将还没有使用的数据移动到数据开头
+                    Array.Copy
+                }
+
                 //将读取的数据写入到缓存中              
-                Array.Copy(e.Buffer,e.Offset,_buffer,)
+                //Array.Copy(e.Buffer,e.Offset,_buffer,)
 
                 //byte[] ba = new byte[e.BytesTransferred];
                 //Array.Copy(e.Buffer, e.Offset, ba, 0, e.BytesTransferred);
