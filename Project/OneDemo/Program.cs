@@ -30,9 +30,10 @@ namespace OneDemo
 
         private void OnClientEnter(object sender, TcpClient e)
         {
+            //Console.WriteLine("Thread [{0}]:enter cout:{1}", Thread.CurrentThread.ManagedThreadId, _tcpSrver.ClientCount);
             _tsa.AddToSyncAction(()=> {
                 UserMgr.Ins.Enter(e);
-                //Console.WriteLine("Thread [{0}]:enter", Thread.CurrentThread.ManagedThreadId);
+                
             });            
         }
 
