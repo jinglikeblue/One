@@ -8,16 +8,16 @@ namespace OneDemo.Managers
         public static UserMgr Ins { get; private set; } = new UserMgr();
 
         HashSet<User> _userSet = new HashSet<User>();
-        Dictionary<Client, User> _c2uDic = new Dictionary<Client, User>();        
+        Dictionary<TcpClient, User> _c2uDic = new Dictionary<TcpClient, User>();        
 
-        public void Enter(Client client)
+        public void Enter(TcpClient client)
         {
             User user = new User(client);
             _c2uDic[client] = user;
             _userSet.Add(user);            
         }
 
-        public void Exit(Client client)
+        public void Exit(TcpClient client)
         {
             if(_c2uDic.ContainsKey(client))
             {

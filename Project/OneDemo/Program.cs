@@ -14,21 +14,21 @@ namespace OneDemo
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
-
+        TcpSocketServer _tcpSrver;
         public Program()
-        {            
-            new SocketServer().Start("0.0.0.0", 1875);
+        {
+            _tcpSrver = new TcpSocketServer();            
+            _tcpSrver.onClientEnterHandler += OnClientEnter;
+            _tcpSrver.onClientExitHandler += OnClientExit;
+            _tcpSrver.Start("0.0.0.0", 1875, 4096);
             
-            ClientManager.onClientEnterHandler += OnClientEnter;
-            ClientManager.onClientExitHandler += OnClientExit;
-
             new Thread(LogicThraed).Start();
 
             Console.WriteLine("Thread [{0}]:Press any key to terminate the server process....", Thread.CurrentThread.ManagedThreadId); 
             Console.ReadKey();            
         }
 
-        private void OnClientEnter(object sender, Client e)
+        private void OnClientEnter(object sender, TcpClient e)
         {
             _tsa.AddToSyncAction(()=> {
                 UserMgr.Ins.Enter(e);
@@ -36,7 +36,7 @@ namespace OneDemo
             });            
         }
 
-        private void OnClientExit(object sender, Client e)
+        private void OnClientExit(object sender, TcpClient e)
         {
             _tsa.AddToSyncAction(() =>
             {

@@ -1,15 +1,11 @@
 ﻿using One.Net;
 using One.Protocol;
-using OneDemo.Managers;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OneDemo
 {
     class User
     {
-        public Client client { get; }
+        public TcpClient client { get; }
 
         bool _destroyFlag = false;
 
@@ -21,7 +17,7 @@ namespace OneDemo
             _destroyFlag = true;
         }
 
-        public User(Client client)
+        public User(TcpClient client)
         {
             this.client = client;            
         }
@@ -46,7 +42,7 @@ namespace OneDemo
         /// 接收到协议的处理
         /// </summary>
         /// <param name="obj"></param>
-        private void OnReceiveProtocol(ProtocolBody obj)
+        private void OnReceiveProtocol(BaseTcpProtocolBody obj)
         {
             client.Send(client.protocolProcess.Pack(obj));
         }

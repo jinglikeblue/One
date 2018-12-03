@@ -5,11 +5,12 @@ using System.Threading;
 
 namespace One.Net
 {
-    public class Client
+    public class TcpClient
     {
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
-        Socket _socket;
+        TcpSocketServer _server;
+        Socket _clientSocket;
 
         byte[] _buffer;
         /// <summary>
@@ -20,20 +21,21 @@ namespace One.Net
         /// <summary>
         /// 协议处理器
         /// </summary>
-        public ProtocolProcess protocolProcess { get; }
+        public BaseTcpProtocolProcess protocolProcess { get; }
 
         /// <summary>
         /// 是否客户端已关闭
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
-        public Client(Socket socket, ushort bufferSize)
+        public TcpClient(TcpSocketServer server, Socket clientSocket, ushort bufferSize)
         {
             Console.WriteLine("Thread [{0}]: A client has been connected", Thread.CurrentThread.ManagedThreadId);
 
-            _socket = socket;
+            _server = server;
+            _clientSocket = clientSocket;
 
-            protocolProcess = new ProtocolProcess();
+            protocolProcess = new BaseTcpProtocolProcess();
             _buffer = new byte[bufferSize];
 
             _receiveEA = new SocketAsyncEventArgs();            
@@ -63,7 +65,7 @@ namespace One.Net
         {
             _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
 
-            bool willRaiseEvent = _socket.ReceiveAsync(_receiveEA);
+            bool willRaiseEvent = _clientSocket.ReceiveAsync(_receiveEA);
             if (!willRaiseEvent)
             {
                 ProcessReceive(_receiveEA);
@@ -72,14 +74,14 @@ namespace One.Net
 
         public void Send(byte[] bytes)
         {
-            if(null == _socket)
+            if(null == _clientSocket)
             {
                 return;
             }
 
             _sendEA.SetBuffer(bytes, 0, bytes.Length);
             
-            bool willRaiseEvent = _socket.SendAsync(_sendEA);
+            bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
             if (!willRaiseEvent)
             {
                 ProcessSend(_sendEA);
@@ -144,15 +146,15 @@ namespace One.Net
         {
             try
             {
-                _socket.Shutdown(SocketShutdown.Send);
+                _clientSocket.Shutdown(SocketShutdown.Send);
             }
             // throws if client process has already closed
             catch (Exception) { }
-            _socket.Close();
-            _socket = null;
+            _clientSocket.Close();
+            _clientSocket = null;
             _buffer = null;
             Console.WriteLine("A client has shutdown");
-            ClientManager.Exit(this);
+            _server.Exit(this);
         }
 
         /// <summary>

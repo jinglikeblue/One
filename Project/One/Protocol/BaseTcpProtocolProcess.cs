@@ -2,7 +2,6 @@
 using One.Net;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace One.Protocol
 {
@@ -10,13 +9,13 @@ namespace One.Protocol
     /// 协议处理器  
     /// 协议包结构为 | ushort：协议数据长度 | 协议数据 |
     /// </summary>
-    public class ProtocolProcess : IProtocolProcess
-    {       
-        List<ProtocolBody> _pbList = new List<ProtocolBody>();
+    public class BaseTcpProtocolProcess : IProtocolProcess
+    {      
+        List<BaseTcpProtocolBody> _pbList = new List<BaseTcpProtocolBody>();
 
-        public void ReceiveProtocols(Action<ProtocolBody> onReceiveProtocol)
+        public void ReceiveProtocols(Action<BaseTcpProtocolBody> onReceiveProtocol)
         {
-            List<ProtocolBody> pbList = new List<ProtocolBody>();
+            List<BaseTcpProtocolBody> pbList = new List<BaseTcpProtocolBody>();
             
             lock (_pbList)
             {
@@ -59,7 +58,7 @@ namespace One.Protocol
             }
 
             byte[] protocolData = ba.ReadBytes(protocolSize);
-            ProtocolBody pb = new ProtocolBody();
+            BaseTcpProtocolBody pb = new BaseTcpProtocolBody();
             pb.Unserialize(protocolData);
 
             lock (_pbList)

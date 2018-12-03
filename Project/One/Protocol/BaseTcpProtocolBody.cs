@@ -10,7 +10,7 @@ namespace One.Protocol
     /// <summary>
     /// 协议的数据结构体
     /// </summary>
-    public struct ProtocolBody: IProtocolBody
+    public struct BaseTcpProtocolBody: IProtocolBody
     {      
         public string value;
 
