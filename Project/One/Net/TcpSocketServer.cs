@@ -1,4 +1,4 @@
-﻿using One.Core;
+﻿using One.Protocol;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -6,7 +6,11 @@ using System.Threading;
 
 namespace One.Net
 {
-    public class TcpSocketServer
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class TcpSocketServer<T> where T:IProtocolProcess,new()
     {
         /// <summary>
         /// 新的客户端进入的事件（非线程安全）
@@ -101,12 +105,14 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            TcpClient client = new TcpClient(this, clientSocket, _bufferSize);
+            TcpClient client = new TcpClient(clientSocket, new T(), _bufferSize);
+            client.onShutdown += OnClientShutdown;
             onClientEnterHandler?.Invoke(this, client);
         }
 
-        internal void Exit(TcpClient client)
+        private void OnClientShutdown(object sender, TcpClient client)
         {
+            client.onShutdown -= OnClientShutdown;
             Interlocked.Decrement(ref _clientCount);
             onClientExitHandler?.Invoke(this, client);
         }

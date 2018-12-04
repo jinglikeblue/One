@@ -1,4 +1,6 @@
-﻿using One.Net;
+﻿using One.Data;
+using One.Net;
+using One.Protocol;
 using OneDemo.Managers;
 using System;
 using System.Threading;
@@ -14,10 +16,10 @@ namespace OneDemo
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
-        TcpSocketServer _tcpSrver;
+        TcpSocketServer<BaseTcpProtocolProcess> _tcpSrver;
         public Program()
         {
-            _tcpSrver = new TcpSocketServer();            
+            _tcpSrver = new TcpSocketServer<BaseTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
             _tcpSrver.Start("0.0.0.0", 1875, 4096);
@@ -32,8 +34,7 @@ namespace OneDemo
         {
             //Console.WriteLine("Thread [{0}]:enter cout:{1}", Thread.CurrentThread.ManagedThreadId, _tcpSrver.ClientCount);
             _tsa.AddToSyncAction(()=> {
-                UserMgr.Ins.Enter(e);
-                
+                UserMgr.Ins.Enter(e);                
             });            
         }
 

@@ -8,39 +8,44 @@ namespace One.Net
     public class TcpClient
     {
         SocketAsyncEventArgs _receiveEA;
+
         SocketAsyncEventArgs _sendEA;
-        TcpSocketServer _server;
+
+        /// <summary>
+        /// 客户端连接关闭事件
+        /// </summary>
+        internal event EventHandler<TcpClient> onShutdown;
+
         Socket _clientSocket;
 
         byte[] _buffer;
+
         /// <summary>
         /// 缓冲区可用字节长度
         /// </summary>
-        int _bufferAvailable = 0;
+        int _bufferAvailable = 0;                
 
         /// <summary>
         /// 协议处理器
         /// </summary>
-        public BaseTcpProtocolProcess protocolProcess { get; }
+        public IProtocolProcess protocolProcess { get; internal set;}
 
         /// <summary>
         /// 是否客户端已关闭
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
-        public TcpClient(TcpSocketServer server, Socket clientSocket, ushort bufferSize)
+        public TcpClient(Socket clientSocket, IProtocolProcess protocolProcess, ushort bufferSize)
         {
             Console.WriteLine("Thread [{0}]: A client has been connected", Thread.CurrentThread.ManagedThreadId);
-
-            _server = server;
-            _clientSocket = clientSocket;
-
-            protocolProcess = new BaseTcpProtocolProcess();
+            
+            _clientSocket = clientSocket;            
             _buffer = new byte[bufferSize];
 
-            _receiveEA = new SocketAsyncEventArgs();            
+            this.protocolProcess = protocolProcess;
+            _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);            
+            _receiveEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
             _sendEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
 
             StartReceive();
@@ -74,13 +79,13 @@ namespace One.Net
 
         public void Send(byte[] bytes)
         {
-            if(null == _clientSocket)
+            if (null == _clientSocket)
             {
                 return;
             }
 
             _sendEA.SetBuffer(bytes, 0, bytes.Length);
-            
+
             bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
             if (!willRaiseEvent)
             {
@@ -93,9 +98,9 @@ namespace One.Net
         /// </summary>
         /// <param name="e"></param>
         private void ProcessReceive(SocketAsyncEventArgs e)
-        {            
+        {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
-            {                               
+            {
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
@@ -103,7 +108,7 @@ namespace One.Net
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
-                if(used > 0)
+                if (used > 0)
                 {
                     _bufferAvailable = _bufferAvailable - used;
                     if (0 != _bufferAvailable)
@@ -115,7 +120,7 @@ namespace One.Net
                     }
                 }
 
-                StartReceive();                           
+                StartReceive();
             }
             else
             {
@@ -144,17 +149,17 @@ namespace One.Net
         /// </summary>
         void Shutdown()
         {
+            //Console.WriteLine("客户端断开连接");
+
             try
             {
                 _clientSocket.Shutdown(SocketShutdown.Send);
             }
-            // throws if client process has already closed
             catch (Exception) { }
             _clientSocket.Close();
             _clientSocket = null;
             _buffer = null;
-            Console.WriteLine("A client has shutdown");
-            _server.Exit(this);
+            onShutdown?.Invoke(this, this);
         }
 
         /// <summary>

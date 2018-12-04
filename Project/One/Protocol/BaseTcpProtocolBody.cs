@@ -1,21 +1,16 @@
-﻿using One.Core;
-using One.Net;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using One.Data;
 
 namespace One.Protocol
 {
     /// <summary>
     /// 协议的数据结构体
     /// </summary>
-    public struct BaseTcpProtocolBody: IProtocolBody
+    public struct BaseTcpProtocolBody
     {      
         public string value;
 
         public byte[] Serialize()
-        {
+        {            
             ByteArray ba = new ByteArray();
             ba.Write(value);
             return ba.GetAvailable();

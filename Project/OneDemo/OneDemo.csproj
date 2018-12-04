@@ -13,11 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\One\One.csproj" />
+    <Folder Include="BaseProtocol\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BaseProtocol\" />
+    <ProjectReference Include="..\One\One.csproj" />
   </ItemGroup>
 
 </Project>

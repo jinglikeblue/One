@@ -1,11 +1,14 @@
 ﻿using One.Net;
 using One.Protocol;
+using System;
 
 namespace OneDemo
 {
     class User
     {
         public TcpClient client { get; }
+
+        BaseTcpProtocolProcess _protocolProcess;
 
         bool _destroyFlag = false;
 
@@ -19,7 +22,8 @@ namespace OneDemo
 
         public User(TcpClient client)
         {
-            this.client = client;            
+            this.client = client;
+            _protocolProcess = client.protocolProcess as BaseTcpProtocolProcess;
         }
 
         /// <summary>
@@ -34,7 +38,7 @@ namespace OneDemo
                 return false;
             }
 
-            client.protocolProcess.ReceiveProtocols(OnReceiveProtocol);
+            _protocolProcess.ReceiveProtocols(OnReceiveProtocol);
             return true;
         }
 
@@ -44,7 +48,8 @@ namespace OneDemo
         /// <param name="obj"></param>
         private void OnReceiveProtocol(BaseTcpProtocolBody obj)
         {
-            client.Send(client.protocolProcess.Pack(obj));
+            Console.WriteLine("msg: {0}", obj.value);
+            client.Send(_protocolProcess.Pack(obj));
         }
 
         public void Destroy()

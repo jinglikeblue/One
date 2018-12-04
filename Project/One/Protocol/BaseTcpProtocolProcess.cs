@@ -1,5 +1,4 @@
-﻿using One.Core;
-using One.Net;
+﻿using One.Data;
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +12,10 @@ namespace One.Protocol
     {      
         List<BaseTcpProtocolBody> _pbList = new List<BaseTcpProtocolBody>();
 
+        /// <summary>
+        /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
+        /// </summary>
+        /// <param name="onReceiveProtocol"></param>
         public void ReceiveProtocols(Action<BaseTcpProtocolBody> onReceiveProtocol)
         {
             List<BaseTcpProtocolBody> pbList = new List<BaseTcpProtocolBody>();
@@ -79,7 +82,7 @@ namespace One.Protocol
         /// </summary>
         /// <param name="pb"></param>
         /// <returns></returns>
-        public byte[] Pack(IProtocolBody pb)
+        public byte[] Pack(BaseTcpProtocolBody pb)
         {
             byte[] pbData = pb.Serialize();            
             ByteArray ba = new ByteArray(pbData.Length + ByteArray.USHORT_SIZE);
