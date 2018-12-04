@@ -7,7 +7,7 @@ using System.Threading;
 namespace One.Net
 {
     /// <summary>
-    /// 
+    /// 提供基于TCP协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class TcpSocketServer<T> where T:IProtocolProcess,new()

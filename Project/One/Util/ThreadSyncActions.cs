@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace OneDemo
+namespace Util
 {
     /// <summary>
     /// 在线程A中通过AddToSyncAction将Action添加进来，在线程B中通过RunSyncActions来执行这些方法。
     /// </summary>
-    class ThreadSyncActions
+    public class ThreadSyncActions
     {
         List<Action> _toSyncActinList = new List<Action>();
         List<Action> _actionCacheList = new List<Action>();

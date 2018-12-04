@@ -26,7 +26,6 @@
         /// </summary>
         public static System.Action<string> action;
 
-
         public static void Run(string msg)
         {
             System.Console.WriteLine(msg);
