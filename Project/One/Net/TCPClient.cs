@@ -1,5 +1,6 @@
 ﻿using One.Protocol;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -19,6 +20,16 @@ namespace One.Net
         Socket _clientSocket;
 
         byte[] _buffer;
+
+        /// <summary>
+        /// 数据发送队列
+        /// </summary>
+        List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
+
+        /// <summary>
+        /// 是否正在发送数据
+        /// </summary>
+        bool _isSending = false;
 
         /// <summary>
         /// 缓冲区可用字节长度
@@ -45,8 +56,8 @@ namespace One.Net
             this.protocolProcess = protocolProcess;
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
-            _sendEA.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
+            _receiveEA.Completed += OnIOCompleted;
+            _sendEA.Completed += OnIOCompleted;
 
             StartReceive();
         }
@@ -74,22 +85,6 @@ namespace One.Net
             if (!willRaiseEvent)
             {
                 ProcessReceive(_receiveEA);
-            }
-        }
-
-        public void Send(byte[] bytes)
-        {
-            if (null == _clientSocket)
-            {
-                return;
-            }
-
-            _sendEA.SetBuffer(bytes, 0, bytes.Length);
-
-            bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
-            if (!willRaiseEvent)
-            {
-                ProcessSend(_sendEA);
             }
         }
 
@@ -128,6 +123,41 @@ namespace One.Net
             }
         }
 
+        public void Send(byte[] bytes)
+        {
+            if (null == _clientSocket)
+            {
+                return;
+            }
+
+            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+
+            SendBufferList();
+        }
+
+        void SendBufferList()
+        {
+            lock (this)
+            {
+                //如果没有在发送状态，则调用发送
+                if (_isSending || _sendBufferList.Count == 0)
+                {
+                    return;
+                }
+
+                _isSending = true;
+                _sendEA.BufferList = _sendBufferList;
+
+                _sendBufferList.Clear();
+
+                bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
+                if (!willRaiseEvent)
+                {
+                    ProcessSend(_sendEA);
+                }
+            }
+        }
+
         /// <summary>
         /// 处理发送的消息回调（多线程事件）
         /// </summary>
@@ -136,7 +166,9 @@ namespace One.Net
         {
             if (e.SocketError == SocketError.Success)
             {
-                //Console.WriteLine("Thread[{0}]: send {1} bytes!", Thread.CurrentThread.ManagedThreadId, e.Buffer.Length);
+                _isSending = false;
+                //尝试一次发送
+                SendBufferList();
             }
             else
             {

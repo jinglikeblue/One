@@ -56,9 +56,16 @@ namespace One.Net
 
             _bufferSize = bufferSize;
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            _socket.Bind(new IPEndPoint(IPAddress.Parse(host), port));
-            _socket.Listen(2);
-            StartAccept(null);
+            try
+            {
+                _socket.Bind(new IPEndPoint(IPAddress.Parse(host), port));
+                _socket.Listen(100);
+                StartAccept(null);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         /// <summary>

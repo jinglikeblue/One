@@ -35,7 +35,12 @@ namespace One.Net
         /// <summary>
         /// 数据发送队列
         /// </summary>
-        List<ArraySegment<byte>> _sendQueue = new List<ArraySegment<byte>>();
+        List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
+
+        /// <summary>
+        /// 是否正在发送数据
+        /// </summary>
+        bool _isSending = false;
 
         /// <summary>
         /// 缓冲区可用字节长度
@@ -198,20 +203,44 @@ namespace One.Net
             {
                 return;
             }
-            
-            _sendQueue.Add(new ArraySegment<byte>(bytes));
-            _sendEA.BufferList = _sendQueue;
-            _sendQueue.Clear();
-            
-            if (!_socket.SendAsync(_sendEA))
+
+                           
+            _sendBufferList.Add(new ArraySegment<byte>(bytes));           
+
+            SendBufferList();
+        }
+
+        void SendBufferList()
+        {
+            lock (this)
             {
-                OnSendCompleted(null, _sendEA);
+                //如果没有在发送状态，则调用发送
+                if (_isSending || _sendBufferList.Count == 0)
+                {
+                    return;
+                }
+
+                _isSending = true;
+                _sendEA.BufferList = _sendBufferList;
+
+                _sendBufferList.Clear();
+
+                if (!_socket.SendAsync(_sendEA))
+                {
+                    OnSendCompleted(null, _sendEA);
+                }
             }
         }
 
         void OnSendCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            if(e.SocketError != SocketError.Success)
+        {                       
+            if (e.SocketError == SocketError.Success)
+            {
+                _isSending = false;
+                //尝试一次发送
+                SendBufferList();
+            }
+            else
             {
                 Disconnect();
             }

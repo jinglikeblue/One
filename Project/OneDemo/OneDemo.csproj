@@ -5,6 +5,12 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <StartupObject>OneDemo.ClientDemo</StartupObject>
     <ApplicationIcon />
+    <Authors>Jing</Authors>
+    <Company>Pieces</Company>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>E:\projects\One\Bin\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
