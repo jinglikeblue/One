@@ -8,17 +8,17 @@ using Util;
 
 namespace OneDemo
 {
-    class Program
+    class ServerDemo
     {
         static void Main(string[] args)
         {
             ByteArray.defaultBufferSize = 4096;
-            new Program();
+            new ServerDemo();
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
         TcpSocketServer<BaseTcpProtocolProcess> _tcpSrver;
-        public Program()
+        public ServerDemo()
         {
             _tcpSrver = new TcpSocketServer<BaseTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;

@@ -1,6 +1,7 @@
 ﻿using One.Protocol;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -29,7 +30,12 @@ namespace One.Net
         SocketAsyncEventArgs _sendEA;        
         Socket _socket;
 
-        byte[] _buffer;
+        byte[] _receiveBuffer;
+
+        /// <summary>
+        /// 数据发送队列
+        /// </summary>
+        List<ArraySegment<byte>> _sendQueue = new List<ArraySegment<byte>>();
 
         /// <summary>
         /// 缓冲区可用字节长度
@@ -48,13 +54,16 @@ namespace One.Net
         /// 是否已连接
         /// </summary>
         /// <returns></returns>
-        public bool IsConnected()
+        public bool IsConnected
         {
-            if(null != _socket)
+            get
             {
-                return true;
+                if (null != _socket)
+                {
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
 
         public TcpSocketClient(IProtocolProcess protocolProcess)
@@ -72,6 +81,7 @@ namespace One.Net
         {
             Disconnect();
 
+            _receiveBuffer = new byte[bufferSize];
             _sendEA = new SocketAsyncEventArgs();
             _sendEA.Completed += OnSendCompleted;
             _receiveEA = new SocketAsyncEventArgs();
@@ -97,7 +107,8 @@ namespace One.Net
                 catch (Exception) { }
                 _socket.Close();
                 _socket = null;
-                _buffer = null;
+                _receiveBuffer = null;
+                _bufferAvailable = 0;
 
                 onDisconnect?.Invoke(this, this);
             }
@@ -121,7 +132,7 @@ namespace One.Net
         void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
         {
             e.Completed -= OnConnectCompleted;
-            if(null == e.AcceptSocket)
+            if(null == e.ConnectSocket)
             {
                 onConnectFail?.Invoke(this, this);
                 return;
@@ -137,7 +148,7 @@ namespace One.Net
         /// </summary>
         void StartReceive()
         {
-            _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
+            _receiveEA.SetBuffer(_receiveBuffer, _bufferAvailable, _receiveBuffer.Length - _bufferAvailable);
 
             if (!_socket.ReceiveAsync(_receiveEA))
             {
@@ -155,7 +166,7 @@ namespace One.Net
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
-                int used = protocolProcess.Unpack(_buffer, _bufferAvailable);                
+                int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);                
 
                 if (used > 0)
                 {
@@ -163,9 +174,9 @@ namespace One.Net
                     if (0 != _bufferAvailable)
                     {
                         //将还没有使用的数据移动到数据开头
-                        byte[] newBytes = new byte[_buffer.Length];
-                        Array.Copy(_buffer, used, newBytes, 0, _bufferAvailable);
-                        _buffer = newBytes;
+                        byte[] newBytes = new byte[_receiveBuffer.Length];
+                        Array.Copy(_receiveBuffer, used, newBytes, 0, _bufferAvailable);
+                        _receiveBuffer = newBytes;
                     }
                 }
 
@@ -187,10 +198,12 @@ namespace One.Net
             {
                 return;
             }
-
-            _sendEA.SetBuffer(bytes, 0, bytes.Length);
-
-            if(!_socket.SendAsync(_sendEA))
+            
+            _sendQueue.Add(new ArraySegment<byte>(bytes));
+            _sendEA.BufferList = _sendQueue;
+            _sendQueue.Clear();
+            
+            if (!_socket.SendAsync(_sendEA))
             {
                 OnSendCompleted(null, _sendEA);
             }
