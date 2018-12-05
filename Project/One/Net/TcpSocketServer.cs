@@ -70,7 +70,7 @@ namespace One.Net
             if (e == null)
             {
                 e = new SocketAsyncEventArgs();
-                e.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
+                e.Completed += OnAcceptCompleted;
             }
             else
             {                
