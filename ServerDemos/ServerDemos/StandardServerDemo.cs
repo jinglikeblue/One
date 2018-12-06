@@ -6,11 +6,11 @@ using System;
 using System.Threading;
 using Util;
 
-namespace OneDemo
+namespace ServerDemos
 {
     class StandardServerDemo
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             ByteArray.defaultBufferSize = 4096;
             new StandardServerDemo();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Util
@@ -8,31 +9,30 @@ namespace Util
     /// </summary>
     public class ThreadSyncActions
     {
-        List<Action> _toSyncActinList = new List<Action>();
-        List<Action> _actionCacheList = new List<Action>();
+        /// <summary>
+        /// 线程安全的先入先出队列
+        /// </summary>
+        ConcurrentQueue<Action> _syncActionsQueue = new ConcurrentQueue<Action>();
 
+        /// <summary>
+        /// 如果不同的线程并发调用该方法，无法保证添加的Action是有序的
+        /// </summary>
+        /// <param name="action"></param>
         public void AddToSyncAction(Action action)
         {
-            lock (_toSyncActinList)
-            {
-                _toSyncActinList.Add(action);
-            }
+            _syncActionsQueue.Enqueue(action);
         }
 
+        /// <summary>
+        /// 如果不同的线程并发调用该方法，无法保证添加的方法是按照先进先出的顺序执行
+        /// </summary>
         public void RunSyncActions()
-        {           
-            lock (_toSyncActinList)
+        {
+            Action action;
+            while(_syncActionsQueue.TryDequeue(out action))
             {
-                _actionCacheList.AddRange(_toSyncActinList);
-                _toSyncActinList.Clear();
+                action.Invoke();
             }
-
-            for (int i = 0; i < _actionCacheList.Count; i++)
-            {
-                _actionCacheList[i].Invoke();
-            }
-
-            _actionCacheList.Clear();
         }
     }
 }

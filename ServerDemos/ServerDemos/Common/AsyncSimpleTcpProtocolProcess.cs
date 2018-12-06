@@ -16,12 +16,8 @@ namespace OneDemo.Common
 
         public int Unpack(byte[] buf, int available)
         {
-            if(null == bindClient)
-            {
-                return 0;
-            }
             ByteArray ba = new ByteArray(buf, available);
-            onReceiveProtocol(this, ba.GetAvailableBytes());
+            onReceiveProtocol?.Invoke(this, ba.GetAvailableBytes());
             return available;
         }
     }

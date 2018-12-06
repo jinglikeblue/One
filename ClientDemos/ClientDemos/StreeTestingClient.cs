@@ -1,12 +1,10 @@
 ﻿using One.Net;
-using One.Protocol;
 using OneDemo.Common;
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace OneDemo
+namespace ClientDemos
 {
     /// <summary>
     /// 服务器压力测试，客户端类。将收到的服务器协议立刻发送回去
@@ -22,15 +20,15 @@ namespace OneDemo
             _pp = new AsyncSimpleTcpProtocolProcess();
             _pp.onReceiveProtocol += OnReceiveProtocol;
 
-            _client = new TcpSocketClient(_pp);
+            _client = new TcpSocketClient(_pp);            
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;            
-            _client.Connect("127.0.0.1", 1875, 4096);
+            _client.Connect("192.168.31.229", 1875, 4096);
         }
 
         private void OnReceiveProtocol(object sender, byte[] obj)
         {
-            Console.WriteLine("回数据：{0}", Thread.CurrentThread.ManagedThreadId);
+            //Console.WriteLine("回数据：{0}", Thread.CurrentThread.ManagedThreadId);
             _client.Send(obj);
         }
 
@@ -44,7 +42,7 @@ namespace OneDemo
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
                        
             UTF8Encoding uft8 = new UTF8Encoding();
-            _client.Send(uft8.GetBytes("test"));
+            _client.Send(uft8.GetBytes("test"));            
         }
     }
 }

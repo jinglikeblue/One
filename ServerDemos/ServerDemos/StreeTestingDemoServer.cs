@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using Util;
 
-namespace OneDemo.ServerDemo
+namespace ServerDemos
 {
     class StreeTestingDemoServer
     {
@@ -17,7 +17,7 @@ namespace OneDemo.ServerDemo
         TcpSocketServer<AsyncSimpleTcpProtocolProcess> _tcpSrver;
         public StreeTestingDemoServer()
         {
-            _tcpSrver = new TcpSocketServer<AsyncSimpleTcpProtocolProcess>();
+            _tcpSrver = new TcpSocketServer<AsyncSimpleTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
             _tcpSrver.Start("0.0.0.0", 1875, 4096);
