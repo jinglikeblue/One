@@ -8,17 +8,17 @@ using Util;
 
 namespace OneDemo
 {
-    class ServerDemo
+    class StandardServerDemo
     {
         static void Main(string[] args)
         {
             ByteArray.defaultBufferSize = 4096;
-            new ServerDemo();
+            new StandardServerDemo();
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
         TcpSocketServer<BaseTcpProtocolProcess> _tcpSrver;
-        public ServerDemo()
+        public StandardServerDemo()
         {
             _tcpSrver = new TcpSocketServer<BaseTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
@@ -59,8 +59,8 @@ namespace OneDemo
             //long ms = 0;
             //long maxDetal = 0;
 
-            int delay = 1000 / 30;
-
+            //int delay = 1000 / 60;
+            int delay = 10;
             while (true)
             {
                 //long now = DateTime.UtcNow.ToFileTimeUtc() / 10000;

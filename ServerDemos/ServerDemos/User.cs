@@ -48,7 +48,7 @@ namespace OneDemo
         /// <param name="obj"></param>
         private void OnReceiveProtocol(BaseTcpProtocolBody obj)
         {
-            Console.WriteLine("msg: {0}", obj.value);
+            //Console.WriteLine("msg: {0}", obj.value);
             client.Send(_protocolProcess.Pack(obj));
         }
 

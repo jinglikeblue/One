@@ -5,18 +5,20 @@ using System.Threading;
 
 namespace OneDemo
 {
-    class ClientDemo
+    class StandardDemo
     {
         static void Main(string[] args)
         {
-            new ClientDemo();
+            for (int i = 0; i < 3; i++)
+            {
+                new StandardDemo();
+            }
         }
 
         BaseTcpProtocolProcess _pp;
-        TcpSocketClient _client;
-        long lastT;
+        TcpSocketClient _client;        
 
-        public ClientDemo()
+        public StandardDemo()
         {
             _client = new TcpSocketClient(new BaseTcpProtocolProcess());
             _client.onConnectSuccess += OnConnectSuccess;

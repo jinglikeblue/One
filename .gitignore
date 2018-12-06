@@ -12,3 +12,12 @@
 /ClientDemo/OneClientDemo/Assembly-CSharp.csproj
 /Project/OneDemo/bin
 /Project/OneDemo/obj
+/ClientDemos/.vs
+/ClientDemos/ClientDemos/obj
+/ClientDemos/ClientDemos/bin
+/One/.vs
+/One/One/obj
+/One/One/bin
+/ServerDemos/.vs
+/ServerDemos/ServerDemos/obj
+/ServerDemos/ServerDemos/bin
