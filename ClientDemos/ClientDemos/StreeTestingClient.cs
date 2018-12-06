@@ -11,7 +11,7 @@ namespace ClientDemos
     /// </summary>
     class StreeTestingClient
     {
-        static byte[] bytes = new byte[4096];
+        static byte[] bytes;
 
         AsyncSimpleTcpProtocolProcess _pp;
         TcpSocketClient _client;
@@ -20,6 +20,7 @@ namespace ClientDemos
         public StreeTestingClient(int id)
         {
             _id = id;
+            bytes = new byte[StreeTestingDemoClient.sendSize];
         }
 
         public void Start()
@@ -31,7 +32,8 @@ namespace ClientDemos
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             //_client.Connect("127.0.0.1", 1875, 4096);
-            _client.Connect("192.168.31.229", 1875, 4096);
+            //_client.Connect("192.168.31.229", 1875, 4096);
+            _client.Connect(StreeTestingDemoClient.host, StreeTestingDemoClient.port, (ushort)StreeTestingDemoClient.sendSize);
 
             while (true)
             {

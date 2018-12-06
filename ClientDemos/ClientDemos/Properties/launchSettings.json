@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClientDemos": {
+      "commandName": "Project",
+      "commandLineArgs": "127.0.0.1 1875 10 100"
+    }
+  }
+}
