@@ -47,9 +47,7 @@ namespace One.Net
         public bool isClosed { get; private set; } = false;
 
         public TcpClient(Socket clientSocket, IProtocolProcess protocolProcess, ushort bufferSize)
-        {
-            Console.WriteLine("Thread [{0}]: 客户端已连接", Thread.CurrentThread.ManagedThreadId);
-            
+        {                       
             _clientSocket = clientSocket;            
             _buffer = new byte[bufferSize];
 
@@ -73,7 +71,7 @@ namespace One.Net
                     ProcessSend(e);
                     break;
                 default:
-                    throw new ArgumentException(string.Format("The last operation completed on the socket was not a receive or send : {0}", e.LastOperation));
+                    throw new ArgumentException(string.Format("Wrong last operation : {0}", e.LastOperation));
             }
         }
 
@@ -180,9 +178,7 @@ namespace One.Net
         /// 关闭客户端连接
         /// </summary>
         void Shutdown()
-        {
-            Console.WriteLine("客户端断开连接");
-
+        {            
             try
             {
                 _clientSocket.Shutdown(SocketShutdown.Send);

@@ -83,9 +83,7 @@ namespace One.Net
         /// <param name="port"></param>
         /// <param name="bufferSize"></param>
         public void Connect(string host, int port, ushort bufferSize)
-        {
-            Disconnect();
-
+        {          
             _receiveBuffer = new byte[bufferSize];
             _sendEA = new SocketAsyncEventArgs();
             _sendEA.Completed += OnSendCompleted;

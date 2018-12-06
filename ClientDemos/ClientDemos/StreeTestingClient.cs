@@ -11,25 +11,43 @@ namespace ClientDemos
     /// </summary>
     class StreeTestingClient
     {
+        static byte[] bytes = new byte[4096];
+
         AsyncSimpleTcpProtocolProcess _pp;
         TcpSocketClient _client;
         int _id;
 
         public StreeTestingClient(int id)
         {
+            _id = id;
+        }
+
+        public void Start()
+        {
             _pp = new AsyncSimpleTcpProtocolProcess();
             _pp.onReceiveProtocol += OnReceiveProtocol;
 
-            _client = new TcpSocketClient(_pp);            
+            _client = new TcpSocketClient(_pp);
             _client.onConnectSuccess += OnConnectSuccess;
-            _client.onDisconnect += OnDisconnect;            
+            _client.onDisconnect += OnDisconnect;
+            //_client.Connect("127.0.0.1", 1875, 4096);
             _client.Connect("192.168.31.229", 1875, 4096);
+
+            while (true)
+            {
+                if (_client.IsConnected)
+                {
+                    Send();
+                    //Console.WriteLine("发送：{0}", Thread.CurrentThread.ManagedThreadId);
+                    Thread.Sleep(1000);
+                }
+            }
         }
 
         private void OnReceiveProtocol(object sender, byte[] obj)
         {
             //Console.WriteLine("回数据：{0}", Thread.CurrentThread.ManagedThreadId);
-            _client.Send(obj);
+            //_client.Send(obj);
         }
 
         private void OnDisconnect(object sender, TcpSocketClient e)
@@ -41,8 +59,14 @@ namespace ClientDemos
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
                        
-            UTF8Encoding uft8 = new UTF8Encoding();
-            _client.Send(uft8.GetBytes("test"));            
+    
+        }
+
+        void Send()
+        {
+            //UTF8Encoding uft8 = new UTF8Encoding();
+            //_client.Send(uft8.GetBytes("test"));
+            _client.Send(bytes);
         }
     }
 }

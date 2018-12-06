@@ -115,6 +115,8 @@ namespace One.Net
             TcpClient client = new TcpClient(clientSocket, new T(), _bufferSize);
             client.onShutdown += OnClientShutdown;
             onClientEnterHandler?.Invoke(this, client);
+
+            Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }
 
         private void OnClientShutdown(object sender, TcpClient client)
@@ -122,6 +124,8 @@ namespace One.Net
             client.onShutdown -= OnClientShutdown;
             Interlocked.Decrement(ref _clientCount);
             onClientExitHandler?.Invoke(this, client);
+
+            Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }
     }
 }

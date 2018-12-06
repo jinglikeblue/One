@@ -7,10 +7,11 @@ namespace ClientDemos
     {
         static void Main(string[] args)
         {
-            int count = 1000;
+            int count = 5000;
             for (int i = 0; i < count; i++)
             {
-                new StreeTestingClient(i);
+                var t = new StreeTestingClient(i);
+                new Thread(t.Start).Start();
             }
 
             Console.ReadKey();
