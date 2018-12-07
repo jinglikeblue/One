@@ -112,7 +112,7 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            WebSocketClient client = new WebSocketClient(clientSocket, new T(), _bufferSize);
+            WebSocketClient client = new WebSocketClient(clientSocket, new T(), _bufferSize);            
             client.onShutdown += OnClientShutdown;
             onClientEnterHandler?.Invoke(this, client);
 

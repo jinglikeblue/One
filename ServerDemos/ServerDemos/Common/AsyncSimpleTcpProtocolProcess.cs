@@ -14,6 +14,11 @@ namespace OneDemo.Common
 
         public event EventHandler<byte[]> onReceiveProtocol;
 
+        public void SetSender(ISender sender)
+        {
+            
+        }
+
         public int Unpack(byte[] buf, int available)
         {
             ByteArray ba = new ByteArray(buf, available);

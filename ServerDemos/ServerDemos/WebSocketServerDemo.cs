@@ -9,7 +9,7 @@ namespace ServerDemos
 {
     class WebSocketServerDemo
     {
-        WebSocketServer<BaseTcpProtocolProcess> _server;
+        WebSocketServer<WebSocketTextProtocolProcess> _server;
 
         public static void Main(string[] args)
         {           
@@ -19,8 +19,8 @@ namespace ServerDemos
 
         public WebSocketServerDemo()
         {
-            _server = new WebSocketServer<BaseTcpProtocolProcess>();
-            _server.Start("0.0.0.0", 1875, 4096);
+            _server = new WebSocketServer<WebSocketTextProtocolProcess>();
+            _server.Start("0.0.0.0", 1875, 80000);
 
             //new Thread(LogicThraed).Start();
 

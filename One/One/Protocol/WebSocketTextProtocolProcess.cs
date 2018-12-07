@@ -1,4 +1,5 @@
 ﻿using One.Data;
+using One.Net;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,6 +38,8 @@ namespace One.Protocol
 
         List<byte[]> _pbList = new List<byte[]>();
 
+        ISender _sender;
+
         /// <summary>
         /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
         /// </summary>
@@ -59,14 +62,20 @@ namespace One.Protocol
 
         public int Unpack(byte[] buf, int available)
         {
-            ByteArray ba = new ByteArray(buf, available);
+            ByteArray ba = new ByteArray(buf, available, false);
             int used = 0;
             Unpack(ba, ref used);
             return used;
         }
 
         void Unpack(ByteArray ba, ref int used)
-        {
+        {           
+            if(ba.ReadEnableSize < 2 * ByteArray.BYTE_SIZE)
+            {
+                //数据存在半包问题
+                return;
+            }
+
             int startPos = ba.Pos;
 
             //获取第一个byte
@@ -84,9 +93,19 @@ namespace One.Protocol
             switch (payloadLen)
             {
                 case 127:
+                    if (ba.ReadEnableSize < 2 * ByteArray.ULONG_SIZE)
+                    {
+                        //数据存在半包问题
+                        return;
+                    }
                     dataSize = (int)ba.ReadULong();
                     break;
                 case 126:
+                    if (ba.ReadEnableSize < 2 * ByteArray.USHORT_SIZE)
+                    {
+                        //数据存在半包问题
+                        return;
+                    }
                     dataSize = ba.ReadUShort();
                     break;
                 default:
@@ -97,6 +116,12 @@ namespace One.Protocol
             byte[] maskKeys = null;
             if (mask)
             {
+                if (ba.ReadEnableSize < 4 * ByteArray.BYTE_SIZE)
+                {
+                    //数据存在半包问题
+                    return;
+                }
+
                 maskKeys = new byte[4];
                 for (int i = 0; i < maskKeys.Length; i++)
                 {
@@ -111,6 +136,12 @@ namespace One.Protocol
                 case EOpcode.TEXT:                
                     if (dataSize > 0)
                     {
+                        if (ba.ReadEnableSize < dataSize)
+                        {
+                            //数据存在半包问题
+                            return;
+                        }
+
                         byte[] payloadData = ba.ReadBytes(dataSize);
                         if (mask)
                         {
@@ -122,6 +153,9 @@ namespace One.Protocol
                         }
 
                         _pbList.Add(payloadData);
+
+                        //收到的数据原路返回
+                        _sender.Send(Pack(payloadData));
                         //var textBA = new ByteArray(payloadData, payloadData.Length);
                         //string content = textBA.ReadStringBytes(textBA.ReadEnableSize);
                     }
@@ -193,6 +227,11 @@ namespace One.Protocol
 
             ba.Write(data);
             return ba.GetAvailableBytes();
+        }
+
+        public void SetSender(ISender sender)
+        {
+            _sender = sender;
         }
     }
 }

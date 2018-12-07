@@ -11,7 +11,7 @@ namespace One.Net
     /// <summary>
     /// 连接到服务器的客户端对象
     /// </summary>
-    public class WebSocketClient : TcpClient
+    public class WebSocketClient : TcpClient,ISender
     {
         /// <summary>
         /// 负载数据内容
@@ -52,7 +52,7 @@ namespace One.Net
 
         public WebSocketClient(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
-
+            protocolProcess.SetSender(this);
         }
 
         public override void Send(byte[] bytes)

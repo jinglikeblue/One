@@ -1,4 +1,5 @@
 ﻿using One.Data;
+using One.Net;
 using System;
 using System.Collections.Generic;
 
@@ -92,6 +93,11 @@ namespace One.Protocol
             //写入协议数据
             ba.Write(pbData);
             return ba.Bytes;
+        }
+
+        public void SetSender(ISender sender)
+        {
+            
         }
     }
 }
