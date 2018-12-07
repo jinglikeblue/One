@@ -14,31 +14,6 @@ namespace One.Net
     public class WebSocketRemoteProxy : TcpReomteProxy
     {
         /// <summary>
-        /// 负载数据内容
-        /// </summary>
-        enum EOpcode
-        {
-            /// <summary>
-            /// 继续帧
-            /// </summary>
-            CONTINUE = 0,
-            /// <summary>
-            /// 文本帧
-            /// </summary>
-            TEXT = 1,
-            /// <summary>
-            /// 二进制帧
-            /// </summary>
-            BYTE = 2,
-            /// <summary>
-            /// 连接关闭
-            /// </summary>
-            CLOSE = 8,
-            PING = 9,
-            PONG = 10,
-        }
-
-        /// <summary>
         /// 客户端请求升级发送的KEY
         /// </summary>
         const string CLIENT_UPGRADE_REQEUST_KEY = "Sec-WebSocket-Key";
@@ -165,44 +140,5 @@ namespace One.Net
         {
 
         }
-
-        /// <summary>
-        /// 将要发送的数据封装为WebSocket通信数据帧。
-        /// 默认mask为0
-        /// </summary>
-        /// <param name="data">发送的数据</param>
-        /// <param name="isFin">是否是结束帧(默认为true)</param>
-        /// <param name="opcode">操作码(默认为TEXT)</param>
-        byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
-        {
-            ByteArray ba = new ByteArray(data.Length + 20, false);
-
-            int b1 = 0;
-            if(isFin)
-            {
-                b1 = b1 | 128;
-            }
-            b1 = b1 | (int)opcode;
-            ba.Write((byte)b1);            
-
-            if(data.Length > 65535)
-            {
-                ba.Write((byte)127);
-                ba.Write((long)data.Length);
-            }
-            else if(data.Length > 125)
-            {
-                ba.Write((byte)126);
-                ba.Write((ushort)data.Length);
-            }
-            else
-            {
-                ba.Write((byte)data.Length);
-            }
-
-            ba.Write(data);            
-            return ba.GetAvailableBytes();
-        }
-
     }
 }
