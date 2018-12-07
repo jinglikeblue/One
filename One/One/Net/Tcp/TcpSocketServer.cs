@@ -25,9 +25,9 @@ namespace One.Net
         /// <summary>
         /// 监听的端口
         /// </summary>
-        Socket _socket;
+        protected Socket _socket;
 
-        int _clientCount = 0;
+        protected int _clientCount = 0;
         /// <summary>
         /// 已连接的客户端总数
         /// </summary>
@@ -42,7 +42,7 @@ namespace One.Net
         /// <summary>
         /// 缓冲区大小
         /// </summary>
-        ushort _bufferSize;
+        int _bufferSize;
 
         /// <summary>
         /// 启动Socket服务
@@ -50,7 +50,7 @@ namespace One.Net
         /// <param name="host">监听的地址</param>
         /// <param name="port">坚挺的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
-        public void Start(string host, int port, ushort bufferSize)
+        public void Start(string host, int port, int bufferSize)
         {
             Console.WriteLine(string.Format("Start Lisening {0}:{1}", host, port));
 
@@ -112,20 +112,36 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            TcpReomteProxy client = new TcpReomteProxy(clientSocket, new T(), _bufferSize);
+            TcpReomteProxy client = CreateRemoteProxy(clientSocket, _bufferSize);
             client.onShutdown += OnClientShutdown;
-            onClientEnterHandler?.Invoke(this, client);
+            DispatchRemoteProxyEnterEvent(client);
 
             Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }
 
         private void OnClientShutdown(object sender, TcpReomteProxy client)
         {
+            System.GC.Collect();
             client.onShutdown -= OnClientShutdown;
             Interlocked.Decrement(ref _clientCount);
-            onClientExitHandler?.Invoke(this, client);
+            DispatchRemoteProxyExitEvent(client);
 
             Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
+        }
+
+        protected virtual TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize)
+        {
+            return new TcpReomteProxy(clientSocket, new T(), bufferSize);
+        }
+
+        protected void DispatchRemoteProxyEnterEvent(IRemoteProxy remoteProxy)
+        {
+            onClientEnterHandler?.Invoke(this, remoteProxy);
+        }
+
+        protected void DispatchRemoteProxyExitEvent(IRemoteProxy remoteProxy)
+        {
+            onClientExitHandler?.Invoke(this, remoteProxy);
         }
     }
 }

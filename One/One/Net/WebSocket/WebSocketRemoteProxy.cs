@@ -23,7 +23,10 @@ namespace One.Net
         /// </summary>
         const string WEB_SOCKET_UPGRADE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-        bool _isUpgraded = false;
+        /// <summary>
+        /// WebSocket协议是否升级
+        /// </summary>
+        bool _isUpgraded = false;        
 
         public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
@@ -136,9 +139,18 @@ namespace One.Net
             return _bufferAvailable;
         }
 
-        void SendPong()
+        public void SendPing()
         {
-
+            byte[] pingFrame = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PING);
+            Send(pingFrame);
         }
+
+        public void SendPong()
+        {
+            byte[] pongFrame = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PONG);
+            Send(pongFrame);
+        }
+
+        
     }
 }

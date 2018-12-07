@@ -45,6 +45,11 @@ namespace One.Net
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
+        /// <summary>
+        /// 期望关闭
+        /// </summary>
+        bool _wantShutdown = false;
+
         public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
         {
             _clientSocket = clientSocket;
@@ -77,6 +82,11 @@ namespace One.Net
 
         protected void StartReceive()
         {
+            if (IsFade)
+            {
+                return;
+            }
+
             _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
 
             bool willRaiseEvent = _clientSocket.ReceiveAsync(_receiveEA);
@@ -123,7 +133,7 @@ namespace One.Net
 
         virtual public void Send(byte[] bytes)
         {
-            if (null == _clientSocket)
+            if (IsFade)
             {
                 return;
             }
@@ -135,6 +145,11 @@ namespace One.Net
 
         protected void SendBufferList()
         {
+            if (IsFade)
+            {               
+                return;
+            }
+
             lock (this)
             {
                 //如果没有在发送状态，则调用发送
@@ -179,15 +194,48 @@ namespace One.Net
         /// </summary>
         protected void Shutdown()
         {
-            try
+            if (null != _clientSocket)
             {
-                _clientSocket.Shutdown(SocketShutdown.Send);
+                try
+                {
+                    _clientSocket.Shutdown(SocketShutdown.Send);
+                }
+                catch (Exception) { }
+                _clientSocket.Close();
+                _clientSocket = null;
+                _buffer = null;
+                _receiveEA.Dispose();
+                _receiveEA = null;
+                _sendEA.Dispose();
+                _sendEA = null;
+                isClosed = true;
+                _wantShutdown = false;
+
+                onShutdown?.Invoke(this, this);
+                
             }
-            catch (Exception) { }
-            _clientSocket.Close();
-            _clientSocket = null;
-            _buffer = null;
-            onShutdown?.Invoke(this, this);
+        }
+
+        /// <summary>
+        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
+        /// </summary>
+        bool IsFade
+        {
+            get
+            {
+                if (_wantShutdown)
+                {
+                    Shutdown();
+                    return true;
+                }
+
+                if (null == _clientSocket)
+                {
+                    return true;
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -195,7 +243,7 @@ namespace One.Net
         /// </summary>
         public void Close()
         {
-            isClosed = true;
+            _wantShutdown = true;
         }
     }
 }

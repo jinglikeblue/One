@@ -10,7 +10,7 @@
             try{  
                 socket=new WebSocket('ws://127.0.0.1:1875');  
             }catch(e){  
-                alert('error');  
+                console.log('error');  
                 return;  
             }  
             socket.onopen = sOpen;  
@@ -19,16 +19,16 @@
             socket.onclose= sClose;
         }  
         function sOpen(){
-            alert('connect success!');
+            console.log('connect success!');
         }
         function sError(e){
-            alert("error " + e);
+            console.log("error " + e);
         }
         function sMessage(msg){  
             console.log("server:" + msg.data);             
         }
         function sClose(e){
-            alert("connect closed:" + e.code);
+            console.log("connect closed:" + e.code);
         }  
         function Send(){
             var content = document.getElementById("msg").value;
@@ -69,17 +69,54 @@
                 socket.send(content);
             }                       
         }
+
+        function StreeTesting(){
+            var count = +document.getElementById("inputStreeTestingCount").value;
+            var content = "hello world";  
+            var intervalId;          
+            var host = document.getElementById("inputHost").value;
+            for(var i = 0; i < count; i++)
+            {
+                var tempSocket = new WebSocket(host);  
+                tempSocket.onopen = ()=>{
+                    console.log("open");
+                    intervalId = setInterval(send2Server.bind(this), 1000, tempSocket, content);                    
+                };
+                tempSocket.onerror = (e)=>{
+                    console.log("error " + e);
+                };
+                tempSocket.onmessage= (msg)=>{
+                    console.log("msg");                    
+                };
+                tempSocket.onclose= ()=>{
+                    console.log("close");
+                    clearInterval(intervalId);
+                };    
+            }
+        }
+
+        function send2Server(socket, content){
+            socket.send(content);
+        }
     </script>
 </head>  
    
 <body>  
-<input id="msg" type="text">  
+Host: 
+<input id="inputHost" type="text" value="ws://192.168.0.77:1875">  
 <button id="connect" onclick="Connect();">Connect</button>  
-<button id="send" onclick="Send();">Send</button>  
 <button id="close" onclick="Close();">Close</button>
+<p></p>
+Message: 
+<input id="msg" type="text">
+<button id="send" onclick="Send();">Send</button>  
 <button id="send400byte" onclick="send400byte();">send400byte</button>
 <button id="send70000byte" onclick="send70000byte();">send70000byte</button>
 <button id="send100frame" onclick="send100frame();">send100frame</button>
+<br/><p></p>
+压力测试:
+<input id="inputStreeTestingCount" type="text" value="250">  
+<button id="StreeTesting" onclick="StreeTesting();">StreeTesting</button>
 </body>  
    
 </html>  

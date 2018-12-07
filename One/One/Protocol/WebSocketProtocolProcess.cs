@@ -14,7 +14,7 @@ namespace One.Protocol
         /// <summary>
         /// 负载数据内容
         /// </summary>
-        enum EOpcode
+        internal enum EOpcode
         {
             /// <summary>
             /// 继续帧
@@ -38,7 +38,12 @@ namespace One.Protocol
 
         List<byte[]> _pbList = new List<byte[]>();
 
-        IRemoteProxy _sender;
+        WebSocketRemoteProxy _sender;
+
+        public void SetSender(IRemoteProxy sender)
+        {
+            _sender = sender as WebSocketRemoteProxy;
+        }
 
         /// <summary>
         /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
@@ -109,7 +114,7 @@ namespace One.Protocol
                     dataSize = ba.ReadUShort();
                     break;
                 default:
-                    dataSize = payloadLen;
+                    dataSize = payloadLen;                    
                     break;
             }
 
@@ -132,6 +137,7 @@ namespace One.Protocol
             switch (opcode)
             {
                 case EOpcode.CONTINUE:
+                    //使用率低，暂不处理这种情况
                     break;
                 case EOpcode.TEXT:
                 case EOpcode.BYTE:
@@ -153,31 +159,41 @@ namespace One.Protocol
                             }
                         }
 
-                        _pbList.Add(payloadData);
-
-                        //收到的数据原路返回
-                        _sender.Send(Pack(payloadData));
-                        //var textBA = new ByteArray(payloadData, payloadData.Length);
-                        //string content = textBA.ReadStringBytes(textBA.ReadEnableSize);
+                        OnReceiveProtocol(payloadData);
                     }
                     break;
-                case EOpcode.CLOSE:
-                    
-                    break;
                 case EOpcode.PING:
-                    
+                    _sender.SendPong();
                     break;
                 case EOpcode.PONG:
+                    //忽略
+                    break;
 
-                    break;
+                case EOpcode.CLOSE:
                 default:
-                    Console.WriteLine("危险！");                    
-                    break;
+                    //不可识别的操作符
+                    _sender.Close();
+                    return; //注意这里不是break，是返回！！！                    
             }
 
             used += ba.Pos - startPos;
 
             Unpack(ba, ref used);
+        }
+
+        /// <summary>
+        /// 解包时拿到的数据帧中的应用数据
+        /// </summary>
+        /// <param name="data"></param>
+        public void OnReceiveProtocol(byte[] data)
+        {
+            lock (_pbList)
+            {
+                _pbList.Add(data);
+            }
+
+            //收到的数据原路返回
+            _sender.Send(Pack(data));
         }
 
         /// <summary>
@@ -198,9 +214,15 @@ namespace One.Protocol
         /// <param name="data">发送的数据</param>
         /// <param name="isFin">是否是结束帧(默认为true)</param>
         /// <param name="opcode">操作码(默认为TEXT)</param>
-        byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
+        internal byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
         {
-            ByteArray ba = new ByteArray(data.Length + 20, false);
+            int bufferSize = 10;
+            if(null != data)
+            {
+                bufferSize += data.Length;
+            }
+
+            ByteArray ba = new ByteArray(bufferSize, false);
 
             int b1 = 0;
             if (isFin)
@@ -210,28 +232,32 @@ namespace One.Protocol
             b1 = b1 | (int)opcode;
             ba.Write((byte)b1);
 
-            if (data.Length > 65535)
+            if (data != null)
             {
-                ba.Write((byte)127);
-                ba.Write((long)data.Length);
-            }
-            else if (data.Length > 125)
-            {
-                ba.Write((byte)126);
-                ba.Write((ushort)data.Length);
+                if (data.Length > 65535)
+                {
+                    ba.Write((byte)127);
+                    ba.Write((long)data.Length);
+                }
+                else if (data.Length > 125)
+                {
+                    ba.Write((byte)126);
+                    ba.Write((ushort)data.Length);
+                }
+                else
+                {
+                    ba.Write((byte)data.Length);
+                }
+
+                ba.Write(data);
             }
             else
             {
-                ba.Write((byte)data.Length);
+                ba.Write((byte)0);
             }
-
-            ba.Write(data);
             return ba.GetAvailableBytes();
         }
 
-        public void SetSender(IRemoteProxy sender)
-        {
-            _sender = sender;
-        }
+
     }
 }
