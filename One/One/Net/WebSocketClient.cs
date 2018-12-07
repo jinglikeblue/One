@@ -80,7 +80,7 @@ namespace One.Net
                 }
                 else
                 {
-                    used = LoadDataFrame();
+                    used = protocolProcess.Unpack(_buffer, _bufferAvailable);
                 }
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
@@ -135,7 +135,7 @@ namespace One.Net
 
             if (null == value)
             {
-                Shutdown();
+                Close();
                 return 0;
             }
 
@@ -262,7 +262,7 @@ namespace One.Net
         /// <param name="opcode">操作码(默认为TEXT)</param>
         byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
         {
-            ByteArray ba = new ByteArray(_buffer.Length, false);
+            ByteArray ba = new ByteArray(data.Length + 20, false);
 
             int b1 = 0;
             if(isFin)

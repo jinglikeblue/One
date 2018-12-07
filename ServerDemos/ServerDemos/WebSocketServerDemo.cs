@@ -20,7 +20,7 @@ namespace ServerDemos
         public WebSocketServerDemo()
         {
             _server = new WebSocketServer<BaseTcpProtocolProcess>();
-            _server.Start("0.0.0.0", 1875, 80000);
+            _server.Start("0.0.0.0", 1875, 4096);
 
             //new Thread(LogicThraed).Start();
 
