@@ -12,10 +12,21 @@ namespace ClientDemos
 
         static void Main(string[] args)
         {
-            host = args[0];
-            port = int.Parse(args[1]);
-            count = int.Parse(args[2]);
-            sendSize = int.Parse(args[3]);
+            if (args.Length == 4)
+            {
+                host = args[0];
+                port = int.Parse(args[1]);
+                count = int.Parse(args[2]);
+                sendSize = int.Parse(args[3]);
+            }
+            else
+            {
+                Console.WriteLine("启动参数不正确，将使用默认参数");                
+                host = "127.0.0.1";
+                port = 1875;
+                count = 1;
+                sendSize = 4096;
+            }            
 
             for (int i = 0; i < count; i++)
             {

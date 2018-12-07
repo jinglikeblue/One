@@ -17,14 +17,14 @@ namespace One.Net
         /// </summary>
         internal event EventHandler<TcpClient> onShutdown;
 
-        Socket _clientSocket;
+        protected Socket _clientSocket;
 
-        byte[] _buffer;
+        protected byte[] _buffer;
 
         /// <summary>
         /// 数据发送队列
         /// </summary>
-        List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
+        protected List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
 
         /// <summary>
         /// 是否正在发送数据
@@ -34,7 +34,7 @@ namespace One.Net
         /// <summary>
         /// 缓冲区可用字节长度
         /// </summary>
-        int _bufferAvailable = 0;                
+        protected int _bufferAvailable = 0;                
 
         /// <summary>
         /// 协议处理器
@@ -75,7 +75,7 @@ namespace One.Net
             }
         }
 
-        void StartReceive()
+        protected void StartReceive()
         {
             _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
 
@@ -90,7 +90,7 @@ namespace One.Net
         /// 处理接收到的消息（多线程事件）
         /// </summary>
         /// <param name="e"></param>
-        private void ProcessReceive(SocketAsyncEventArgs e)
+        virtual protected void ProcessReceive(SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
@@ -121,7 +121,7 @@ namespace One.Net
             }
         }
 
-        public void Send(byte[] bytes)
+        virtual public void Send(byte[] bytes)
         {
             if (null == _clientSocket)
             {
@@ -133,7 +133,7 @@ namespace One.Net
             SendBufferList();
         }
 
-        void SendBufferList()
+        protected void SendBufferList()
         {
             lock (this)
             {
@@ -177,7 +177,7 @@ namespace One.Net
         /// <summary>
         /// 关闭客户端连接
         /// </summary>
-        void Shutdown()
+        protected void Shutdown()
         {            
             try
             {
