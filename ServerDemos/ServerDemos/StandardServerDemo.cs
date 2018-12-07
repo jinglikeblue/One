@@ -31,7 +31,7 @@ namespace ServerDemos
             Console.ReadKey();            
         }
 
-        private void OnClientEnter(object sender, TcpClient e)
+        private void OnClientEnter(object sender, IRemoteProxy e)
         {
             //Console.WriteLine("Thread [{0}]:enter cout:{1}", Thread.CurrentThread.ManagedThreadId, _tcpSrver.ClientCount);
             _tsa.AddToSyncAction(()=> {
@@ -39,7 +39,7 @@ namespace ServerDemos
             });            
         }
 
-        private void OnClientExit(object sender, TcpClient e)
+        private void OnClientExit(object sender, IRemoteProxy e)
         {
             _tsa.AddToSyncAction(() =>
             {

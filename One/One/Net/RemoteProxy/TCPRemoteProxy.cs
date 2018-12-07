@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Threading;
 
 namespace One.Net
 {
-    public class TcpClient
+    public class TcpReomteProxy : IRemoteProxy
     {
         SocketAsyncEventArgs _receiveEA;
 
@@ -15,7 +14,7 @@ namespace One.Net
         /// <summary>
         /// 客户端连接关闭事件
         /// </summary>
-        internal event EventHandler<TcpClient> onShutdown;
+        internal event EventHandler<TcpReomteProxy> onShutdown;
 
         protected Socket _clientSocket;
 
@@ -34,24 +33,25 @@ namespace One.Net
         /// <summary>
         /// 缓冲区可用字节长度
         /// </summary>
-        protected int _bufferAvailable = 0;                
+        protected int _bufferAvailable = 0;
 
         /// <summary>
         /// 协议处理器
         /// </summary>
-        public IProtocolProcess protocolProcess { get; internal set;}
+        public IProtocolProcess protocolProcess { get; internal set; }
 
         /// <summary>
         /// 是否客户端已关闭
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
-        public TcpClient(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
-        {                       
-            _clientSocket = clientSocket;            
+        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
+        {
+            _clientSocket = clientSocket;
             _buffer = new byte[bufferSize];
 
             this.protocolProcess = protocolProcess;
+            protocolProcess.SetSender(this);
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += OnIOCompleted;
@@ -178,7 +178,7 @@ namespace One.Net
         /// 关闭客户端连接
         /// </summary>
         protected void Shutdown()
-        {            
+        {
             try
             {
                 _clientSocket.Shutdown(SocketShutdown.Send);

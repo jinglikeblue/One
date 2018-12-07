@@ -11,7 +11,7 @@ namespace One.Protocol
         /// Socket连接创建协议处理器时，会将关联的发送器传递进来。可根据需要保留引用。
         /// </summary>
         /// <param name="sender"></param>
-        void SetSender(ISender sender);
+        void SetSender(IRemoteProxy sender);
 
         /// <summary>
         /// 将通信接口收到的字节数据解包（多线程方法）

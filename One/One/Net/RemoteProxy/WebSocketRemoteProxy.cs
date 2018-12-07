@@ -11,7 +11,7 @@ namespace One.Net
     /// <summary>
     /// 连接到服务器的客户端对象
     /// </summary>
-    public class WebSocketClient : TcpClient,ISender
+    public class WebSocketRemoteProxy : TcpReomteProxy
     {
         /// <summary>
         /// 负载数据内容
@@ -50,9 +50,9 @@ namespace One.Net
 
         bool _isUpgraded = false;
 
-        public WebSocketClient(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
+        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
-            protocolProcess.SetSender(this);
+            
         }
 
         public override void Send(byte[] bytes)
@@ -159,93 +159,6 @@ namespace One.Net
             //Console.WriteLine("response:\r\n {0}", responseData);
             _isUpgraded = true;
             return _bufferAvailable;
-        }
-
-
-
-        /// <summary>
-        /// 处理WebSocket通信数据帧
-        /// </summary>
-        int LoadDataFrame()
-        {
-            ByteArray ba = new ByteArray(_buffer, _bufferAvailable, false);
-            //获取第一个byte
-            byte byte1 = ba.ReadByte();
-            bool fin = (byte1 & 128) == 128 ? true : false;
-            var rsv123 = (byte1 & 112);
-            var opcode = (EOpcode)(byte1 & 15);
-
-            //获取第二个byte
-            byte byte2 = ba.ReadByte();
-            bool mask = (byte2 & 128) == 128 ? true : false;
-            var payloadLen = (byte2 & 127);
-
-            int dataSize = 0;
-            switch (payloadLen)
-            {
-                case 127:
-                    dataSize = (int)ba.ReadULong();
-                    break;
-                case 126:
-                    dataSize = ba.ReadUShort();
-                    break;
-                default:
-                    dataSize = payloadLen;
-                    break;
-            }
-
-            byte[] maskKeys = null;
-            if (mask)
-            {
-                maskKeys = new byte[4];
-                for (int i = 0; i < maskKeys.Length; i++)
-                {
-                    maskKeys[i] = ba.ReadByte();
-                }
-            }
-
-
-
-            switch (opcode)
-            {
-                case EOpcode.CONTINUE:
-                    break;
-                case EOpcode.TEXT:                    
-                case EOpcode.BYTE:
-                    if (dataSize > 0)
-                    {
-                        byte[] payloadData = ba.ReadBytes(dataSize);
-                        if (mask)
-                        {
-                            for (int i = 0; i < payloadData.Length; i++)
-                            {
-                                var maskKey = maskKeys[i % 4];
-                                payloadData[i] = (byte)(payloadData[i] ^ maskKey);
-                            }
-                        }
-
-                        //数据发回去
-                        Send(CreateDataFrame(payloadData));
-
-                        //var test = new ByteArray(payloadData, payloadData.Length);
-                        //string v = test.ReadStringBytes(test.ReadEnableSize);
-                    }
-                    break;
-                case EOpcode.CLOSE:
-                    Close();
-                    break;
-                case EOpcode.PING:
-                    SendPong();
-                    break;
-                case EOpcode.PONG:
-                    break;
-                default:
-                    Console.WriteLine("危险！");
-                    Close();
-                    break;
-            }
-
-            return ba.Pos;
         }
 
         void SendPong()

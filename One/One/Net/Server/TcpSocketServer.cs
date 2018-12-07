@@ -10,17 +10,17 @@ namespace One.Net
     /// 提供基于TCP协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TcpSocketServer<T> where T:IProtocolProcess,new()
+    public class TcpSocketServer<T> where T : IProtocolProcess, new()
     {
         /// <summary>
         /// 新的客户端进入的事件（非线程安全）
         /// </summary>
-        public event EventHandler<TcpClient> onClientEnterHandler;
+        public event EventHandler<IRemoteProxy> onClientEnterHandler;
 
         /// <summary>
         /// 客户端退出的事件（非线程安全）
         /// </summary>
-        public event EventHandler<TcpClient> onClientExitHandler;
+        public event EventHandler<IRemoteProxy> onClientExitHandler;
 
         /// <summary>
         /// 监听的端口
@@ -51,7 +51,7 @@ namespace One.Net
         /// <param name="port">坚挺的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(string host, int port, ushort bufferSize)
-        {            
+        {
             Console.WriteLine(string.Format("Start Lisening {0}:{1}", host, port));
 
             _bufferSize = bufferSize;
@@ -62,7 +62,7 @@ namespace One.Net
                 _socket.Listen(100);
                 StartAccept(null);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
@@ -80,10 +80,10 @@ namespace One.Net
                 e.Completed += OnAcceptCompleted;
             }
             else
-            {                
+            {
                 e.AcceptSocket = null;
             }
-            
+
             bool willRaiseEvent = _socket.AcceptAsync(e);
             if (!willRaiseEvent)
             {
@@ -112,14 +112,14 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            TcpClient client = new TcpClient(clientSocket, new T(), _bufferSize);
+            TcpReomteProxy client = new TcpReomteProxy(clientSocket, new T(), _bufferSize);
             client.onShutdown += OnClientShutdown;
             onClientEnterHandler?.Invoke(this, client);
 
             Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }
 
-        private void OnClientShutdown(object sender, TcpClient client)
+        private void OnClientShutdown(object sender, TcpReomteProxy client)
         {
             client.onShutdown -= OnClientShutdown;
             Interlocked.Decrement(ref _clientCount);

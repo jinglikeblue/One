@@ -10,17 +10,17 @@ namespace One.Net
     /// 提供基于WebSocket协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class WebSocketServer<T> where T : IProtocolProcess, new()
+    public class WebSocketServer
     {
         /// <summary>
         /// 新的客户端进入的事件（非线程安全）
         /// </summary>
-        public event EventHandler<WebSocketClient> onClientEnterHandler;
+        public event EventHandler<IRemoteProxy> onClientEnterHandler;
 
         /// <summary>
         /// 客户端退出的事件（非线程安全）
         /// </summary>
-        public event EventHandler<WebSocketClient> onClientExitHandler;
+        public event EventHandler<IRemoteProxy> onClientExitHandler;
 
         /// <summary>
         /// 监听的端口
@@ -112,18 +112,18 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            WebSocketClient client = new WebSocketClient(clientSocket, new T(), _bufferSize);            
+            WebSocketRemoteProxy client = new WebSocketRemoteProxy(clientSocket, new WebSocketProtocolProcess(), _bufferSize);            
             client.onShutdown += OnClientShutdown;
             onClientEnterHandler?.Invoke(this, client);
 
             Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }
 
-        private void OnClientShutdown(object sender, TcpClient client)
+        private void OnClientShutdown(object sender, TcpReomteProxy client)
         {
             client.onShutdown -= OnClientShutdown;
             Interlocked.Decrement(ref _clientCount);
-            onClientExitHandler?.Invoke(this, client as WebSocketClient);
+            onClientExitHandler?.Invoke(this, client as WebSocketRemoteProxy);
 
             Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
         }

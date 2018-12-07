@@ -10,11 +10,11 @@ namespace OneDemo.Common
     /// </summary>
     public class AsyncSimpleTcpProtocolProcess : IProtocolProcess
     {
-        public TcpClient bindClient;
+        public IRemoteProxy bindClient;
 
         public event EventHandler<byte[]> onReceiveProtocol;
 
-        public void SetSender(ISender sender)
+        public void SetSender(IRemoteProxy sender)
         {
             
         }

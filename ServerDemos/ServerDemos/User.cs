@@ -6,7 +6,7 @@ namespace OneDemo
 {
     class User
     {
-        public TcpClient client { get; }
+        public IRemoteProxy client { get; }
 
         BaseTcpProtocolProcess _protocolProcess;
 
@@ -20,7 +20,7 @@ namespace OneDemo
             _destroyFlag = true;
         }
 
-        public User(TcpClient client)
+        public User(IRemoteProxy client)
         {
             this.client = client;
             _protocolProcess = client.protocolProcess as BaseTcpProtocolProcess;

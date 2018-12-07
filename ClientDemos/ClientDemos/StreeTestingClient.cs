@@ -52,12 +52,12 @@ namespace ClientDemos
             //_client.Send(obj);
         }
 
-        private void OnDisconnect(object sender, TcpSocketClient e)
+        private void OnDisconnect(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
 
-        private void OnConnectSuccess(object sender, TcpSocketClient e)
+        private void OnConnectSuccess(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
                        

@@ -9,7 +9,7 @@ namespace One.Protocol
     /// <summary>
     /// WebSocket协议处理器
     /// </summary>
-    public class WebSocketTextProtocolProcess : IProtocolProcess
+    public sealed class WebSocketProtocolProcess : IProtocolProcess
     {
         /// <summary>
         /// 负载数据内容
@@ -38,7 +38,7 @@ namespace One.Protocol
 
         List<byte[]> _pbList = new List<byte[]>();
 
-        ISender _sender;
+        IRemoteProxy _sender;
 
         /// <summary>
         /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
@@ -133,7 +133,8 @@ namespace One.Protocol
             {
                 case EOpcode.CONTINUE:
                     break;
-                case EOpcode.TEXT:                
+                case EOpcode.TEXT:
+                case EOpcode.BYTE:
                     if (dataSize > 0)
                     {
                         if (ba.ReadEnableSize < dataSize)
@@ -160,8 +161,6 @@ namespace One.Protocol
                         //string content = textBA.ReadStringBytes(textBA.ReadEnableSize);
                     }
                     break;
-                case EOpcode.BYTE:
-                    break;
                 case EOpcode.CLOSE:
                     
                     break;
@@ -169,6 +168,7 @@ namespace One.Protocol
                     
                     break;
                 case EOpcode.PONG:
+
                     break;
                 default:
                     Console.WriteLine("危险！");                    
@@ -229,7 +229,7 @@ namespace One.Protocol
             return ba.GetAvailableBytes();
         }
 
-        public void SetSender(ISender sender)
+        public void SetSender(IRemoteProxy sender)
         {
             _sender = sender;
         }

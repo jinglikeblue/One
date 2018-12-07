@@ -27,13 +27,13 @@ namespace ServerDemos
             Console.ReadKey();
         }
 
-        private void OnClientEnter(object sender, TcpClient e)
+        private void OnClientEnter(object sender, IRemoteProxy e)
         {
             (e.protocolProcess as AsyncSimpleTcpProtocolProcess).bindClient = e;
             (e.protocolProcess as AsyncSimpleTcpProtocolProcess).onReceiveProtocol += OnReceiveProtocol;
         }
 
-        private void OnClientExit(object sender, TcpClient e)
+        private void OnClientExit(object sender, IRemoteProxy e)
         {
             (e.protocolProcess as AsyncSimpleTcpProtocolProcess).bindClient = null;
             (e.protocolProcess as AsyncSimpleTcpProtocolProcess).onReceiveProtocol -= OnReceiveProtocol;

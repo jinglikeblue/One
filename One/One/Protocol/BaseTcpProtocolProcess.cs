@@ -95,7 +95,7 @@ namespace One.Protocol
             return ba.Bytes;
         }
 
-        public void SetSender(ISender sender)
+        public void SetSender(IRemoteProxy sender)
         {
             
         }

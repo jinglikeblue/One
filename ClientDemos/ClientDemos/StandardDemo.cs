@@ -38,7 +38,7 @@ namespace OneDemo
             }            
         }
 
-        private void OnDisconnect(object sender, TcpSocketClient e)
+        private void OnDisconnect(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
@@ -50,7 +50,7 @@ namespace OneDemo
             Console.WriteLine("T{0} 消息延迟：{1}",Thread.CurrentThread.ManagedThreadId, (now - last) / 10000);
         }
 
-        private void OnConnectSuccess(object sender, TcpSocketClient e)
+        private void OnConnectSuccess(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
             Send();
@@ -63,7 +63,7 @@ namespace OneDemo
             _client.Send(_pp.Pack(obj));
         }
 
-        private void OnConnectFail(object sender, TcpSocketClient e)
+        private void OnConnectFail(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
         }
