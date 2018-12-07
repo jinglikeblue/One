@@ -67,16 +67,6 @@ namespace One.Net
             SendBufferList();
         }
 
-        /// <summary>
-        /// 将要发送的数据封装为WebSocket通信数据帧
-        /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
-        byte[] CreateDataFrame(byte[] data)
-        {
-            return data;
-        }
-
         protected override void ProcessReceive(SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
@@ -234,25 +224,72 @@ namespace One.Net
                             }
                         }
 
-                        var test = new ByteArray(payloadData, payloadData.Length);
-                        string v = test.ReadStringBytes(test.ReadEnableSize);
+                        //数据发回去
+                        Send(CreateDataFrame(payloadData));
+
+                        //var test = new ByteArray(payloadData, payloadData.Length);
+                        //string v = test.ReadStringBytes(test.ReadEnableSize);
                     }
                     break;
                 case EOpcode.CLOSE:
                     Close();
                     break;
                 case EOpcode.PING:
+                    SendPong();
                     break;
                 case EOpcode.PONG:
                     break;
                 default:
                     Console.WriteLine("危险！");
+                    Close();
                     break;
             }
 
             return ba.Pos;
         }
 
+        void SendPong()
+        {
+
+        }
+
+        /// <summary>
+        /// 将要发送的数据封装为WebSocket通信数据帧。
+        /// 默认mask为0
+        /// </summary>
+        /// <param name="data">发送的数据</param>
+        /// <param name="isFin">是否是结束帧(默认为true)</param>
+        /// <param name="opcode">操作码(默认为TEXT)</param>
+        byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
+        {
+            ByteArray ba = new ByteArray(_buffer.Length, false);
+
+            int b1 = 0;
+            if(isFin)
+            {
+                b1 = b1 | 128;
+            }
+            b1 = b1 | (int)opcode;
+            ba.Write((byte)b1);            
+
+            if(data.Length > 65535)
+            {
+                ba.Write((byte)127);
+                ba.Write((long)data.Length);
+            }
+            else if(data.Length > 125)
+            {
+                ba.Write((byte)126);
+                ba.Write((ushort)data.Length);
+            }
+            else
+            {
+                ba.Write((byte)data.Length);
+            }
+
+            ba.Write(data);            
+            return ba.GetAvailableBytes();
+        }
 
     }
 }

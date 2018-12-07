@@ -25,7 +25,7 @@
             alert("error " + e);
         }
         function sMessage(msg){  
-            alert('server says:' + msg);  
+            console.log("server:" + msg.data);             
         }
         function sClose(e){
             alert("connect closed:" + e.code);
@@ -60,6 +60,15 @@
             content += "456";
             socket.send(content);
         }
+
+        function send100frame(){
+            var content = "hello world";
+            var i = 100;
+            while(--i > -1)
+            {
+                socket.send(content);
+            }                       
+        }
     </script>
 </head>  
    
@@ -70,6 +79,7 @@
 <button id="close" onclick="Close();">Close</button>
 <button id="send400byte" onclick="send400byte();">send400byte</button>
 <button id="send70000byte" onclick="send70000byte();">send70000byte</button>
+<button id="send100frame" onclick="send100frame();">send100frame</button>
 </body>  
    
 </html>  
