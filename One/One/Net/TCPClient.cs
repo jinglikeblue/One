@@ -46,7 +46,7 @@ namespace One.Net
         /// </summary>
         public bool isClosed { get; private set; } = false;
 
-        public TcpClient(Socket clientSocket, IProtocolProcess protocolProcess, ushort bufferSize)
+        public TcpClient(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
         {                       
             _clientSocket = clientSocket;            
             _buffer = new byte[bufferSize];

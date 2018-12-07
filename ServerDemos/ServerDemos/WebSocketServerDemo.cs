@@ -12,7 +12,7 @@ namespace ServerDemos
         WebSocketServer<BaseTcpProtocolProcess> _server;
 
         public static void Main(string[] args)
-        {
+        {           
             ByteArray.defaultBufferSize = 4096;
             new WebSocketServerDemo();
         }
@@ -20,7 +20,7 @@ namespace ServerDemos
         public WebSocketServerDemo()
         {
             _server = new WebSocketServer<BaseTcpProtocolProcess>();
-            _server.Start("0.0.0.0", 1875, 4096);
+            _server.Start("0.0.0.0", 1875, 80000);
 
             //new Thread(LogicThraed).Start();
 

@@ -31,11 +31,35 @@
             alert("connect closed:" + e.code);
         }  
         function Send(){
-            socket.send(document.getElementById("msg").value);
+            var content = document.getElementById("msg").value;
+            socket.send(content);
         } 
         function Close(){
             socket.close();
         }  
+
+        function send400byte(){
+            var content = "123";
+            var i = 400 - 6;
+            while(--i > -1)
+            {
+                content += "a";
+            }
+            content += "456";
+            socket.send(content);
+        }
+
+        
+        function send70000byte(){
+            var content = "123";
+            var i = 70000 - 6;
+            while(--i > -1)
+            {
+                content += "a";
+            }
+            content += "456";
+            socket.send(content);
+        }
     </script>
 </head>  
    
@@ -44,7 +68,8 @@
 <button id="connect" onclick="Connect();">Connect</button>  
 <button id="send" onclick="Send();">Send</button>  
 <button id="close" onclick="Close();">Close</button>
-
+<button id="send400byte" onclick="send400byte();">send400byte</button>
+<button id="send70000byte" onclick="send70000byte();">send70000byte</button>
 </body>  
    
 </html>  

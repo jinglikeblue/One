@@ -14,6 +14,31 @@ namespace One.Net
     public class WebSocketClient : TcpClient
     {
         /// <summary>
+        /// 负载数据内容
+        /// </summary>
+        enum EOpcode
+        {
+            /// <summary>
+            /// 继续帧
+            /// </summary>
+            CONTINUE = 0,
+            /// <summary>
+            /// 文本帧
+            /// </summary>
+            TEXT = 1,
+            /// <summary>
+            /// 二进制帧
+            /// </summary>
+            BYTE = 2,
+            /// <summary>
+            /// 连接关闭
+            /// </summary>
+            CLOSE = 8,
+            PING = 9,
+            PONG = 10,
+        }
+
+        /// <summary>
         /// 客户端请求升级发送的KEY
         /// </summary>
         const string CLIENT_UPGRADE_REQEUST_KEY = "Sec-WebSocket-Key";
@@ -25,9 +50,9 @@ namespace One.Net
 
         bool _isUpgraded = false;
 
-        public WebSocketClient(Socket clientSocket, IProtocolProcess protocolProcess, ushort bufferSize) : base(clientSocket, protocolProcess, bufferSize)
+        public WebSocketClient(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
-            
+
         }
 
         public override void Send(byte[] bytes)
@@ -42,6 +67,16 @@ namespace One.Net
             SendBufferList();
         }
 
+        /// <summary>
+        /// 将要发送的数据封装为WebSocket通信数据帧
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        byte[] CreateDataFrame(byte[] data)
+        {
+            return data;
+        }
+
         protected override void ProcessReceive(SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
@@ -51,13 +86,13 @@ namespace One.Net
                 int used = 0;
                 if (false == _isUpgraded)
                 {
-                    used = Upgrade();                    
+                    used = Upgrade();
                 }
                 else
                 {
-                    used = ProcessPayloadData();
-                }                               
-                
+                    used = LoadDataFrame();
+                }
+
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
                 if (used > 0)
@@ -78,16 +113,6 @@ namespace One.Net
             {
                 Shutdown();
             }
-        }
-
-        /// <summary>
-        /// 处理WS携带的数据
-        /// </summary>
-        int ProcessPayloadData()
-        {
-            ByteArray ba = new ByteArray(_buffer, _bufferAvailable);
-
-            return 0;
         }
 
         /// <summary>
@@ -112,22 +137,22 @@ namespace One.Net
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 value = null;
             }
 
-            if(null == value)
+            if (null == value)
             {
-                Close();
+                Shutdown();
                 return 0;
             }
 
             //生成升级协议确认KEY
             string responseValue = value + WEB_SOCKET_UPGRADE_GUID;
             byte[] bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(responseValue));
-            string base64Value = Convert.ToBase64String(bytes);             
+            string base64Value = Convert.ToBase64String(bytes);
 
             //构建升级回复协议
             var builder = new StringBuilder();
@@ -145,5 +170,89 @@ namespace One.Net
             _isUpgraded = true;
             return _bufferAvailable;
         }
+
+
+
+        /// <summary>
+        /// 处理WebSocket通信数据帧
+        /// </summary>
+        int LoadDataFrame()
+        {
+            ByteArray ba = new ByteArray(_buffer, _bufferAvailable, false);
+            //获取第一个byte
+            byte byte1 = ba.ReadByte();
+            bool fin = (byte1 & 128) == 128 ? true : false;
+            var rsv123 = (byte1 & 112);
+            var opcode = (EOpcode)(byte1 & 15);
+
+            //获取第二个byte
+            byte byte2 = ba.ReadByte();
+            bool mask = (byte2 & 128) == 128 ? true : false;
+            var payloadLen = (byte2 & 127);
+
+            int dataSize = 0;
+            switch (payloadLen)
+            {
+                case 127:
+                    dataSize = (int)ba.ReadULong();
+                    break;
+                case 126:
+                    dataSize = ba.ReadUShort();
+                    break;
+                default:
+                    dataSize = payloadLen;
+                    break;
+            }
+
+            byte[] maskKeys = null;
+            if (mask)
+            {
+                maskKeys = new byte[4];
+                for (int i = 0; i < maskKeys.Length; i++)
+                {
+                    maskKeys[i] = ba.ReadByte();
+                }
+            }
+
+
+
+            switch (opcode)
+            {
+                case EOpcode.CONTINUE:
+                    break;
+                case EOpcode.TEXT:                    
+                case EOpcode.BYTE:
+                    if (dataSize > 0)
+                    {
+                        byte[] payloadData = ba.ReadBytes(dataSize);
+                        if (mask)
+                        {
+                            for (int i = 0; i < payloadData.Length; i++)
+                            {
+                                var maskKey = maskKeys[i % 4];
+                                payloadData[i] = (byte)(payloadData[i] ^ maskKey);
+                            }
+                        }
+
+                        var test = new ByteArray(payloadData, payloadData.Length);
+                        string v = test.ReadStringBytes(test.ReadEnableSize);
+                    }
+                    break;
+                case EOpcode.CLOSE:
+                    Close();
+                    break;
+                case EOpcode.PING:
+                    break;
+                case EOpcode.PONG:
+                    break;
+                default:
+                    Console.WriteLine("危险！");
+                    break;
+            }
+
+            return ba.Pos;
+        }
+
+
     }
 }

@@ -42,7 +42,7 @@ namespace One.Net
         /// <summary>
         /// 缓冲区大小
         /// </summary>
-        ushort _bufferSize;
+        int _bufferSize;
 
         /// <summary>
         /// 启动Socket服务
@@ -50,7 +50,7 @@ namespace One.Net
         /// <param name="host">监听的地址</param>
         /// <param name="port">坚挺的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
-        public void Start(string host, int port, ushort bufferSize)
+        public void Start(string host, int port, int bufferSize)
         {
             Console.WriteLine(string.Format("Start Lisening {0}:{1}", host, port));
 
