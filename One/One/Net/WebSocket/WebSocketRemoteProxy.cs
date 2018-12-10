@@ -14,19 +14,19 @@ namespace One.Net
     public class WebSocketRemoteProxy : TcpReomteProxy
     {
         /// <summary>
-        /// 客户端请求升级发送的KEY
-        /// </summary>
-        const string CLIENT_UPGRADE_REQEUST_KEY = "Sec-WebSocket-Key";
-
-        /// <summary>
-        /// 协议升级为WebSocket使用的GUID
-        /// </summary>
-        const string WEB_SOCKET_UPGRADE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
-        /// <summary>
         /// WebSocket协议是否升级
         /// </summary>
-        bool _isUpgraded = false;        
+        bool _isUpgraded = false;   
+
+        public bool isUpgraded{
+            get{
+                return _isUpgraded;
+            }
+
+            internal set{
+                _isUpgraded = value;
+            }
+        }
 
         public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
@@ -51,15 +51,7 @@ namespace One.Net
             {
                 _bufferAvailable += e.BytesTransferred;
 
-                int used = 0;
-                if (false == _isUpgraded)
-                {
-                    used = Upgrade();
-                }
-                else
-                {
-                    used = protocolProcess.Unpack(_buffer, _bufferAvailable);
-                }
+                int used = protocolProcess.Unpack(_buffer, _bufferAvailable);
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
@@ -83,6 +75,7 @@ namespace One.Net
             }
         }
 
+        /*
         /// <summary>
         /// 升级协议为WebSocket协议
         /// </summary>
@@ -138,7 +131,7 @@ namespace One.Net
             _isUpgraded = true;
             return _bufferAvailable;
         }
-
+        */
         public void SendPing()
         {
             byte[] pingFrame = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PING);
