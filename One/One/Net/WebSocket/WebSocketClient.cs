@@ -35,12 +35,13 @@ namespace One.Net
         }
 
         protected override void ProcessReceivedData()
-        {
-            if(false == IsUpgrade)
+        {            
+            if(false == IsUpgrade) //协议没有升级
             {
                 bool isUpgradeSuccess = UpgradeResponse();
                 if(isUpgradeSuccess)
-                {                    
+                {
+                    _bufferAvailable = 0;
                     DispatchConnectSuccessEvent();
                 }
                 else
@@ -54,11 +55,22 @@ namespace One.Net
             }
         }
 
+        public override void Send(byte[] bytes)
+        {
+            if (null == _socket)
+            {
+                return;
+            }
+
+            var data = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(bytes, false);
+
+            base.Send(data);
+        }
+
         public void Send(string content)
         {
-            var data = Encoding.UTF8.GetBytes(content);
-            var sendData = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(data);
-            Send(sendData);
+            var bytes = Encoding.UTF8.GetBytes(content);            
+            Send(bytes);
         }        
 
         void RequestUpgrade()
@@ -88,7 +100,7 @@ namespace One.Net
         /// </summary>
         bool UpgradeResponse()
         {
-            //获取客户端发来的升级协议KEY
+            //获取服务器发来的升级确认
             ByteArray ba = new ByteArray(_receiveBuffer, _bufferAvailable);
             string clientRequest = ba.ReadStringBytes(Encoding.ASCII, ba.ReadEnableSize);
             string[] datas = clientRequest.Split(new String[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);            
@@ -99,6 +111,7 @@ namespace One.Net
                     if (datas[i].Contains("Sec-WebSocket-Accept"))
                     {
                         IsUpgrade = true;
+                        Console.WriteLine("WS协议升级成功！");
                         break;
                     }
                 }

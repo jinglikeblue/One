@@ -27,16 +27,30 @@ namespace One.Net
             
         }
 
-        public override void Send(byte[] bytes)
+        /// <summary>
+        /// 数据内容将被自动包装为WebSocket帧协议
+        /// </summary>
+        /// <param name="data"></param>
+        public void SendData(byte[] data)
         {
             if (null == _clientSocket)
             {
                 return;
             }
 
-            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+            var bytes = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(data, false);
 
-            SendBufferList();
+            Send(bytes);
+        }
+
+        /// <summary>
+        /// 数据内容将被自动包装为WebSocket帧协议
+        /// </summary>
+        /// <param name="content"></param>
+        public void SendData(string content)
+        {
+            var bytes = Encoding.UTF8.GetBytes(content);
+            SendData(bytes);
         }
 
         protected override void ProcessReceive(SocketAsyncEventArgs e)

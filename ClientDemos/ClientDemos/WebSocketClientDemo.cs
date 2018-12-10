@@ -24,23 +24,24 @@ namespace ClientDemos
         public WebSocketClientDemo()
         {
             var client = new WebSocketClient();
+            _pp = client.protocolProcess as WebSocketProtocolProcess;
             _client = client;            
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;
-            _client.Connect("127.0.0.1", 1875, 4096);
-            //_client.Connect("121.40.165.18", 8800, 4096);
+            //_client.Connect("127.0.0.1", 1875, 4096);
+            _client.Connect("121.40.165.18", 8800, 4096);
 
             //_pp = _client.protocolProcess as WebSocketProtocolProcess;
-            //while (true)
-            //{
-            //    if (_client.IsConnected)
-            //    {
-            //        _pp.ReceiveProtocols(OnReceiveProtocol);
-            //        //Send();
-            //    }
-            //    Thread.Sleep(1000);
-            //}
+            while (true)
+            {
+                if (_client.IsConnected)
+                {
+                    _pp.ReceiveProtocols(OnReceiveProtocol);
+                    //Send();
+                }
+                Thread.Sleep(1000);
+            }
         }
 
         private void OnDisconnect(object sender, IRemoteProxy e)

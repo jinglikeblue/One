@@ -2,8 +2,6 @@
 using One.Net;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace One.Protocol
 {
@@ -12,6 +10,12 @@ namespace One.Protocol
     /// </summary>
     public sealed class WebSocketProtocolProcess : IProtocolProcess
     {
+        /// <summary>
+        /// 收到协议的事件，如果监听该事件，那么ReceiveProtocols方法将失效。
+        /// 非线程安全，如果需要线程安全，请使用ReceiveProtocols方法
+        /// </summary>
+        public Action<IRemoteProxy, byte[]> onReceiveProtocolEvent;
+
         /// <summary>
         /// 负载数据内容
         /// </summary>
@@ -52,7 +56,7 @@ namespace One.Protocol
         /// <param name="onReceiveProtocol"></param>
         public void ReceiveProtocols(Action<byte[]> onReceiveProtocol)
         {
-            if(0 == _pbList.Count)
+            if (0 == _pbList.Count)
             {
                 return;
             }
@@ -80,8 +84,8 @@ namespace One.Protocol
         }
 
         void Unpack(ByteArray ba, ref int used)
-        {           
-            if(ba.ReadEnableSize < 2 * ByteArray.BYTE_SIZE)
+        {
+            if (ba.ReadEnableSize < 2 * ByteArray.BYTE_SIZE)
             {
                 //数据存在半包问题
                 return;
@@ -120,7 +124,7 @@ namespace One.Protocol
                     dataSize = ba.ReadUShort();
                     break;
                 default:
-                    dataSize = payloadLen;                    
+                    dataSize = payloadLen;
                     break;
             }
 
@@ -175,8 +179,9 @@ namespace One.Protocol
                     //忽略
                     break;
 
-                case EOpcode.CLOSE:
+                case EOpcode.CLOSE:                                                         
                 default:
+                    Console.WriteLine("收到WS协议，操作：{0}", opcode);
                     //不可识别的操作符
                     _sender.Close();
                     return; //注意这里不是break，是返回！！！                    
@@ -189,13 +194,13 @@ namespace One.Protocol
 
         public void SendPing()
         {
-            byte[] pingFrame = CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PING);
+            byte[] pingFrame = CreateDataFrame(null, false, true, WebSocketProtocolProcess.EOpcode.PING);
             _sender.Send(pingFrame);
         }
 
         public void SendPong()
         {
-            byte[] pongFrame = CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PONG);
+            byte[] pongFrame = CreateDataFrame(null, false, true, WebSocketProtocolProcess.EOpcode.PONG);
             _sender.Send(pongFrame);
         }
 
@@ -205,13 +210,17 @@ namespace One.Protocol
         /// <param name="data"></param>
         public void OnReceiveProtocol(byte[] data)
         {
-            lock (_pbList)
+            if (null != onReceiveProtocolEvent)
             {
-                _pbList.Add(data);
+                onReceiveProtocolEvent.Invoke(_sender, data);
             }
-
-            //收到的数据原路返回
-            _sender.Send(Pack(data));
+            else
+            {
+                lock (_pbList)
+                {
+                    _pbList.Add(data);
+                }
+            }
         }
 
         /// <summary>
@@ -219,23 +228,13 @@ namespace One.Protocol
         /// 默认mask为0
         /// </summary>
         /// <param name="data">发送的数据</param>
-        /// <returns>封装好的ws数据帧</returns>
-        public byte[] Pack(byte[] data)
-        {
-            return CreateDataFrame(data);
-        }
-
-        /// <summary>
-        /// 将要发送的数据封装为WebSocket通信数据帧。
-        /// 默认mask为0
-        /// </summary>
-        /// <param name="data">发送的数据</param>
+        /// <param name="isMask">是否做掩码处理</param>
         /// <param name="isFin">是否是结束帧(默认为true)</param>
         /// <param name="opcode">操作码(默认为TEXT)</param>
-        internal byte[] CreateDataFrame(byte[] data, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
+        internal byte[] CreateDataFrame(byte[] data, bool isMask, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
         {
             int bufferSize = 10;
-            if(null != data)
+            if (null != data)
             {
                 bufferSize += data.Length;
             }

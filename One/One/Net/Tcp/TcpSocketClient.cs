@@ -216,7 +216,7 @@ namespace One.Net
         /// 发送数据
         /// </summary>
         /// <param name="bytes"></param>
-        public void Send(byte[] bytes)
+        public virtual void Send(byte[] bytes)
         {
             lock (this)
             {
