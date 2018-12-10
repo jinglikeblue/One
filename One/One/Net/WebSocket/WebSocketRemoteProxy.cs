@@ -38,7 +38,7 @@ namespace One.Net
                 return;
             }
 
-            var bytes = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(data, false);
+            var bytes = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(data);
 
             Send(bytes);
         }

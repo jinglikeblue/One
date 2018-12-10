@@ -55,22 +55,22 @@ namespace One.Net
             }
         }
 
-        public override void Send(byte[] bytes)
+        public void SendData(byte[] bytes)
         {
             if (null == _socket)
             {
                 return;
             }
 
-            var data = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(bytes, false);
+            var data = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(bytes);
 
             base.Send(data);
         }
 
-        public void Send(string content)
+        public void SendData(string content)
         {
             var bytes = Encoding.UTF8.GetBytes(content);            
-            Send(bytes);
+            SendData(bytes);
         }        
 
         void RequestUpgrade()

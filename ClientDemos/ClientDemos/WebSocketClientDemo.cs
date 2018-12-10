@@ -29,8 +29,8 @@ namespace ClientDemos
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;
-            //_client.Connect("127.0.0.1", 1875, 4096);
-            _client.Connect("121.40.165.18", 8800, 4096);
+            _client.Connect("127.0.0.1", 1875, 4096);
+            //_client.Connect("121.40.165.18", 8800, 4096);
 
             //_pp = _client.protocolProcess as WebSocketProtocolProcess;
             while (true)
@@ -54,13 +54,13 @@ namespace ClientDemos
             var s = Encoding.UTF8.GetString(obj);
             //long last = long.Parse(obj.value);
             //long now = DateTime.Now.ToFileTimeUtc();
-            Console.WriteLine("T{0} 消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
+            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
         }
 
         private void OnConnectSuccess(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
-            _client.Send("hello");
+            _client.SendData("hello");
             //Send();
         }        
 

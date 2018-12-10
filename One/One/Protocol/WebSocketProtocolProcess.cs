@@ -12,7 +12,7 @@ namespace One.Protocol
     {
         /// <summary>
         /// 收到协议的事件，如果监听该事件，那么ReceiveProtocols方法将失效。
-        /// 非线程安全，如果需要线程安全，请使用ReceiveProtocols方法
+        /// 多线程事件，如果需要单线程回调，请使用ReceiveProtocols方法
         /// </summary>
         public Action<IRemoteProxy, byte[]> onReceiveProtocolEvent;
 
@@ -228,10 +228,10 @@ namespace One.Protocol
         /// 默认mask为0
         /// </summary>
         /// <param name="data">发送的数据</param>
-        /// <param name="isMask">是否做掩码处理</param>
+        /// <param name="isMask">是否做掩码处理（默认为false)</param>
         /// <param name="isFin">是否是结束帧(默认为true)</param>
         /// <param name="opcode">操作码(默认为TEXT)</param>
-        internal byte[] CreateDataFrame(byte[] data, bool isMask, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
+        internal byte[] CreateDataFrame(byte[] data, bool isMask = false, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
         {
             int bufferSize = 10;
             if (null != data)
@@ -249,21 +249,49 @@ namespace One.Protocol
             b1 = b1 | (int)opcode;
             ba.Write((byte)b1);
 
+            int b2 = 0;
+            byte[] maskKeys = null;
+            if (isMask)
+            {
+                b2 = b2 | 128;
+
+                maskKeys = new byte[4];
+                Random rand = new Random();
+                for (int i = 0; i < maskKeys.Length; i++)
+                {
+                    maskKeys[i] = (byte)rand.Next();                    
+                }
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    var maskKey = maskKeys[i % 4];
+                    data[i] = (byte)(data[i] ^ maskKey);
+                }
+            }
+
             if (data != null)
             {
                 if (data.Length > 65535)
                 {
-                    ba.Write((byte)127);
+                    ba.Write((byte)(b2 | 127));
                     ba.Write((long)data.Length);
                 }
                 else if (data.Length > 125)
                 {
-                    ba.Write((byte)126);
+                    ba.Write((byte)(b2 | 126));
                     ba.Write((ushort)data.Length);
                 }
                 else
                 {
-                    ba.Write((byte)data.Length);
+                    ba.Write((byte)(b2 | data.Length));
+                }
+
+                if (isMask)
+                {
+                    for (int i = 0; i < maskKeys.Length; i++)
+                    {
+                        ba.Write(maskKeys[i]);
+                    }
                 }
 
                 ba.Write(data);

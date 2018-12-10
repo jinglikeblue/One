@@ -24,7 +24,7 @@ namespace ClientDemos
                 Console.WriteLine("启动参数不正确，将使用默认参数");                
                 host = "127.0.0.1";
                 port = 1875;
-                count = 1;
+                count = 100;
                 sendSize = 4096;
             }            
 
