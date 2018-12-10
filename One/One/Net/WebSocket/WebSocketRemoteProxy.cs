@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using One.Data;
@@ -14,19 +13,14 @@ namespace One.Net
     public class WebSocketRemoteProxy : TcpReomteProxy
     {
         /// <summary>
-        /// WebSocket协议是否升级
+        /// 协议升级为WebSocket使用的GUID
         /// </summary>
-        bool _isUpgraded = false;   
+        const string WEB_SOCKET_UPGRADE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-        public bool isUpgraded{
-            get{
-                return _isUpgraded;
-            }
-
-            internal set{
-                _isUpgraded = value;
-            }
-        }
+        /// <summary>
+        /// 协议是否已升级
+        /// </summary>
+        public bool isUpgraded { get; internal set; } = false;
 
         public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
@@ -51,7 +45,16 @@ namespace One.Net
             {
                 _bufferAvailable += e.BytesTransferred;
 
-                int used = protocolProcess.Unpack(_buffer, _bufferAvailable);
+                int used = 0;
+
+                if (false == isUpgraded)
+                {
+                    used = Upgrade(_buffer, _bufferAvailable);
+                }
+                else
+                {
+                    used = protocolProcess.Unpack(_buffer, _bufferAvailable);
+                }                
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
 
@@ -75,14 +78,13 @@ namespace One.Net
             }
         }
 
-        /*
         /// <summary>
         /// 升级协议为WebSocket协议
         /// </summary>
-        int Upgrade()
+        int Upgrade(byte[] buffer, int bufferAvailable)
         {
             //获取客户端发来的升级协议KEY
-            ByteArray ba = new ByteArray(_buffer, _bufferAvailable);
+            ByteArray ba = new ByteArray(buffer, bufferAvailable);
             string clientRequest = ba.ReadStringBytes(Encoding.ASCII, ba.ReadEnableSize);
             string[] datas = clientRequest.Split(new String[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             string value = null;
@@ -90,7 +92,7 @@ namespace One.Net
             {
                 for (int i = 0; i < datas.Length; i++)
                 {
-                    if (datas[i].Contains(CLIENT_UPGRADE_REQEUST_KEY))
+                    if (datas[i].Contains("Sec-WebSocket-Key"))
                     {
                         string[] keyValue = datas[i].Split(':');
                         value = keyValue[1].Trim();
@@ -125,25 +127,12 @@ namespace One.Net
             string responseData = builder.ToString();
 
             byte[] responseBytes = Encoding.ASCII.GetBytes(responseData);
+            //回执升级协议
             Send(responseBytes);
 
             //Console.WriteLine("response:\r\n {0}", responseData);
-            _isUpgraded = true;
-            return _bufferAvailable;
+            isUpgraded = true;
+            return bufferAvailable;
         }
-        */
-        public void SendPing()
-        {
-            byte[] pingFrame = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PING);
-            Send(pingFrame);
-        }
-
-        public void SendPong()
-        {
-            byte[] pongFrame = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PONG);
-            Send(pongFrame);
-        }
-
-        
     }
 }

@@ -25,9 +25,9 @@ namespace One.Net
 
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
-        Socket _socket;
+        protected Socket _socket;
 
-        byte[] _receiveBuffer;
+        protected byte[] _receiveBuffer;
 
         /// <summary>
         /// 数据发送队列
@@ -42,7 +42,7 @@ namespace One.Net
         /// <summary>
         /// 缓冲区可用字节长度
         /// </summary>
-        int _bufferAvailable = 0;
+        protected int _bufferAvailable = 0;
 
         /// <summary>
         /// 协议处理器
@@ -97,7 +97,7 @@ namespace One.Net
         /// <summary>
         /// 断开客户端连接
         /// </summary>
-        public void Disconnect()
+        public void Close()
         {
             if (null != _socket)
             {
@@ -117,7 +117,7 @@ namespace One.Net
 
         public void Reconnect()
         {
-            Disconnect();
+            Close();
 
             IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
             Socket socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -130,25 +130,40 @@ namespace One.Net
             }
         }
 
-        void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
+        protected virtual void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
         {
             e.Completed -= OnConnectCompleted;
             if (null == e.ConnectSocket)
             {
-                onConnectFail?.Invoke(this, this);
+                DispatchConnectFailEvent();
                 return;
             }
 
             _socket = e.ConnectSocket;
-            onConnectSuccess?.Invoke(this, this);
+            DispatchConnectSuccessEvent();
             StartReceive();
+        }
+
+        protected void DispatchConnectFailEvent()
+        {
+            onConnectFail?.Invoke(this, this);
+        }
+
+        protected void DispatchConnectSuccessEvent()
+        {
+            onConnectSuccess?.Invoke(this, this);
         }
 
         /// <summary>
         /// 开始接受数据
         /// </summary>
-        void StartReceive()
+        protected void StartReceive()
         {
+            if(IsFade)
+            {
+                return;
+            }
+
             _receiveEA.SetBuffer(_receiveBuffer, _bufferAvailable, _receiveBuffer.Length - _bufferAvailable);
 
             if (!_socket.ReceiveAsync(_receiveEA))
@@ -166,26 +181,34 @@ namespace One.Net
             {
                 _bufferAvailable += e.BytesTransferred;
 
-                //协议处理器处理协议数据
-                int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);
-
-                if (used > 0)
-                {
-                    _bufferAvailable = _bufferAvailable - used;
-                    if (0 != _bufferAvailable)
-                    {
-                        //将还没有使用的数据移动到数据开头
-                        byte[] newBytes = new byte[_receiveBuffer.Length];
-                        Array.Copy(_receiveBuffer, used, newBytes, 0, _bufferAvailable);
-                        _receiveBuffer = newBytes;
-                    }
-                }
+                ProcessReceivedData();
 
                 StartReceive();
             }
             else
             {
-                Disconnect();
+                Close();
+            }
+        }
+
+        /// <summary>
+        /// 处理接收到的数据
+        /// </summary>
+        protected virtual void ProcessReceivedData()
+        {
+            //协议处理器处理协议数据
+            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);
+
+            if (used > 0)
+            {
+                _bufferAvailable = _bufferAvailable - used;
+                if (0 != _bufferAvailable)
+                {
+                    //将还没有使用的数据移动到数据开头
+                    byte[] newBytes = new byte[_receiveBuffer.Length];
+                    Array.Copy(_receiveBuffer, used, newBytes, 0, _bufferAvailable);
+                    _receiveBuffer = newBytes;
+                }
             }
         }
 
@@ -240,8 +263,24 @@ namespace One.Net
                 }
                 else
                 {
-                    Disconnect();
+                    Close();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
+        /// </summary>
+        bool IsFade
+        {
+            get
+            {
+                if (null == _socket)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
     }

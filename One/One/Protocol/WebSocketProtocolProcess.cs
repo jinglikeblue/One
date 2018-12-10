@@ -13,16 +13,6 @@ namespace One.Protocol
     public sealed class WebSocketProtocolProcess : IProtocolProcess
     {
         /// <summary>
-        /// 客户端请求升级发送的KEY
-        /// </summary>
-        const string CLIENT_UPGRADE_REQEUST_KEY = "Sec-WebSocket-Key";
-
-        /// <summary>
-        /// 协议升级为WebSocket使用的GUID
-        /// </summary>
-        const string WEB_SOCKET_UPGRADE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
-        /// <summary>
         /// 负载数据内容
         /// </summary>
         internal enum EOpcode
@@ -49,11 +39,11 @@ namespace One.Protocol
 
         List<byte[]> _pbList = new List<byte[]>();
 
-        WebSocketRemoteProxy _sender;
+        IRemoteProxy _sender;
 
         public void SetSender(IRemoteProxy sender)
         {
-            _sender = sender as WebSocketRemoteProxy;
+            _sender = sender;
         }
 
         /// <summary>
@@ -83,12 +73,6 @@ namespace One.Protocol
 
         public int Unpack(byte[] buf, int available)
         {
-            if(false == _sender.isUpgraded)
-            {
-                //首先升级协议
-                return Upgrade(buf, available);
-            }
-
             ByteArray ba = new ByteArray(buf, available, false);
             int used = 0;
             Unpack(ba, ref used);
@@ -185,7 +169,7 @@ namespace One.Protocol
                     }
                     break;
                 case EOpcode.PING:
-                    _sender.SendPong();
+                    SendPong();
                     break;
                 case EOpcode.PONG:
                     //忽略
@@ -201,6 +185,18 @@ namespace One.Protocol
             used += ba.Pos - startPos;
 
             Unpack(ba, ref used);
+        }
+
+        public void SendPing()
+        {
+            byte[] pingFrame = CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PING);
+            _sender.Send(pingFrame);
+        }
+
+        public void SendPong()
+        {
+            byte[] pongFrame = CreateDataFrame(null, true, WebSocketProtocolProcess.EOpcode.PONG);
+            _sender.Send(pongFrame);
         }
 
         /// <summary>
@@ -280,61 +276,5 @@ namespace One.Protocol
             return ba.GetAvailableBytes();
         }
 
-        /// <summary>
-        /// 升级协议为WebSocket协议
-        /// </summary>
-        int Upgrade(byte[] buffer, int bufferAvailable)
-        {
-            //获取客户端发来的升级协议KEY
-            ByteArray ba = new ByteArray(buffer, bufferAvailable);
-            string clientRequest = ba.ReadStringBytes(Encoding.ASCII, ba.ReadEnableSize);
-            string[] datas = clientRequest.Split(new String[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-            string value = null;
-            try
-            {
-                for (int i = 0; i < datas.Length; i++)
-                {
-                    if (datas[i].Contains(CLIENT_UPGRADE_REQEUST_KEY))
-                    {
-                        string[] keyValue = datas[i].Split(':');
-                        value = keyValue[1].Trim();
-                        break;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                value = null;
-            }
-
-            if (null == value)
-            {
-                _sender.Close();
-                return 0;
-            }
-
-            //生成升级协议确认KEY
-            string responseValue = value + WEB_SOCKET_UPGRADE_GUID;
-            byte[] bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(responseValue));
-            string base64Value = Convert.ToBase64String(bytes);
-
-            //构建升级回复协议
-            var builder = new StringBuilder();
-            builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
-            builder.Append("Upgrade: websocket\r\n");
-            builder.Append("Connection: Upgrade\r\n");
-            builder.AppendFormat("Sec-WebSocket-Accept: {0}\r\n", base64Value);
-            builder.Append("\r\n");
-            string responseData = builder.ToString();
-
-            byte[] responseBytes = Encoding.ASCII.GetBytes(responseData);
-            //回执升级协议
-            _sender.Send(responseBytes);
-
-            //Console.WriteLine("response:\r\n {0}", responseData);
-            _sender.isUpgraded = true;
-            return bufferAvailable;
-        }
     }
 }
