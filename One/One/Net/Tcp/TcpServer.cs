@@ -10,7 +10,7 @@ namespace One.Net
     /// 提供基于TCP协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TcpSocketServer<T> where T : IProtocolProcess, new()
+    public class TcpServer<T> where T : IProtocolProcess, new()
     {
         /// <summary>
         /// 新的客户端进入的事件（非线程安全）

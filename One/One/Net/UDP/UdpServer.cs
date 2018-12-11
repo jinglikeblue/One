@@ -3,6 +3,7 @@ using One.Protocol;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -61,6 +62,8 @@ namespace One.Net
             }
         }
 
+        int i = 0;
+
         /// <summary>
         /// 接收到连接完成的事件
         /// </summary>
@@ -70,7 +73,10 @@ namespace One.Net
         {
             byte[] data = new byte[e.BytesTransferred];
             Array.Copy(e.Buffer,data,e.BytesTransferred);
-            
+
+            Interlocked.Increment(ref i);
+            Console.WriteLine(i);
+
             Task.Run(
                 ()=> ProcessReceiveDataTask(e.RemoteEndPoint, data, data.Length)
             );

@@ -20,16 +20,16 @@ namespace ClientDemos
             Console.ReadKey();
         }
 
-        UdpSocketClient _client;
+        UdpClient _client;
         BaseUdpProtocolProcess _pp;
 
         public UdpSocketClientDemo()
         {
             _pp = new BaseUdpProtocolProcess();
-            var client = new UdpSocketClient(_pp);            
+            var client = new UdpClient(_pp);            
             _client = client;
-            _client.Bind("127.0.0.1", 1875, 1874, 4096);
-            for (int i = 0; i < 10; i++)
+            _client.Bind("127.0.0.1", 1875, 1874, 4096);            
+            for (int i = 0; i < 1000; i++)
             {
                 _client.Send(Encoding.UTF8.GetBytes("Hello" + i));
             }
@@ -52,8 +52,6 @@ namespace ClientDemos
         private void OnReceiveEvent(object sender, ByteArray e)
         {
             var s = Encoding.UTF8.GetString(e.GetAvailableBytes());
-            //long last = long.Parse(obj.value);
-            //long now = DateTime.Now.ToFileTimeUtc();
             Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
         }
 

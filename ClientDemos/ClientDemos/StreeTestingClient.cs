@@ -14,7 +14,7 @@ namespace ClientDemos
         static byte[] bytes;
 
         AsyncSimpleTcpProtocolProcess _pp;
-        TcpSocketClient _client;
+        TcpClient _client;
         int _id;
 
         public StreeTestingClient(int id)
@@ -28,7 +28,7 @@ namespace ClientDemos
             _pp = new AsyncSimpleTcpProtocolProcess();
             _pp.onReceiveProtocol += OnReceiveProtocol;
 
-            _client = new TcpSocketClient(_pp);
+            _client = new TcpClient(_pp);
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             //_client.Connect("127.0.0.1", 1875, 4096);

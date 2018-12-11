@@ -16,11 +16,11 @@ namespace OneDemo
         }
 
         BaseTcpProtocolProcess _pp;
-        TcpSocketClient _client;        
+        TcpClient _client;        
 
         public StandardDemo()
         {
-            _client = new TcpSocketClient(new BaseTcpProtocolProcess());
+            _client = new TcpClient(new BaseTcpProtocolProcess());
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;

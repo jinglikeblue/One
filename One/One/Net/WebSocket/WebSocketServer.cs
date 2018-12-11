@@ -7,7 +7,7 @@ namespace One.Net
     /// 提供基于WebSocket协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class WebSocketServer:TcpSocketServer<WebSocketProtocolProcess>
+    public class WebSocketServer:TcpServer<WebSocketProtocolProcess>
     {
         protected override TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize)
         {

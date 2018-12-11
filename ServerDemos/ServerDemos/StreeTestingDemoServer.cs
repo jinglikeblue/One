@@ -14,10 +14,10 @@ namespace ServerDemos
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
-        TcpSocketServer<AsyncSimpleTcpProtocolProcess> _tcpSrver;
+        TcpServer<AsyncSimpleTcpProtocolProcess> _tcpSrver;
         public StreeTestingDemoServer()
         {
-            _tcpSrver = new TcpSocketServer<AsyncSimpleTcpProtocolProcess>();            
+            _tcpSrver = new TcpServer<AsyncSimpleTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
             _tcpSrver.Start("0.0.0.0", 1875, 4096);

@@ -3,12 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace One.Net
 {
-    public class UdpSocketClient : IRemoteProxy
+    public class TcpClient : IRemoteProxy
     {
+        /// <summary>
+        /// 连接成功事件(多线程事件）
+        /// </summary>
+        public event EventHandler<IRemoteProxy> onConnectSuccess;
+
+        /// <summary>
+        /// 连接断开事件(多线程事件）
+        /// </summary>
+        public event EventHandler<IRemoteProxy> onDisconnect;
+
+        /// <summary>
+        /// 连接失败事件(多线程事件）
+        /// </summary>
+        public event EventHandler<IRemoteProxy> onConnectFail;
+
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
         protected Socket _socket;
@@ -35,13 +49,8 @@ namespace One.Net
         /// </summary>
         public IProtocolProcess protocolProcess { get; internal set; }
 
-        public string RemoteHost { get; private set; }
-        public int RemotePort { get; private set; }
-        public int LocalPort { get; private set; }
-
-        IPEndPoint _remoteEndPoint;
-
-        IPEndPoint _localEndPoint;
+        public string Host { get; private set; }
+        public int Port { get; private set; }
 
         /// <summary>
         /// 是否已连接
@@ -59,13 +68,19 @@ namespace One.Net
             }
         }
 
-        public UdpSocketClient(IProtocolProcess protocolProcess)
+        public TcpClient(IProtocolProcess protocolProcess)
         {
             this.protocolProcess = protocolProcess;
             protocolProcess.SetSender(this);
         }
 
-        public void Bind(string remoteHost, int remotePort, int localPort, ushort bufferSize)
+        /// <summary>
+        /// 连接指定的服务器
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="port"></param>
+        /// <param name="bufferSize"></param>
+        public void Connect(string host, int port, ushort bufferSize)
         {
             _receiveBuffer = new byte[bufferSize];
             _sendEA = new SocketAsyncEventArgs();
@@ -73,19 +88,70 @@ namespace One.Net
             _receiveEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += OnReceiveCompleted;
 
-            RemoteHost = remoteHost;
-            RemotePort = remotePort;
-            LocalPort = LocalPort;
-            
-            _remoteEndPoint = new IPEndPoint(IPAddress.Parse(RemoteHost), RemotePort);
-            _localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+            Host = host;
+            Port = port;
 
-            _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            _socket.Bind(_localEndPoint);            
-             
-            _receiveEA.RemoteEndPoint = _localEndPoint;
-            _sendEA.RemoteEndPoint = _remoteEndPoint;
+            Reconnect();
+        }
+
+        /// <summary>
+        /// 断开客户端连接
+        /// </summary>
+        public void Close()
+        {
+            if (null != _socket)
+            {
+                try
+                {
+                    _socket.Shutdown(SocketShutdown.Send);
+                }
+                catch (Exception) { }
+                _socket.Close();
+                _socket = null;
+                _receiveBuffer = null;
+                _bufferAvailable = 0;
+
+                onDisconnect?.Invoke(this, this);
+            }
+        }
+
+        public void Reconnect()
+        {
+            Close();
+
+            IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
+            Socket socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            SocketAsyncEventArgs connectEA = new SocketAsyncEventArgs();
+            connectEA.RemoteEndPoint = ipe;
+            connectEA.Completed += OnConnectCompleted;
+            if (!socket.ConnectAsync(connectEA))
+            {
+                OnConnectCompleted(null, connectEA);
+            }
+        }
+
+        protected virtual void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            e.Completed -= OnConnectCompleted;
+            if (null == e.ConnectSocket)
+            {
+                DispatchConnectFailEvent();
+                return;
+            }
+
+            _socket = e.ConnectSocket;
+            DispatchConnectSuccessEvent();
             StartReceive();
+        }
+
+        protected void DispatchConnectFailEvent()
+        {
+            onConnectFail?.Invoke(this, this);
+        }
+
+        protected void DispatchConnectSuccessEvent()
+        {
+            onConnectSuccess?.Invoke(this, this);
         }
 
         /// <summary>
@@ -93,14 +159,14 @@ namespace One.Net
         /// </summary>
         protected void StartReceive()
         {
-            if (IsFade)
+            if(IsFade)
             {
                 return;
             }
 
-            _receiveEA.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
+            _receiveEA.SetBuffer(_receiveBuffer, _bufferAvailable, _receiveBuffer.Length - _bufferAvailable);
 
-            if (!_socket.ReceiveFromAsync(_receiveEA))
+            if (!_socket.ReceiveAsync(_receiveEA))
             {
                 OnReceiveCompleted(null, _receiveEA);
             }
@@ -121,7 +187,7 @@ namespace One.Net
             }
             else
             {
-                //Close();
+                Close();
             }
         }
 
@@ -179,7 +245,7 @@ namespace One.Net
 
             _sendBufferList.Clear();
 
-            if (!_socket.SendToAsync(_sendEA))
+            if (!_socket.SendAsync(_sendEA))
             {
                 OnSendCompleted(null, _sendEA);
             }
@@ -197,14 +263,9 @@ namespace One.Net
                 }
                 else
                 {
-                    //Close();
+                    Close();
                 }
             }
-        }
-
-        public void Close()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

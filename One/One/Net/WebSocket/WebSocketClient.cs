@@ -7,7 +7,7 @@ using One.Protocol;
 
 namespace One.Net
 {
-    public class WebSocketClient : TcpSocketClient, IRemoteProxy
+    public class WebSocketClient : TcpClient, IRemoteProxy
     {
         /// <summary>
         /// 协议是否已升级

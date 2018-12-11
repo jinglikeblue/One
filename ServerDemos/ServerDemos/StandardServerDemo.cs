@@ -17,10 +17,10 @@ namespace ServerDemos
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
-        TcpSocketServer<BaseTcpProtocolProcess> _tcpSrver;
+        TcpServer<BaseTcpProtocolProcess> _tcpSrver;
         public StandardServerDemo()
         {
-            _tcpSrver = new TcpSocketServer<BaseTcpProtocolProcess>();            
+            _tcpSrver = new TcpServer<BaseTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
             _tcpSrver.Start("0.0.0.0", 1875, 4096);
