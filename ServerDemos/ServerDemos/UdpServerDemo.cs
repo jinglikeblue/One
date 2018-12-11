@@ -25,7 +25,7 @@ namespace ServerDemos
         }
 
         private void OnReceiveDataEvent(object sender, UdpRemoteProxy remoteProxy)
-        {
+        {            
             var pp = (remoteProxy.protocolProcess as BaseUdpProtocolProcess);
             pp.ReceiveProtocols((ByteArray ba) =>
             {

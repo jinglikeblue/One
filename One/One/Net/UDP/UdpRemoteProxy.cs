@@ -27,16 +27,17 @@ namespace One.Net
         /// </summary>
         public IProtocolProcess protocolProcess { get; internal set; }
 
-        EndPoint _remoteEndPoint;
+        /// <summary>
+        /// 远端地址
+        /// </summary>
+        public EndPoint RemoteEndPoint { get; private set; }
 
-        Socket _socket;
-
-        public ByteArray ba;
+        Socket _socket;        
 
         public UdpRemoteProxy(Socket socket, EndPoint remoteEndPoint, IProtocolProcess protocolProcess)
         {
             _socket = socket;
-            _remoteEndPoint = remoteEndPoint;
+            RemoteEndPoint = remoteEndPoint;
             this.protocolProcess = protocolProcess;
         }
 
@@ -53,7 +54,7 @@ namespace One.Net
         virtual public void Send(byte[] bytes)
         {
             _sendEA = new SocketAsyncEventArgs();
-            _sendEA.RemoteEndPoint = _remoteEndPoint;
+            _sendEA.RemoteEndPoint = RemoteEndPoint;
             _sendEA.Completed += OnSendCompleted;
             _sendBufferList.Add(new ArraySegment<byte>(bytes));
 
@@ -89,7 +90,7 @@ namespace One.Net
         public void Close()
         {
             _socket = null;
-            _remoteEndPoint = null;
+            RemoteEndPoint = null;
         }
     }
 }
