@@ -8,15 +8,17 @@ namespace One.Protocol
 {
     public class BaseUdpProtocolProcess : IProtocolProcess
     {
-        List<byte[]> _pbList = new List<byte[]>();
+        List<ByteArray> _pbList = new List<ByteArray>();
+
+        public event EventHandler<ByteArray> onReceiveEvent;
 
         /// <summary>
         /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
         /// </summary>
         /// <param name="onReceiveProtocol"></param>
-        public void ReceiveProtocols(Action<byte[]> onReceiveProtocol)
+        public void ReceiveProtocols(Action<ByteArray> onReceiveProtocol)
         {
-            List<byte[]> pbList = new List<byte[]>();
+            List<ByteArray> pbList = new List<ByteArray>();
 
             lock (_pbList)
             {
@@ -37,11 +39,18 @@ namespace One.Protocol
 
         public int Unpack(byte[] buf, int available)
         {
-            ByteArray ba = new ByteArray(buf, available);
-            lock (_pbList)
+            ByteArray ba = new ByteArray(buf, available);            
+            if (null != onReceiveEvent)
             {
-                //协议加入收到的协议队列
-                _pbList.Add(ba.ReadBytes(available));
+                onReceiveEvent.Invoke(this, ba);
+            }
+            else
+            {
+                lock (_pbList)
+                {
+                    //协议加入收到的协议队列
+                    _pbList.Add(ba);
+                }
             }
             return available;
         }

@@ -1,55 +1,30 @@
 ﻿using One.Data;
 using One.Protocol;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace One.Net
 {
     public class UdpServer<T> where T : IProtocolProcess, new()
-    {
+    {       
         /// <summary>
-        /// 新的客户端进入的事件（非线程安全）
+        /// 收到UDP数据的事件（多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onClientEnterHandler;
-
-        /// <summary>
-        /// 客户端退出的事件（非线程安全）
-        /// </summary>
-        public event EventHandler<IRemoteProxy> onClientExitHandler;
+        public event EventHandler<UdpRemoteProxy> onReceiveDataEvent;
 
         /// <summary>
         /// 监听的端口
         /// </summary>
         protected Socket _socket;
 
-        protected int _clientCount = 0;
-        /// <summary>
-        /// 已连接的客户端总数
-        /// </summary>
-        public int ClientCount
-        {
-            get
-            {
-                return _clientCount;
-            }
-        }
-
-        /// <summary>
-        /// 缓冲区大小
-        /// </summary>
-        int _bufferSize;
-
         IPEndPoint _endPoint;
-
-        byte[] _buffer;
 
         SocketAsyncEventArgs _receiveEA;
 
-        Dictionary<string, UdpRemoteProxy> _remoteProxyDic = new Dictionary<string, UdpRemoteProxy>();
+        byte[] _buffer;
 
         /// <summary>
         /// 启动Socket服务
@@ -62,14 +37,13 @@ namespace One.Net
             Console.WriteLine(string.Format("Start Lisening {0}:{1}", IPAddress.Any, bindPort));
 
             _endPoint = new IPEndPoint(IPAddress.Any, bindPort);
-            _bufferSize = bufferSize;
-            _buffer = new byte[bufferSize];
             _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
             _socket.Bind(_endPoint);
-
+            _buffer = new byte[bufferSize];
             _receiveEA = new SocketAsyncEventArgs();            
             _receiveEA.Completed += OnReceiveCompleted;
             _receiveEA.RemoteEndPoint = _endPoint;
+
             StartReceive();
         }
 
@@ -94,34 +68,22 @@ namespace One.Net
         /// <param name="e"></param>
         void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
         {
-            ByteArray ba = new ByteArray(_bufferSize);
-            ba.Write(e.Buffer, 0, e.BytesTransferred);
-            ba.SetPos(0);
-            //添加一个成功链接
-            ProcessReceiveData(e.RemoteEndPoint, ba);
-
+            byte[] data = new byte[e.BytesTransferred];
+            Array.Copy(e.Buffer,data,e.BytesTransferred);
+            
+            Task.Run(
+                ()=> ProcessReceiveDataTask(e.RemoteEndPoint, data, data.Length)
+            );
+            
             StartReceive();
         }
 
-        void ProcessReceiveData(EndPoint remoteEndPoint, ByteArray ba)
-        {
-            var key = remoteEndPoint.ToString();
-            UdpRemoteProxy client;
-            if (false == _remoteProxyDic.ContainsKey(key))
-            {
-                client = new UdpRemoteProxy(_socket, remoteEndPoint, null, _bufferSize);
-                _remoteProxyDic[key] = client;
-            }
-            else
-            {
-                client = _remoteProxyDic[key];
-            }
-            
-            //返回数据
-            client.Send(ba.ReadBytes(ba.ReadEnableSize));
-            
 
-            Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
+        void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data, int available)
+        {            
+            UdpRemoteProxy client = new UdpRemoteProxy(_socket, remoteEndPOINT, new T());
+            client.protocolProcess.Unpack(data, data.Length);
+            onReceiveDataEvent?.Invoke(this, client);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using One.Net;
+﻿using One.Data;
+using One.Net;
 using One.Protocol;
 using System;
 using System.Collections.Generic;
@@ -28,32 +29,45 @@ namespace ClientDemos
             var client = new UdpSocketClient(_pp);            
             _client = client;
             _client.Bind("127.0.0.1", 1875, 1874, 4096);
-            _client.Send(Encoding.UTF8.GetBytes("Hello"));
+            for (int i = 0; i < 10; i++)
+            {
+                _client.Send(Encoding.UTF8.GetBytes("Hello" + i));
+            }
+
+            _pp.onReceiveEvent += OnReceiveEvent;
             //_client.Connect("121.40.165.18", 8800, 4096);
 
             //_pp = _client.protocolProcess as WebSocketProtocolProcess;
-            while (true)
-            {
-                if (_client.IsConnected)
-                {
-                    _pp.ReceiveProtocols(OnReceiveProtocol);
-                    //Send();
-                }
-                Thread.Sleep(1000);
-            }
+            //while (true)
+            //{
+            //    if (_client.IsConnected)
+            //    {
+            //        _pp.ReceiveProtocols(OnReceiveProtocol);
+            //        //Send();
+            //    }
+            //    Thread.Sleep(1000);
+            //}
+        }
+
+        private void OnReceiveEvent(object sender, ByteArray e)
+        {
+            var s = Encoding.UTF8.GetString(e.GetAvailableBytes());
+            //long last = long.Parse(obj.value);
+            //long now = DateTime.Now.ToFileTimeUtc();
+            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
+        }
+
+        private void OnReceiveProtocol(ByteArray ba)
+        {
+            var s = Encoding.UTF8.GetString(ba.GetAvailableBytes());
+            //long last = long.Parse(obj.value);
+            //long now = DateTime.Now.ToFileTimeUtc();
+            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
         }
 
         private void OnDisconnect(object sender, IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
-        }
-
-        private void OnReceiveProtocol(byte[] obj)
-        {
-            var s = Encoding.UTF8.GetString(obj);
-            //long last = long.Parse(obj.value);
-            //long now = DateTime.Now.ToFileTimeUtc();
-            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
         }
 
         private void OnConnectSuccess(object sender, IRemoteProxy e)

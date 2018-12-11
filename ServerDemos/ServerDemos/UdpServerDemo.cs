@@ -2,8 +2,6 @@
 using One.Net;
 using One.Protocol;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ServerDemos
 {
@@ -20,22 +18,19 @@ namespace ServerDemos
         public UdpServerDemo()
         {
             _server = new UdpServer<BaseUdpProtocolProcess>();
-            _server.onClientEnterHandler += OnClientEnter;
-            _server.onClientExitHandler += OnClientExit;
+            _server.onReceiveDataEvent += OnReceiveDataEvent;
             _server.Start(1875, 4096);
 
             Console.ReadKey();
         }
 
-        private void OnClientExit(object sender, IRemoteProxy e)
+        private void OnReceiveDataEvent(object sender, UdpRemoteProxy remoteProxy)
         {
-            
-        }
-
-        private void OnClientEnter(object sender, IRemoteProxy e)
-        {
-            var data = Encoding.UTF8.GetBytes("hello");
-            e.Send(data);
+            var pp = (remoteProxy.protocolProcess as BaseUdpProtocolProcess);
+            pp.ReceiveProtocols((ByteArray ba) =>
+            {
+                remoteProxy.Send(ba.GetAvailableBytes());
+            });
         }
     }
 }
