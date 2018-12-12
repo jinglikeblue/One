@@ -20,7 +20,7 @@ namespace ServerDemos
             _tcpSrver = new TcpServer<AsyncSimpleTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
-            _tcpSrver.Start(1875, 4096);
+            _tcpSrver.Start("0.0.0.0", 1875, 4096);
 
             Console.WriteLine("StreeTestingDemoServer");
             Console.WriteLine("Thread [{0}]:Press any key to terminate the server process....", Thread.CurrentThread.ManagedThreadId);

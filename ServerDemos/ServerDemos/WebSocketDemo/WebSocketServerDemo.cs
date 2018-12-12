@@ -20,7 +20,7 @@ namespace ServerDemos
             _server = new WebSocketServer();
             _server.onClientEnterHandler += OnClientEnter;
             _server.onClientExitHandler += OnClientExit;
-            _server.Start(1875, 80000);
+            _server.Start("0.0.0.0", 1875, 80000);
             
 
             //new Thread(LogicThraed).Start();

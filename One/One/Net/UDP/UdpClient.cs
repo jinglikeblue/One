@@ -80,8 +80,10 @@ namespace One.Net
             _remoteEndPoint = new IPEndPoint(IPAddress.Parse(RemoteHost), RemotePort);
             _localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
 
-            _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            _socket.Bind(_localEndPoint);            
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            _socket.Bind(_localEndPoint);
+
+             
             _receiveEA.RemoteEndPoint = _localEndPoint;
             _sendEA.RemoteEndPoint = _remoteEndPoint;
             StartReceive();
