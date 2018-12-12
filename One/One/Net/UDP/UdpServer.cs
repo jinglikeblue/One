@@ -60,9 +60,7 @@ namespace One.Net
             {
                 OnReceiveCompleted(null, _receiveEA);
             }
-        }
-
-        int i = 0;
+        }        
 
         /// <summary>
         /// 接收到连接完成的事件
@@ -72,10 +70,7 @@ namespace One.Net
         void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
         {
             byte[] data = new byte[e.BytesTransferred];
-            Array.Copy(e.Buffer,data,e.BytesTransferred);
-
-            Interlocked.Increment(ref i);
-            Console.WriteLine(i);
+            Array.Copy(e.Buffer,data,e.BytesTransferred);          
 
             Task.Run(
                 ()=> ProcessReceiveDataTask(e.RemoteEndPoint, data, data.Length)

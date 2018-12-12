@@ -29,6 +29,8 @@ namespace ServerDemos
             var pp = (remoteProxy.protocolProcess as BaseUdpProtocolProcess);
             pp.ReceiveProtocols((ByteArray ba) =>
             {
+                Console.WriteLine(ba.ReadStringBytes(ba.ReadEnableSize));
+                ba.SetPos(0);
                 remoteProxy.Send(ba.GetAvailableBytes());
             });
         }

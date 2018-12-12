@@ -28,13 +28,15 @@ namespace ClientDemos
             _pp = new BaseUdpProtocolProcess();
             var client = new UdpClient(_pp);            
             _client = client;
-            _client.Bind("127.0.0.1", 1875, 1874, 4096);            
+            _client.Bind("127.0.0.1", 1875, 1874, 4096);                        
+
+            _pp.onReceiveEvent += OnReceiveEvent;
+
             for (int i = 0; i < 1000; i++)
             {
                 _client.Send(Encoding.UTF8.GetBytes("Hello" + i));
+                Thread.Sleep(1000);
             }
-
-            _pp.onReceiveEvent += OnReceiveEvent;
             //_client.Connect("121.40.165.18", 8800, 4096);
 
             //_pp = _client.protocolProcess as WebSocketProtocolProcess;
@@ -52,7 +54,7 @@ namespace ClientDemos
         private void OnReceiveEvent(object sender, ByteArray e)
         {
             var s = Encoding.UTF8.GetString(e.GetAvailableBytes());
-            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
+            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);            
         }
 
         private void OnReceiveProtocol(ByteArray ba)
