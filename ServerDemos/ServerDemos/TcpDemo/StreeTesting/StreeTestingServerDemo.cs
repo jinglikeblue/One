@@ -6,16 +6,16 @@ using Util;
 
 namespace ServerDemos
 {
-    class StreeTestingDemoServer
+    class StreeTestingServerDemo
     {
         public static void Main(string[] args)
         {
-            new StreeTestingDemoServer();
+            new StreeTestingServerDemo();
         }
 
         ThreadSyncActions _tsa = new ThreadSyncActions();
         TcpServer<AsyncSimpleTcpProtocolProcess> _tcpSrver;
-        public StreeTestingDemoServer()
+        public StreeTestingServerDemo()
         {
             _tcpSrver = new TcpServer<AsyncSimpleTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;

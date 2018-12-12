@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace ClientDemos
 {
-    internal class StreeTestingDemoClient
+    internal class StreeTestingClientDemo
     {
         public static string host;
         public static int port;
@@ -30,7 +30,7 @@ namespace ClientDemos
 
             for (int i = 0; i < count; i++)
             {
-                var t = new StreeTestingClient(i);
+                var t = new StreeTestingClientThread(i);
                 new Thread(t.Start).Start();
             }
 

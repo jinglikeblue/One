@@ -9,7 +9,7 @@ namespace ClientDemos
     /// <summary>
     /// 服务器压力测试，客户端类。将收到的服务器协议立刻发送回去
     /// </summary>
-    class StreeTestingClient
+    class StreeTestingClientThread
     {
         static byte[] bytes;
 
@@ -17,10 +17,10 @@ namespace ClientDemos
         TcpClient _client;
         int _id;
 
-        public StreeTestingClient(int id)
+        public StreeTestingClientThread(int id)
         {
             _id = id;
-            bytes = new byte[StreeTestingDemoClient.sendSize];
+            bytes = new byte[StreeTestingClientDemo.sendSize];
         }
 
         public void Start()
@@ -33,7 +33,7 @@ namespace ClientDemos
             _client.onDisconnect += OnDisconnect;
             //_client.Connect("127.0.0.1", 1875, 4096);
             //_client.Connect("192.168.31.229", 1875, 4096);
-            _client.Connect(StreeTestingDemoClient.host, StreeTestingDemoClient.port, (ushort)StreeTestingDemoClient.sendSize);
+            _client.Connect(StreeTestingClientDemo.host, StreeTestingClientDemo.port, (ushort)StreeTestingClientDemo.sendSize);
 
             while (true)
             {
