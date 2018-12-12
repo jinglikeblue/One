@@ -28,7 +28,7 @@ namespace ClientDemos
             _pp = new BaseUdpProtocolProcess();
             var client = new UdpClient(_pp);            
             _client = client;
-            _client.Bind("127.0.0.1", 1875, 1874, 4096);                        
+            _client.Bind("123.207.88.71", 1875, 1874, 4096);                        
 
             _pp.onReceiveEvent += OnReceiveEvent;
 
