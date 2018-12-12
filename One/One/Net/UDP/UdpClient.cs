@@ -82,7 +82,6 @@ namespace One.Net
 
             _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
             _socket.Bind(_localEndPoint);            
-             
             _receiveEA.RemoteEndPoint = _localEndPoint;
             _sendEA.RemoteEndPoint = _remoteEndPoint;
             StartReceive();
