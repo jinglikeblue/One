@@ -1,5 +1,6 @@
 ﻿using One.Data;
 using One.Protocol;
+using One.Util;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -35,7 +36,7 @@ namespace One.Net
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(int bindPort, int bufferSize)
         {
-            Console.WriteLine(string.Format("Start Lisening {0}:{1}", IPAddress.Any, bindPort));
+            Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, bindPort);
 
             _endPoint = new IPEndPoint(IPAddress.Any, bindPort);
             _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);

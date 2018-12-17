@@ -23,7 +23,7 @@ namespace ServerDemos
             _tcpSrver = new TcpServer<BaseTcpProtocolProcess>();            
             _tcpSrver.onClientEnterHandler += OnClientEnter;
             _tcpSrver.onClientExitHandler += OnClientExit;
-            _tcpSrver.Start("0.0.0.0", 1875, 4096);
+            _tcpSrver.Start(1875, 4096);
             
             new Thread(LogicThraed).Start();
 
