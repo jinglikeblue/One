@@ -14,7 +14,7 @@ namespace One.Net
         /// <summary>
         /// 客户端连接关闭事件
         /// </summary>
-        internal event EventHandler<TcpReomteProxy> onShutdown;
+        Action<TcpReomteProxy> _onShutdown;
 
         protected Socket _clientSocket;
 
@@ -50,9 +50,10 @@ namespace One.Net
         /// </summary>
         bool _wantShutdown = false;
 
-        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
+        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize, Action<TcpReomteProxy> onShutDown)
         {
             _clientSocket = clientSocket;
+            _onShutdown = onShutDown;
             _buffer = new byte[bufferSize];
 
             this.protocolProcess = protocolProcess;
@@ -211,7 +212,7 @@ namespace One.Net
                 isClosed = true;
                 _wantShutdown = false;
 
-                onShutdown?.Invoke(this, this);
+                _onShutdown.Invoke(this);
                 
             }
         }

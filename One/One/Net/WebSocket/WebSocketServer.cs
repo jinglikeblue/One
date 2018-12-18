@@ -1,4 +1,5 @@
 ﻿using One.Protocol;
+using System;
 using System.Net.Sockets;
 
 namespace One.Net
@@ -9,9 +10,9 @@ namespace One.Net
     /// <typeparam name="T"></typeparam>
     public class WebSocketServer:TcpServer<WebSocketProtocolProcess>
     {
-        protected override TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize)
+        protected override TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize, Action<TcpReomteProxy> onShutdown)
         {
-            return new WebSocketRemoteProxy(clientSocket, new WebSocketProtocolProcess(), bufferSize);
+            return new WebSocketRemoteProxy(clientSocket, new WebSocketProtocolProcess(), bufferSize, onShutdown);
         }
     }
 }

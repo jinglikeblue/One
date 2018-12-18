@@ -22,7 +22,7 @@ namespace One.Net
         /// </summary>
         public bool isUpgraded { get; internal set; } = false;
 
-        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
+        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize, Action<TcpReomteProxy> onShutdown) : base(clientSocket, protocolProcess, bufferSize, onShutdown)
         {
             
         }

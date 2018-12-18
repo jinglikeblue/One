@@ -1,5 +1,6 @@
 ﻿using One.Protocol;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -111,26 +112,25 @@ namespace One.Net
         void Enter(Socket clientSocket)
         {
             Interlocked.Increment(ref _clientCount);
-            TcpReomteProxy client = CreateRemoteProxy(clientSocket, _bufferSize);
-            client.onShutdown += OnClientShutdown;
+            TcpReomteProxy client = CreateRemoteProxy(clientSocket, _bufferSize, OnClientShutdown);
             DispatchRemoteProxyEnterEvent(client);
-
-            Console.WriteLine("Thread [{0}]: enter  total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
+            Console.WriteLine("Thread [{0}]: enter total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);            
         }
 
-        private void OnClientShutdown(object sender, TcpReomteProxy client)
+        //object clientExitLock = new object();
+        private void OnClientShutdown(TcpReomteProxy client)
         {
-            System.GC.Collect();
-            client.onShutdown -= OnClientShutdown;
-            Interlocked.Decrement(ref _clientCount);
-            DispatchRemoteProxyExitEvent(client);
-
-            Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
+            //lock (clientExitLock)
+            //{
+                Interlocked.Decrement(ref _clientCount);
+                DispatchRemoteProxyExitEvent(client);
+                Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
+            //}
         }
 
-        protected virtual TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize)
+        protected virtual TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize, Action<TcpReomteProxy> onShutdown)
         {
-            return new TcpReomteProxy(clientSocket, new T(), bufferSize);
+            return new TcpReomteProxy(clientSocket, new T(), bufferSize, onShutdown);
         }
 
         protected void DispatchRemoteProxyEnterEvent(IRemoteProxy remoteProxy)
