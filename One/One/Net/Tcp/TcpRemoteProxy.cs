@@ -160,7 +160,7 @@ namespace One.Net
                 }
 
                 _isSending = true;
-                _sendEA.BufferList = _sendBufferList;
+                _sendEA.BufferList = _sendBufferList.ToArray();
 
                 _sendBufferList.Clear();
 
