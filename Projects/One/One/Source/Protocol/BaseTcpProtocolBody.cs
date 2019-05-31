@@ -1,4 +1,6 @@
-﻿namespace One
+﻿using System.Threading;
+
+namespace One
 {
     /// <summary>
     /// 协议的数据结构体
@@ -18,7 +20,7 @@
         {
             ByteArray ba = new ByteArray(protocolData);
             value = ba.ReadString();
-            //Console.WriteLine("{0}: 收到的内容：{1}", Thread.CurrentThread.ManagedThreadId, value);
+            //Log.I("{0}: 收到的内容：{1}", Thread.CurrentThread.ManagedThreadId, value);            
         }
     }
 

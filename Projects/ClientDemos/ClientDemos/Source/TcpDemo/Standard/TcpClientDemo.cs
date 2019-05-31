@@ -33,7 +33,7 @@ namespace ClientDemo
                     _pp.ReceiveProtocols(OnReceiveProtocol);
                     Send();
                 }
-                Thread.Sleep(1);
+                Thread.Sleep(1000);
             }            
         }
 
@@ -45,8 +45,11 @@ namespace ClientDemo
         private void OnReceiveProtocol(BaseTcpProtocolBody obj)
         {
             long last = long.Parse(obj.value);
-            long now = DateTime.Now.ToFileTimeUtc();            
-            Console.WriteLine("T{0} 消息延迟：{1}",Thread.CurrentThread.ManagedThreadId, (now - last) / 10000);
+            long now = DateTime.Now.ToFileTimeUtc();
+
+            Log.CI(ConsoleColor.DarkYellow, "[{0}] 收到消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), obj.value);
+
+            //Console.WriteLine("T{0} 消息延迟：{1}",Thread.CurrentThread.ManagedThreadId, (now - last) / 10000);
         }
 
         private void OnConnectSuccess(object sender, IRemoteProxy e)
@@ -60,6 +63,7 @@ namespace ClientDemo
             BaseTcpProtocolBody obj = new BaseTcpProtocolBody();
             obj.value = DateTime.Now.ToFileTimeUtc().ToString();
             _client.Send(_pp.Pack(obj));
+            Log.CI(ConsoleColor.DarkMagenta, "[{0}] 发送消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), obj.value);
         }
 
         private void OnConnectFail(object sender, IRemoteProxy e)
