@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ClientDemos": {
+      "commandName": "Project",
+      "commandLineArgs": "111"
+    },
+    "newProfile1": {
+      "commandName": "Executable",
+      "commandLineArgs": "asdf"
+    }
+  }
+}

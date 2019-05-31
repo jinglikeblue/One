@@ -1,4 +1,13 @@
-/Project/One/bin
-/Project/One/obj
-/Project/One/One.csproj
-/Project/.vs
+/Projects/ClientDemos/.vs
+/Projects/ClientDemos/ClientDemos/obj
+/Projects/ClientDemos/ClientDemos/bin
+/Projects/One/.vs
+/Projects/One/One/obj
+/Projects/One/One/bin
+/Projects/ServerDemos/.vs
+/Projects/ServerDemos/ServerDemos/obj
+/Projects/ServerDemos/ServerDemos/bin
+/Bin
+/Projects/DemoLibrary/.vs
+/Projects/DemoLibrary/DemoLibrary/obj
+/Projects/DemoLibrary/DemoLibrary/bin
