@@ -14,26 +14,11 @@ namespace ServerDemo
 
         TcpServer _tcpSrver;
         public TcpServerDemo()
-        {
-            _tcpSrver = new TcpServer();            
-            _tcpSrver.onClientEnterHandler += OnClientEnter;
-            _tcpSrver.onClientExitHandler += OnClientExit;
-            _tcpSrver.Start(1875, 4096);
-            
+        {            
             new Thread(LogicThraed).Start();
 
-            Console.WriteLine("Thread [{0}]:Press any key to terminate the server process....", Thread.CurrentThread.ManagedThreadId); 
+            Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process...."); 
             Console.ReadKey();            
-        }
-
-        private void OnClientEnter(IRemoteProxy e)
-        {                       
-            UserMgr.Ins.Enter(e);                            
-        }
-
-        private void OnClientExit(IRemoteProxy e)
-        {
-            UserMgr.Ins.Exit(e);
         }
         
         /// <summary>
@@ -41,7 +26,12 @@ namespace ServerDemo
         /// </summary>
         private void LogicThraed()
         {
-            Console.WriteLine("Thread [{0}]:Logic Start", Thread.CurrentThread.ManagedThreadId);
+            _tcpSrver = new TcpServer();
+            _tcpSrver.onClientEnter += OnClientEnter;
+            _tcpSrver.onClientExit += OnClientExit;
+            _tcpSrver.Start(1875, 4096);
+
+            Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
             int delay = 10;
             while (true)
             {
@@ -50,6 +40,18 @@ namespace ServerDemo
 
                 Thread.Sleep(delay);
             }
+        }
+
+        private void OnClientEnter(TcpReomteProxy e)
+        {
+            Log.I("用户进入");
+            UserMgr.Ins.Enter(e);
+        }
+
+        private void OnClientExit(TcpReomteProxy e)
+        {
+            Log.I("用户退出");
+            UserMgr.Ins.Exit(e);
         }
     }
 }

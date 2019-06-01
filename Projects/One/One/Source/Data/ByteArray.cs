@@ -175,6 +175,10 @@ namespace One
         /// </summary>
         public void Reset()
         {
+            if(Bytes.Length != defaultBufferSize)
+            {
+                Bytes = new byte[defaultBufferSize];
+            }
             Available = 0;
             SetPos(0);
         }

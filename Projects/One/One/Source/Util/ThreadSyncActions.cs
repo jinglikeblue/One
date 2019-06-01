@@ -8,8 +8,7 @@ namespace One
     /// </summary>
     public class ThreadSyncActions
     {
-        List<Action> _toSyncActinList = new List<Action>();
-        List<Action> _actionCacheList = new List<Action>();
+        List<Action> _toSyncActinList = new List<Action>();         
 
         public void AddToSyncAction(Action action)
         {
@@ -21,18 +20,18 @@ namespace One
 
         public void RunSyncActions()
         {
+            List<Action> actionCacheList = null;
+
             lock (_toSyncActinList)
             {
-                _actionCacheList.AddRange(_toSyncActinList);
+                actionCacheList = _toSyncActinList.GetRange(0, _toSyncActinList.Count);                
                 _toSyncActinList.Clear();
             }
 
-            for (int i = 0; i < _actionCacheList.Count; i++)
+            for (int i = 0; i < actionCacheList.Count; i++)
             {
-                _actionCacheList[i].Invoke();
-            }
-
-            _actionCacheList.Clear();
+                actionCacheList[i].Invoke();
+            }            
         }
     }
 }

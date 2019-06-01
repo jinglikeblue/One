@@ -197,7 +197,8 @@ namespace One
                 return;
             }
 
-            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+            var protocolData = protocolProcess.Pack(bytes);
+            _sendBufferList.Add(new ArraySegment<byte>(protocolData));
 
             SendBufferList();            
         }

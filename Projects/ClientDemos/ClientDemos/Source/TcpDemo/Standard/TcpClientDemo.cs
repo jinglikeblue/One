@@ -20,6 +20,7 @@ namespace ClientDemo
         {
             _client = new TcpClient(new TcpProtocolProcess());
             _client.onConnectSuccess += OnConnectSuccess;
+            _client.onReceiveData += OnReceiveProtocol;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;
             _client.Connect("127.0.0.1", 1875, 4096);
@@ -38,7 +39,7 @@ namespace ClientDemo
 
         private void OnDisconnect(IRemoteProxy e)
         {
-            Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
+            Log.I("连接断开");
         }
 
         private void OnReceiveProtocol(byte[] obj)
@@ -47,14 +48,12 @@ namespace ClientDemo
             var last = ba.ReadString();
             long now = DateTime.Now.ToFileTimeUtc();
 
-            Log.CI(ConsoleColor.DarkYellow, "[{0}] 收到消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), last);
-
-            //Console.WriteLine("T{0} 消息延迟：{1}",Thread.CurrentThread.ManagedThreadId, (now - last) / 10000);
+            Log.CI(ConsoleColor.DarkYellow, "收到消息:{0}", last);            
         }
 
         private void OnConnectSuccess(IRemoteProxy e)
         {
-            Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
+            Log.I("连接成功");
             Send();
         }
 
@@ -64,12 +63,12 @@ namespace ClientDemo
             ba.Write(DateTime.Now.ToFileTimeUtc().ToString());            
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
-            Log.CI(ConsoleColor.DarkMagenta, "[{0}] 发送消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), ba.ReadString());
+            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
         }
 
         private void OnConnectFail(IRemoteProxy e)
         {
-            Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
+            Log.I("连接失败");
         }
 
 

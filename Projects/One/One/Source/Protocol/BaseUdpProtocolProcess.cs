@@ -9,6 +9,11 @@ namespace One
 
         public event EventHandler<ByteArray> onReceiveEvent;
 
+        public byte[] Pack(byte[] protocolData)
+        {
+            return protocolData;
+        }
+
         /// <summary>
         /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
         /// </summary>

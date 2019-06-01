@@ -1,12 +1,11 @@
-﻿using One;
+﻿using System;
+using One;
 
 namespace ServerDemo
 {
     class User
     {
-        public IRemoteProxy client { get; }
-
-        TcpProtocolProcess _protocolProcess;
+        public TcpReomteProxy client { get; }
 
         bool _destroyFlag = false;
 
@@ -18,10 +17,20 @@ namespace ServerDemo
             _destroyFlag = true;
         }
 
-        public User(IRemoteProxy client)
-        {
+        public User(TcpReomteProxy client)
+        {            
             this.client = client;
-            _protocolProcess = client.protocolProcess as TcpProtocolProcess;
+            this.client.onReceiveData += OnReceiveData;            
+        }
+
+        private void OnReceiveData(byte[] obj)
+        {
+            ByteArray ba = new ByteArray(obj);
+            Log.I("收到消息:{0}", ba.ReadString());
+
+            ba.Reset();
+            ba.Write("Server Got It!");
+            client.Send(ba.GetAvailableBytes());
         }
 
         /// <summary>

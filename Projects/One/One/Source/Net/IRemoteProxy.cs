@@ -12,11 +12,6 @@
         void Send(byte[] data);
 
         /// <summary>
-        /// 获取远端对象的协议处理器
-        /// </summary>
-        IProtocolProcess protocolProcess { get; }
-
-        /// <summary>
         /// 关闭远端代理
         /// </summary>
         void Close();

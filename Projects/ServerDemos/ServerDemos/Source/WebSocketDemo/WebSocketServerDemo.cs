@@ -16,8 +16,8 @@ namespace ServerDemo
         public WebSocketServerDemo()
         {
             _server = new WebSocketServer();
-            _server.onClientEnterHandler += OnClientEnter;
-            _server.onClientExitHandler += OnClientExit;
+            _server.onClientEnter += OnClientEnter;
+            _server.onClientExit += OnClientExit;
             _server.Start(1875, 80000);
             
 

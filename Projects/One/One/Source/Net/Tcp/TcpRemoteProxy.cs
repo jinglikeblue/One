@@ -23,7 +23,7 @@ namespace One
         /// <summary>
         /// 客户端连接关闭事件
         /// </summary>
-        public event Action<TcpReomteProxy> onShutdown;
+        internal event Action<TcpReomteProxy> onShutdown;
 
         protected Socket _clientSocket;
 
@@ -47,17 +47,22 @@ namespace One
         /// <summary>
         /// 协议处理器
         /// </summary>
-        public IProtocolProcess protocolProcess { get; internal set; }
+        internal IProtocolProcess protocolProcess;
 
         /// <summary>
-        /// 是否客户端已关闭
+        /// 是否客户端连接中
         /// </summary>
-        public bool isClosed { get; private set; } = false;
-
-        /// <summary>
-        /// 期望关闭
-        /// </summary>
-        bool _wantShutdown = false;
+        public bool IsConnected
+        {
+            get
+            {
+                if(_clientSocket != null && _clientSocket.Connected)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
 
         public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
         {
@@ -76,7 +81,7 @@ namespace One
         /// <summary>
         /// 刷新
         /// </summary>
-        public void Refresh()
+        internal void Refresh()
         {
             _tsa.RunSyncActions();
         }
@@ -101,7 +106,7 @@ namespace One
 
         protected void StartReceive()
         {
-            if (IsFade)
+            if (false == IsConnected)
             {
                 return;
             }
@@ -121,7 +126,6 @@ namespace One
         /// <param name="e"></param>
         virtual protected void ProcessReceive(SocketAsyncEventArgs e)
         {
-
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
                 _bufferAvailable += e.BytesTransferred;
@@ -145,7 +149,7 @@ namespace One
             }
             else
             {
-                Shutdown();
+                Close();
             }
         }
 
@@ -160,19 +164,20 @@ namespace One
 
         virtual public void Send(byte[] bytes)
         {
-            if (IsFade)
+            if (false == IsConnected)
             {
                 return;
             }
 
-            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+            var protocolData = protocolProcess.Pack(bytes);
+            _sendBufferList.Add(new ArraySegment<byte>(protocolData));
 
             SendBufferList();
         }
 
         protected void SendBufferList()
         {
-            if (IsFade)
+            if (false == IsConnected)
             {
                 return;
             }
@@ -212,14 +217,14 @@ namespace One
             }
             else
             {
-                Shutdown();
+                Close();
             }
         }
 
         /// <summary>
         /// 关闭客户端连接
         /// </summary>
-        protected void Shutdown()
+        public void Close()
         {
             if (null != _clientSocket)
             {
@@ -235,42 +240,9 @@ namespace One
                 _receiveEA = null;
                 _sendEA.Dispose();
                 _sendEA = null;
-                isClosed = true;
-                _wantShutdown = false;
 
                 onShutdown?.Invoke(this);
-
             }
-        }
-
-        /// <summary>
-        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
-        /// </summary>
-        bool IsFade
-        {
-            get
-            {
-                if (_wantShutdown)
-                {
-                    Shutdown();
-                    return true;
-                }
-
-                if (null == _clientSocket)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 关闭客户端
-        /// </summary>
-        public void Close()
-        {
-            _wantShutdown = true;
         }
     }
 }

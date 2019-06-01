@@ -13,14 +13,14 @@ namespace One
     public class TcpServer
     {
         /// <summary>
-        /// 新的客户端进入的事件（非线程安全）
+        /// 新的客户端进入的事件
         /// </summary>
-        public event Action<IRemoteProxy> onClientEnterHandler;
+        public event Action<TcpReomteProxy> onClientEnter;
 
         /// <summary>
-        /// 客户端退出的事件（非线程安全）
+        /// 客户端退出的事件
         /// </summary>
-        public event Action<IRemoteProxy> onClientExitHandler;
+        public event Action<TcpReomteProxy> onClientExit;
 
         /// <summary>
         /// 线程同步器，将异步方法同步到调用Refresh的线程中
@@ -57,7 +57,7 @@ namespace One
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(int port, int bufferSize)
         {
-            Console.WriteLine(string.Format("Start Lisening {0}:{1}", IPAddress.Any, port));
+            Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, port);
 
             _bufferSize = bufferSize;
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
@@ -76,6 +76,10 @@ namespace One
         public void Refresh()
         {
             _tsa.RunSyncActions();
+            foreach(var client in _clientList)
+            {
+                client.Refresh();
+            }
         }
 
         /// <summary>
@@ -126,27 +130,17 @@ namespace One
         {            
             TcpReomteProxy client = new TcpReomteProxy(clientSocket, new TcpProtocolProcess(), _bufferSize);           
             client.onShutdown += OnClientShutdown;
-            _clientList.Add(client);
-            DispatchRemoteProxyEnterEvent(client);
-            Console.WriteLine("Thread [{0}]: enter total:{1}", Thread.CurrentThread.ManagedThreadId, ClientCount);
+            _clientList.Add(client);            
+            Log.I("连接总数:{0}", ClientCount);
+            onClientEnter?.Invoke(client);            
         }
-
-        //object clientExitLock = new object();
+        
         private void OnClientShutdown(TcpReomteProxy client)
         {
             client.onShutdown -= OnClientShutdown;
-            DispatchRemoteProxyExitEvent(client);
-            Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, ClientCount);
-        }
-
-        protected void DispatchRemoteProxyEnterEvent(IRemoteProxy remoteProxy)
-        {
-            onClientEnterHandler?.Invoke(remoteProxy);
-        }
-
-        protected void DispatchRemoteProxyExitEvent(IRemoteProxy remoteProxy)
-        {
-            onClientExitHandler?.Invoke(remoteProxy);
+            _clientList.Remove(client);
+            Log.I("连接总数:{0}", ClientCount);
+            onClientExit?.Invoke(client);
         }
     }
 }
