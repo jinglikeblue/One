@@ -46,12 +46,12 @@ namespace ClientDemo
             //_client.Send(obj);
         }
 
-        private void OnDisconnect(IRemoteProxy e)
+        private void OnDisconnect(IChannel e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
 
-        private void OnConnectSuccess(IRemoteProxy e)
+        private void OnConnectSuccess(IChannel e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
                        

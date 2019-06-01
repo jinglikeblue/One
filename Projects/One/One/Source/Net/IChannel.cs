@@ -1,9 +1,9 @@
 ﻿namespace One
 {
     /// <summary>
-    /// 远端连接的代理，通过该代理与远端对象通信
+    /// 连接通信的通道
     /// </summary>
-    public interface IRemoteProxy
+    public interface IChannel
     {
         /// <summary>
         /// 发送数据给远端

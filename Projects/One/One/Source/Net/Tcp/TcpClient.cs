@@ -5,22 +5,22 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class TcpClient : IRemoteProxy
+    public class TcpClient : IChannel
     {
         /// <summary>
         /// 连接成功事件(多线程事件）
         /// </summary>
-        public event Action<IRemoteProxy> onConnectSuccess;
+        public event Action<IChannel> onConnectSuccess;
 
         /// <summary>
         /// 连接断开事件(多线程事件）
         /// </summary>
-        public event Action<IRemoteProxy> onDisconnect;
+        public event Action<IChannel> onDisconnect;
 
         /// <summary>
         /// 连接失败事件(多线程事件）
         /// </summary>
-        public event Action<IRemoteProxy> onConnectFail;
+        public event Action<IChannel> onConnectFail;
 
         /// <summary>
         /// 收到数据
@@ -130,7 +130,7 @@ namespace One
 
         public void Reconnect()
         {
-            Close();
+            CloseSilently();
 
             IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
             Socket socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -171,7 +171,9 @@ namespace One
                 {
                     _socket.Shutdown(SocketShutdown.Send);
                 }
-                catch (Exception) { }
+                catch
+                {
+                }
                 _socket.Close();
                 _socket = null;
                 _receiveBuffer = null;
@@ -205,7 +207,7 @@ namespace One
             var protocolData = protocolProcess.Pack(bytes);
             _sendBufferList.Add(new ArraySegment<byte>(protocolData));
 
-            SendBufferList();            
+            SendBufferList();
         }
 
         void SendBufferList()
@@ -330,7 +332,7 @@ namespace One
             {
                 _isSending = false;
                 if (e.SocketError == SocketError.Success)
-                {                    
+                {
                     //尝试一次发送
                     SendBufferList();
                 }

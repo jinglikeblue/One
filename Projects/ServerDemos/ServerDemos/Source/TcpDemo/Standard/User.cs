@@ -5,7 +5,7 @@ namespace ServerDemo
 {
     class User
     {
-        public IRemoteProxy client { get; }
+        public IChannel client { get; }
 
         bool _destroyFlag = false;
 
@@ -17,13 +17,13 @@ namespace ServerDemo
             _destroyFlag = true;
         }
 
-        public User(IRemoteProxy client)
+        public User(IChannel client)
         {            
             this.client = client;
             this.client.onReceiveData += OnReceiveData;            
         }
 
-        private void OnReceiveData(IRemoteProxy sender, byte[] data)
+        private void OnReceiveData(IChannel sender, byte[] data)
         {
             ByteArray ba = new ByteArray(data);
             Log.I("收到消息:{0}", ba.ReadString());

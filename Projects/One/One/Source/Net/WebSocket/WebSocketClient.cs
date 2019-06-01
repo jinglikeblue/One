@@ -5,7 +5,7 @@ using System.Text;
 
 namespace One
 {
-    public class WebSocketClient : TcpClient, IRemoteProxy
+    public class WebSocketClient : TcpClient, IChannel
     {
         /// <summary>
         /// 协议是否已升级

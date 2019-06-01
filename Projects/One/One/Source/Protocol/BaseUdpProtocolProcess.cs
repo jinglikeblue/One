@@ -34,7 +34,7 @@ namespace One
             }
         }
 
-        public void SetSender(IRemoteProxy sender)
+        public void SetSender(IChannel sender)
         {
             
         }

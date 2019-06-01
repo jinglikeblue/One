@@ -5,5 +5,5 @@
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="data"></param>
-    public delegate void ReceiveDataEvent(IRemoteProxy sender, byte[] data);
+    public delegate void ReceiveDataEvent(IChannel sender, byte[] data);
 }

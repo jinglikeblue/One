@@ -15,12 +15,12 @@ namespace One
         /// <summary>
         /// 新的客户端进入的事件
         /// </summary>
-        public event Action<IRemoteProxy> onClientEnter;
+        public event Action<IChannel> onClientEnter;
 
         /// <summary>
         /// 客户端退出的事件
         /// </summary>
-        public event Action<IRemoteProxy> onClientExit;
+        public event Action<IChannel> onClientExit;
 
         /// <summary>
         /// 线程同步器，将异步方法同步到调用Refresh的线程中

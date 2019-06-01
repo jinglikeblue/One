@@ -12,7 +12,7 @@ namespace One
         /// 收到协议的事件，如果监听该事件，那么ReceiveProtocols方法将失效。
         /// 多线程事件，如果需要单线程回调，请使用ReceiveProtocols方法
         /// </summary>
-        public Action<IRemoteProxy, byte[]> onReceiveProtocolEvent;
+        public Action<IChannel, byte[]> onReceiveProtocolEvent;
 
         /// <summary>
         /// 负载数据内容
@@ -41,9 +41,9 @@ namespace One
 
         List<byte[]> _pbList = new List<byte[]>();
 
-        IRemoteProxy _sender;
+        IChannel _sender;
 
-        public void SetSender(IRemoteProxy sender)
+        public void SetSender(IChannel sender)
         {
             _sender = sender;
         }

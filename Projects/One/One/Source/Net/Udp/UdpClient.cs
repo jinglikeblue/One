@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class UdpClient : IRemoteProxy
+    public class UdpClient : IChannel
     {
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;

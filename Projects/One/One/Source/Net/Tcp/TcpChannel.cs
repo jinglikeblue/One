@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class TcpReomteProxy : IRemoteProxy
+    public class TcpReomteProxy : IChannel
     {
         SocketAsyncEventArgs _receiveEA;
 
@@ -56,7 +56,7 @@ namespace One
         {
             get
             {
-                if(_clientSocket != null && _clientSocket.Connected)
+                if (_clientSocket != null && _clientSocket.Connected)
                 {
                     return true;
                 }
@@ -64,16 +64,16 @@ namespace One
             }
         }
 
-        public TcpReomteProxy(Socket clientSocket,  int bufferSize)
+        public TcpReomteProxy(Socket clientSocket, int bufferSize)
         {
-            _clientSocket = clientSocket;            
+            _clientSocket = clientSocket;
             _buffer = new byte[bufferSize];
 
             this.protocolProcess = new TcpProtocolProcess();
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += OnIOCompleted;
-            _sendEA.Completed += OnIOCompleted;
+            _receiveEA.Completed += OnAsyncEventCompleted;
+            _sendEA.Completed += OnAsyncEventCompleted;
 
             StartReceive();
         }
@@ -86,7 +86,12 @@ namespace One
             _tsa.RunSyncActions();
         }
 
-        private void OnIOCompleted(object sender, SocketAsyncEventArgs e)
+        /// <summary>
+        /// 异步事件完成
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
         {
             _tsa.AddToSyncAction(() =>
             {
@@ -182,24 +187,21 @@ namespace One
                 return;
             }
 
-            lock (this)
+            //如果没有在发送状态，则调用发送
+            if (_isSending || _sendBufferList.Count == 0)
             {
-                //如果没有在发送状态，则调用发送
-                if (_isSending || _sendBufferList.Count == 0)
-                {
-                    return;
-                }
+                return;
+            }
 
-                _isSending = true;
-                _sendEA.BufferList = _sendBufferList.ToArray();
+            _isSending = true;
+            _sendEA.BufferList = _sendBufferList.ToArray();
 
-                _sendBufferList.Clear();
+            _sendBufferList.Clear();
 
-                bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
-                if (!willRaiseEvent)
-                {
-                    ProcessSend(_sendEA);
-                }
+            bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
+            if (!willRaiseEvent)
+            {
+                ProcessSend(_sendEA);
             }
         }
 
@@ -232,7 +234,10 @@ namespace One
                 {
                     _clientSocket.Shutdown(SocketShutdown.Send);
                 }
-                catch (Exception) { }
+                catch
+                {
+                }
+
                 _clientSocket.Close();
                 _clientSocket = null;
                 _buffer = null;

@@ -37,12 +37,12 @@ namespace ClientDemo
             }            
         }
 
-        private void OnDisconnect(IRemoteProxy e)
+        private void OnDisconnect(IChannel e)
         {
             Log.I("连接断开");
         }
 
-        private void OnReceiveProtocol(IRemoteProxy sender, byte[] data)
+        private void OnReceiveProtocol(IChannel sender, byte[] data)
         {
             ByteArray ba = new ByteArray(data);
             var last = ba.ReadString();
@@ -51,7 +51,7 @@ namespace ClientDemo
             Log.CI(ConsoleColor.DarkYellow, "收到消息:{0}", last);            
         }
 
-        private void OnConnectSuccess(IRemoteProxy e)
+        private void OnConnectSuccess(IChannel e)
         {
             Log.I("连接成功");
             Send();
@@ -66,7 +66,7 @@ namespace ClientDemo
             Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
         }
 
-        private void OnConnectFail(IRemoteProxy e)
+        private void OnConnectFail(IChannel e)
         {
             Log.I("连接失败");
         }
