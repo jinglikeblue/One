@@ -20,9 +20,9 @@ namespace One
         /// </summary>
         public bool isUpgraded { get; internal set; } = false;
 
-        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
+        public WebSocketRemoteProxy(Socket clientSocket,  int bufferSize) : base(clientSocket, bufferSize)
         {
-            
+            protocolProcess = new WebSocketProtocolProcess();
         }
 
         /// <summary>
@@ -31,12 +31,12 @@ namespace One
         /// <param name="data"></param>
         public void SendData(byte[] data)
         {
-            if (null == _clientSocket)
+            if (false == IsConnected)
             {
                 return;
             }
 
-            var bytes = (base.protocolProcess as WebSocketProtocolProcess).CreateDataFrame(data);
+            var bytes = protocolProcess.Pack(data);
 
             Send(bytes);
         }
@@ -86,7 +86,7 @@ namespace One
             }
             else
             {
-                Shutdown();
+                Close();
             }
         }
 

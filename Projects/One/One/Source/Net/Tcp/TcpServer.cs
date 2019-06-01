@@ -15,12 +15,12 @@ namespace One
         /// <summary>
         /// 新的客户端进入的事件
         /// </summary>
-        public event Action<TcpReomteProxy> onClientEnter;
+        public event Action<IRemoteProxy> onClientEnter;
 
         /// <summary>
         /// 客户端退出的事件
         /// </summary>
-        public event Action<TcpReomteProxy> onClientExit;
+        public event Action<IRemoteProxy> onClientExit;
 
         /// <summary>
         /// 线程同步器，将异步方法同步到调用Refresh的线程中
@@ -128,7 +128,7 @@ namespace One
 
         void Enter(Socket clientSocket)
         {            
-            TcpReomteProxy client = new TcpReomteProxy(clientSocket, new TcpProtocolProcess(), _bufferSize);           
+            TcpReomteProxy client = new TcpReomteProxy(clientSocket, _bufferSize);           
             client.onShutdown += OnClientShutdown;
             _clientList.Add(client);            
             Log.I("连接总数:{0}", ClientCount);

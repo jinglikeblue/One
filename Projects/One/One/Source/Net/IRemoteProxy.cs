@@ -15,5 +15,18 @@
         /// 关闭远端代理
         /// </summary>
         void Close();
+
+        /// <summary>
+        /// 是否连接中
+        /// </summary>
+        bool IsConnected
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 收到数据事件
+        /// </summary>
+        event ReceiveDataEvent onReceiveData;              
     }
 }

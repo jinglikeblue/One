@@ -18,7 +18,7 @@ namespace ClientDemo
 
         public TcpClientDemo()
         {
-            _client = new TcpClient(new TcpProtocolProcess());
+            _client = new TcpClient();
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onReceiveData += OnReceiveProtocol;
             _client.onDisconnect += OnDisconnect;
@@ -42,9 +42,9 @@ namespace ClientDemo
             Log.I("连接断开");
         }
 
-        private void OnReceiveProtocol(byte[] obj)
+        private void OnReceiveProtocol(IRemoteProxy sender, byte[] data)
         {
-            ByteArray ba = new ByteArray(obj);
+            ByteArray ba = new ByteArray(data);
             var last = ba.ReadString();
             long now = DateTime.Now.ToFileTimeUtc();
 

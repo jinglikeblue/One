@@ -14,6 +14,9 @@ namespace One
         /// </summary>
         protected List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
 
+
+        public event ReceiveDataEvent onReceiveData;
+
         /// <summary>
         /// 是否正在发送数据
         /// </summary>
@@ -29,7 +32,23 @@ namespace One
         /// </summary>
         public EndPoint RemoteEndPoint { get; private set; }
 
-        Socket _socket;        
+        Socket _socket;
+
+        /// <summary>
+        /// 是否已连接
+        /// </summary>
+        /// <returns></returns>
+        public bool IsConnected
+        {
+            get
+            {
+                if (null != _socket)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
 
         public UdpRemoteProxy(Socket socket, EndPoint remoteEndPoint, IProtocolProcess protocolProcess)
         {

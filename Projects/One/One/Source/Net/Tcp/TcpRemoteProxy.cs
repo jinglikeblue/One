@@ -18,7 +18,7 @@ namespace One
         /// <summary>
         /// 收到数据
         /// </summary>
-        public event Action<byte[]> onReceiveData;
+        public event ReceiveDataEvent onReceiveData;
 
         /// <summary>
         /// 客户端连接关闭事件
@@ -47,7 +47,7 @@ namespace One
         /// <summary>
         /// 协议处理器
         /// </summary>
-        internal IProtocolProcess protocolProcess;
+        protected IProtocolProcess protocolProcess;
 
         /// <summary>
         /// 是否客户端连接中
@@ -64,12 +64,12 @@ namespace One
             }
         }
 
-        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
+        public TcpReomteProxy(Socket clientSocket,  int bufferSize)
         {
             _clientSocket = clientSocket;            
             _buffer = new byte[bufferSize];
 
-            this.protocolProcess = protocolProcess;
+            this.protocolProcess = new TcpProtocolProcess();
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += OnIOCompleted;
@@ -159,7 +159,7 @@ namespace One
         /// <param name="protocolData"></param>
         protected void OnReceiveData(byte[] protocolData)
         {
-            onReceiveData?.Invoke(protocolData);
+            onReceiveData?.Invoke(this, protocolData);
         }
 
         virtual public void Send(byte[] bytes)

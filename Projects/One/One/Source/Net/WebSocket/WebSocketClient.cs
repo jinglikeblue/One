@@ -13,16 +13,21 @@ namespace One
         public bool IsUpgrade { get; internal set; } = false;
 
 
-        public WebSocketClient():base(new WebSocketProtocolProcess())
+        public WebSocketClient():base()
         {
             
+        }
+
+        protected override void InitProtocolProcess()
+        {
+            protocolProcess = new WebSocketProtocolProcess();
         }
 
         protected override void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
         {
             e.Completed -= OnConnectCompleted;
             if (null == e.ConnectSocket)
-            {
+            {                
                 DispatchConnectFailEvent();
                 return;
             }
@@ -60,7 +65,7 @@ namespace One
                 return;
             }
 
-            var data = (protocolProcess as WebSocketProtocolProcess).CreateDataFrame(bytes);
+            var data = protocolProcess.Pack(bytes);
 
             base.Send(data);
         }

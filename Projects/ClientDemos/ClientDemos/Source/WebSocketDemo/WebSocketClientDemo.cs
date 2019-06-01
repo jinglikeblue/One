@@ -17,13 +17,11 @@ namespace ClientDemo
             Console.ReadKey();
         }
 
-        WebSocketClient _client;
-        WebSocketProtocolProcess _pp;
+        WebSocketClient _client;        
 
         public WebSocketClientDemo()
         {
-            var client = new WebSocketClient();
-            _pp = client.protocolProcess as WebSocketProtocolProcess;
+            var client = new WebSocketClient();            
             _client = client;
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
@@ -37,7 +35,7 @@ namespace ClientDemo
             {
                 if (_client.IsConnected)
                 {
-                    _pp.ReceiveProtocols(OnReceiveProtocol);
+                    client.Refresh();
                     //Send();
                 }
                 Thread.Sleep(1000);

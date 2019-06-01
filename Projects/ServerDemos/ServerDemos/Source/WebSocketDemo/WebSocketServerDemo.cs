@@ -34,13 +34,21 @@ namespace ServerDemo
 
         private void OnClientEnter(IRemoteProxy e)
         {
-            (e.protocolProcess as WebSocketProtocolProcess).onReceiveProtocolEvent += OnReceiveData;
+            e.onReceiveData += OnReceiveData;
         }
 
-        private void OnReceiveData(IRemoteProxy sender, byte[] data)
+        private void OnReceiveData(IRemoteProxy remoteProxy, byte[] data)
         {
-            //收到的数据原路返回(Test)
-            (sender as WebSocketRemoteProxy).SendData(data);
+            remoteProxy.Send(data);
         }
+
+
+
+        //private void OnReceiveData(byte[] data)
+        //{
+        //    //收到的数据原路返回(Test)
+
+        //    (sender as WebSocketRemoteProxy).SendData(data);
+        //}
     }
 }

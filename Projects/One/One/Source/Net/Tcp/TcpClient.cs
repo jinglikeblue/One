@@ -25,7 +25,7 @@ namespace One
         /// <summary>
         /// 收到数据
         /// </summary>
-        public event Action<byte[]> onReceiveData;
+        public event ReceiveDataEvent onReceiveData;
 
         /// <summary>
         /// 接收数据的SocketAsyncEventArgs
@@ -70,7 +70,7 @@ namespace One
         /// <summary>
         /// 协议处理器
         /// </summary>
-        public IProtocolProcess protocolProcess { get; internal set; }
+        protected IProtocolProcess protocolProcess;
 
         /// <summary>
         /// 主机地址
@@ -98,9 +98,14 @@ namespace One
             }
         }
 
-        public TcpClient(IProtocolProcess protocolProcess)
+        public TcpClient()
         {
-            this.protocolProcess = protocolProcess;
+            InitProtocolProcess();
+        }
+
+        virtual protected void InitProtocolProcess()
+        {
+            this.protocolProcess = new TcpProtocolProcess();
         }
 
         /// <summary>
@@ -249,7 +254,7 @@ namespace One
         /// <param name="protocolData"></param>
         private void OnReceiveData(byte[] protocolData)
         {
-            onReceiveData?.Invoke(protocolData);
+            onReceiveData?.Invoke(this, protocolData);
         }
 
         /// <summary>

@@ -8,16 +8,16 @@ namespace ServerDemo
         public static UserMgr Ins { get; private set; } = new UserMgr();
 
         HashSet<User> _userSet = new HashSet<User>();
-        Dictionary<TcpReomteProxy, User> _c2uDic = new Dictionary<TcpReomteProxy, User>();        
+        Dictionary<IRemoteProxy, User> _c2uDic = new Dictionary<IRemoteProxy, User>();        
 
-        public void Enter(TcpReomteProxy client)
+        public void Enter(IRemoteProxy client)
         {
             User user = new User(client);
             _c2uDic[client] = user;
             _userSet.Add(user);            
         }
 
-        public void Exit(TcpReomteProxy client)
+        public void Exit(IRemoteProxy client)
         {
             if(_c2uDic.ContainsKey(client))
             {

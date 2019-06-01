@@ -42,13 +42,13 @@ namespace ServerDemo
             }
         }
 
-        private void OnClientEnter(TcpReomteProxy e)
+        private void OnClientEnter(IRemoteProxy e)
         {
             Log.I("用户进入");
             UserMgr.Ins.Enter(e);
         }
 
-        private void OnClientExit(TcpReomteProxy e)
+        private void OnClientExit(IRemoteProxy e)
         {
             Log.I("用户退出");
             UserMgr.Ins.Exit(e);

@@ -229,7 +229,7 @@ namespace One
         /// <param name="isMask">是否做掩码处理（默认为false)</param>
         /// <param name="isFin">是否是结束帧(默认为true)</param>
         /// <param name="opcode">操作码(默认为TEXT)</param>
-        internal byte[] CreateDataFrame(byte[] data, bool isMask = false, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
+        byte[] CreateDataFrame(byte[] data, bool isMask = false, bool isFin = true, EOpcode opcode = EOpcode.TEXT)
         {
             int bufferSize = 10;
             if (null != data)
@@ -303,7 +303,7 @@ namespace One
 
         public byte[] Pack(byte[] protocolData)
         {
-            return protocolData;
+            return CreateDataFrame(protocolData);
         }
     }
 }

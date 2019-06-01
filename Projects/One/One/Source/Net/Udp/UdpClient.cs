@@ -18,6 +18,9 @@ namespace One
         /// </summary>
         List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
 
+
+        public event ReceiveDataEvent onReceiveData;
+
         /// <summary>
         /// 是否正在发送数据
         /// </summary>
@@ -61,6 +64,7 @@ namespace One
         {
             this.protocolProcess = protocolProcess;            
         }
+
 
         public void Bind(string remoteHost, int remotePort, int localPort, ushort bufferSize)
         {
@@ -153,7 +157,7 @@ namespace One
         /// 发送数据
         /// </summary>
         /// <param name="bytes"></param>
-        public virtual void Send(byte[] bytes)
+        public void Send(byte[] bytes)
         {
             lock (this)
             {
@@ -207,7 +211,7 @@ namespace One
 
         public void Close()
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <summary>

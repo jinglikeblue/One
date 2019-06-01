@@ -22,7 +22,7 @@ namespace ClientDemo
 
         public void Start()
         {           
-            _client = new TcpClient(new TcpProtocolProcess());
+            _client = new TcpClient();
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             //_client.Connect("127.0.0.1", 1875, 4096);
