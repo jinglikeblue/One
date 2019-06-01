@@ -4,4 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Source\Net\WebSocket\WebSocketChannelcs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Source\Protocol\" />
+  </ItemGroup>
+
 </Project>

@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class UdpClient : IChannel
+    public class UdpClient
     {
         SocketAsyncEventArgs _receiveEA;
         SocketAsyncEventArgs _sendEA;
@@ -19,22 +19,15 @@ namespace One
         List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
 
 
-        public event ReceiveDataEvent onReceiveData;
+        /// <summary>
+        /// 收到UDP数据的事件（多线程事件）
+        /// </summary>
+        public event Action<UdpClient, byte[]> onReceiveData;
 
         /// <summary>
         /// 是否正在发送数据
         /// </summary>
         bool _isSending = false;
-
-        /// <summary>
-        /// 缓冲区可用字节长度
-        /// </summary>
-        protected int _bufferAvailable = 0;
-
-        /// <summary>
-        /// 协议处理器
-        /// </summary>
-        public IProtocolProcess protocolProcess { get; internal set; }
 
         public string RemoteHost { get; private set; }
         public int RemotePort { get; private set; }
@@ -43,6 +36,11 @@ namespace One
         IPEndPoint _remoteEndPoint;
 
         IPEndPoint _localEndPoint;
+
+        /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        ThreadSyncActions _tsa = new ThreadSyncActions();
 
         /// <summary>
         /// 是否已连接
@@ -60,9 +58,9 @@ namespace One
             }
         }
 
-        public UdpClient(IProtocolProcess protocolProcess)
+        public UdpClient()
         {
-            this.protocolProcess = protocolProcess;            
+          
         }
 
 
@@ -70,9 +68,9 @@ namespace One
         {
             _receiveBuffer = new byte[bufferSize];
             _sendEA = new SocketAsyncEventArgs();
-            _sendEA.Completed += OnSendCompleted;
+            _sendEA.Completed += OnAsyncEventCompleted;
             _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += OnReceiveCompleted;
+            _receiveEA.Completed += OnAsyncEventCompleted;
 
             RemoteHost = remoteHost;
             RemotePort = remotePort;
@@ -91,6 +89,33 @@ namespace One
         }
 
         /// <summary>
+        /// 异步事件完成（多线程事件）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            _tsa.AddToSyncAction(() => {
+                switch (e.LastOperation)
+                {
+                    case SocketAsyncOperation.ReceiveFrom:
+                        ProcessReceive(e);
+                        break;
+                    case SocketAsyncOperation.SendTo:
+                        ProcessSend(e);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+        }
+
+        /// <summary>
         /// 开始接受数据
         /// </summary>
         protected void StartReceive()
@@ -104,47 +129,25 @@ namespace One
 
             if (!_socket.ReceiveFromAsync(_receiveEA))
             {
-                OnReceiveCompleted(null, _receiveEA);
+                ProcessReceive(_receiveEA);
             }
         }
 
         /// <summary>
-        /// 处理接收到的消息（多线程事件）
+        /// 处理接收到的消息
         /// </summary>        
-        void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
+        void ProcessReceive(SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-                _bufferAvailable += e.BytesTransferred;
-
-                ProcessReceivedData();
-
+                byte[] data = new byte[e.BytesTransferred];
+                Array.Copy(e.Buffer, data, e.BytesTransferred);
+                onReceiveData?.Invoke(this, data);
                 StartReceive();
             }
             else
             {
                 //Close();
-            }
-        }
-
-        /// <summary>
-        /// 处理接收到的数据
-        /// </summary>
-        protected virtual void ProcessReceivedData()
-        {
-            //协议处理器处理协议数据
-            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable, OnReceiveData);
-
-            if (used > 0)
-            {
-                _bufferAvailable = _bufferAvailable - used;
-                if (0 != _bufferAvailable)
-                {
-                    //将还没有使用的数据移动到数据开头
-                    byte[] newBytes = new byte[_receiveBuffer.Length];
-                    Array.Copy(_receiveBuffer, used, newBytes, 0, _bufferAvailable);
-                    _receiveBuffer = newBytes;
-                }
             }
         }
 
@@ -159,18 +162,15 @@ namespace One
         /// <param name="bytes"></param>
         public void Send(byte[] bytes)
         {
-            lock (this)
+            if (null == _socket)
             {
-                if (null == _socket)
-                {
-                    return;
-                }
-
-
-                _sendBufferList.Add(new ArraySegment<byte>(bytes));
-
-                SendBufferList();
+                return;
             }
+
+
+            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+
+            SendBufferList();            
         }
 
         void SendBufferList()
@@ -188,24 +188,21 @@ namespace One
 
             if (!_socket.SendToAsync(_sendEA))
             {
-                OnSendCompleted(null, _sendEA);
+                ProcessSend(_sendEA);
             }
         }
 
-        void OnSendCompleted(object sender, SocketAsyncEventArgs e)
+        void ProcessSend(SocketAsyncEventArgs e)
         {
-            lock (this)
+            if (e.SocketError == SocketError.Success)
             {
-                if (e.SocketError == SocketError.Success)
-                {
-                    _isSending = false;
-                    //尝试一次发送
-                    SendBufferList();
-                }
-                else
-                {
-                    //Close();
-                }
+                _isSending = false;
+                //尝试一次发送
+                SendBufferList();
+            }
+            else
+            {
+                //Close();
             }
         }
 

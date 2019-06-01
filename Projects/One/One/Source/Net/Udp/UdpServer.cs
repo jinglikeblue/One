@@ -1,27 +1,31 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace One
 {
-    public class UdpServer<T> where T : IProtocolProcess, new()
-    {       
+    public class UdpServer
+    {
         /// <summary>
         /// 收到UDP数据的事件（多线程事件）
         /// </summary>
-        public event EventHandler<UdpRemoteProxy> onReceiveDataEvent;
+        public event Action<UdpChannel, byte[]> onReceiveData;
 
         /// <summary>
         /// 监听的端口
         /// </summary>
-        protected Socket _socket;
+        public Socket Socket { get; private set; }
 
         IPEndPoint _endPoint;
 
         SocketAsyncEventArgs _receiveEA;
 
         byte[] _buffer;
+
+        /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        public ThreadSyncActions Tsa { get; } = new ThreadSyncActions();
 
         /// <summary>
         /// 启动Socket服务
@@ -33,15 +37,34 @@ namespace One
         {
             Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, bindPort);
 
+            Tsa.Clear();
             _endPoint = new IPEndPoint(IPAddress.Any, bindPort);
-            _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            _socket.Bind(_endPoint);
+            Socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
+            Socket.Bind(_endPoint);
             _buffer = new byte[bufferSize];
-            _receiveEA = new SocketAsyncEventArgs();            
-            _receiveEA.Completed += OnReceiveCompleted;
+            _receiveEA = new SocketAsyncEventArgs();
+            _receiveEA.Completed += OnAsyncEventCompleted;
             _receiveEA.RemoteEndPoint = _endPoint;
 
             StartReceive();
+        }
+
+        public void Refresh()
+        {
+            Tsa.RunSyncActions();
+        }
+
+        /// <summary>
+        /// 异步事件完成（多线程事件）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            Tsa.AddToSyncAction(() =>
+            {
+                ProcessReceive(e);
+            });
         }
 
         /// <summary>
@@ -51,41 +74,32 @@ namespace One
         void StartReceive()
         {
             _receiveEA.SetBuffer(_buffer, 0, _buffer.Length);
-            bool willRaiseEvent = _socket.ReceiveFromAsync(_receiveEA);
+            bool willRaiseEvent = Socket.ReceiveFromAsync(_receiveEA);
             if (!willRaiseEvent)
             {
-                OnReceiveCompleted(null, _receiveEA);
+                ProcessReceive(_receiveEA);
             }
-        }        
+        }
 
         /// <summary>
         /// 接收到连接完成的事件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
+        void ProcessReceive(SocketAsyncEventArgs e)
         {
             byte[] data = new byte[e.BytesTransferred];
-            Array.Copy(e.Buffer,data,e.BytesTransferred);          
+            Array.Copy(e.Buffer, data, e.BytesTransferred);
 
-            Task.Run(
-                ()=> ProcessReceiveDataTask(e.RemoteEndPoint, data, data.Length)
-            );
-            
+            ProcessReceiveDataTask(e.RemoteEndPoint, data);
+
             StartReceive();
         }
 
-
-        void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data, int available)
-        {            
-            UdpRemoteProxy client = new UdpRemoteProxy(_socket, remoteEndPOINT, new T());
-            client.protocolProcess.Unpack(data, data.Length, OnReceiveData);
-            onReceiveDataEvent?.Invoke(this, client);
-        }
-
-        private void OnReceiveData(byte[] obj)
+        void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data)
         {
-            throw new NotImplementedException();
+            UdpChannel client = new UdpChannel(this, remoteEndPOINT);
+            onReceiveData?.Invoke(client, data);
         }
     }
 }

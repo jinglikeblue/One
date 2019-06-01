@@ -18,7 +18,7 @@ namespace One
         /// <summary>
         /// 协议是否已升级
         /// </summary>
-        public bool isUpgraded { get; internal set; } = false;
+        public bool IsUpgraded { get; internal set; } = false;
 
         public WebSocketRemoteProxy(Socket clientSocket,  int bufferSize) : base(clientSocket, bufferSize)
         {
@@ -59,7 +59,7 @@ namespace One
 
                 int used = 0;
 
-                if (false == isUpgraded)
+                if (false == IsUpgraded)
                 {
                     used = Upgrade(_buffer, _bufferAvailable);
                 }
@@ -143,7 +143,7 @@ namespace One
             Send(responseBytes);
 
             //Console.WriteLine("response:\r\n {0}", responseData);
-            isUpgraded = true;
+            IsUpgraded = true;
             return bufferAvailable;
         }
     }

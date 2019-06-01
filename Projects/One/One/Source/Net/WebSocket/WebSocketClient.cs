@@ -5,13 +5,17 @@ using System.Text;
 
 namespace One
 {
-    public class WebSocketClient : TcpClient
+    public class WebSocketClient
     {
         /// <summary>
         /// 协议是否已升级
         /// </summary>
         public bool IsUpgrade { get; internal set; } = false;
 
+        /// <summary>
+        /// TCP连接（WebSocket其实就是基于Tcp连接的)
+        /// </summary>
+        TcpClient _tcpClient;
 
         public WebSocketClient():base()
         {

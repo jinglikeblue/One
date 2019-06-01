@@ -18,65 +18,38 @@ namespace ClientDemo
         }
 
         UdpClient _client;
-        BaseUdpProtocolProcess _pp;
 
         public UdpClientDemo()
-        {
-            _pp = new BaseUdpProtocolProcess();
-            var client = new UdpClient(_pp);            
+        {            
+            var client = new UdpClient();            
             _client = client;
-            _client.Bind("123.207.88.71", 1875, 1874, 4096);                        
+            _client.onReceiveData += OnReceiveEvent;
+            _client.Bind("127.0.0.1", 1875, 1874, 4096);
 
-            _pp.onReceiveEvent += OnReceiveEvent;
-
-            for (int i = 0; i < 1000; i++)
+            while (true)
             {
-                _client.Send(Encoding.UTF8.GetBytes("Hello" + i));
+                _client.Refresh();
+                if (_client.IsConnected)
+                {
+                    Send();
+                }
                 Thread.Sleep(1000);
             }
-            //_client.Connect("121.40.165.18", 8800, 4096);
-
-            //_pp = _client.protocolProcess as WebSocketProtocolProcess;
-            //while (true)
-            //{
-            //    if (_client.IsConnected)
-            //    {
-            //        _pp.ReceiveProtocols(OnReceiveProtocol);
-            //        //Send();
-            //    }
-            //    Thread.Sleep(1000);
-            //}
         }
 
-        private void OnReceiveEvent(object sender, ByteArray e)
+        void Send()
         {
-            var s = Encoding.UTF8.GetString(e.GetAvailableBytes());
-            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);            
+            ByteArray ba = new ByteArray();
+            ba.Write(DateTime.Now.ToFileTimeUtc().ToString());
+            _client.Send(ba.GetAvailableBytes());
+            ba.SetPos(0);
+            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
         }
 
-        private void OnReceiveProtocol(ByteArray ba)
+        private void OnReceiveEvent(UdpClient sender, byte[] data)
         {
-            var s = Encoding.UTF8.GetString(ba.GetAvailableBytes());
-            //long last = long.Parse(obj.value);
-            //long now = DateTime.Now.ToFileTimeUtc();
-            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
-        }
-
-        private void OnDisconnect(object sender, IChannel e)
-        {
-            Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
-        }
-
-        private void OnConnectSuccess(object sender, IChannel e)
-        {
-            Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
-            //_client.SendData("hello");
-            //Send();
-        }
-
-        private void OnConnectFail(object sender, IChannel e)
-        {
-            Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
+            ByteArray ba = new ByteArray(data);
+            Log.I("服务器返回消息：{0}", ba.ReadString());            
         }
     }
 }

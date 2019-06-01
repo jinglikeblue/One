@@ -1,5 +1,6 @@
 ﻿using One;
 using System;
+using System.Threading;
 
 namespace ServerDemo
 {
@@ -11,26 +12,44 @@ namespace ServerDemo
             new UdpServerDemo();
         }
 
-        private UdpServer<BaseUdpProtocolProcess> _server;
+        private UdpServer _server;
 
         public UdpServerDemo()
         {
-            _server = new UdpServer<BaseUdpProtocolProcess>();
-            _server.onReceiveDataEvent += OnReceiveDataEvent;
-            _server.Start(1875, 4096);
+
+
+            new Thread(LogicThraed).Start();
 
             Console.ReadKey();
         }
 
-        private void OnReceiveDataEvent(object sender, UdpRemoteProxy remoteProxy)
-        {            
-            var pp = (remoteProxy.protocolProcess as BaseUdpProtocolProcess);
-            pp.ReceiveProtocols((ByteArray ba) =>
+        /// <summary>
+        /// 逻辑线程
+        /// </summary>
+        private void LogicThraed()
+        {
+            _server = new UdpServer();
+            _server.onReceiveData += OnReceiveDataEvent;
+            _server.Start(1875, 4096);
+
+            Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
+
+            int delay = 10;
+            while (true)
             {
-                Console.WriteLine(ba.ReadStringBytes(ba.ReadEnableSize));
-                ba.SetPos(0);
-                remoteProxy.Send(ba.GetAvailableBytes());
-            });
+                _server.Refresh();
+                Thread.Sleep(delay);
+            }
+        }
+
+        private void OnReceiveDataEvent(UdpChannel sender, byte[] data)
+        {
+            ByteArray ba = new ByteArray(data);
+            Log.I("收到数据:{0}", ba.ReadString());
+
+            ba.Reset();
+            ba.Write("I Got It");
+            sender.Send(ba.GetAvailableBytes());
         }
     }
 }
