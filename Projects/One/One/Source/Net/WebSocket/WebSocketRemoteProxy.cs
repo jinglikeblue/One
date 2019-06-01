@@ -8,7 +8,7 @@ namespace One
     /// <summary>
     /// 连接到服务器的客户端对象
     /// </summary>
-    public class WebSocketRemoteProxy : TcpReomteProxy
+    public class WebSocketRemoteProxy : TcpChannel
     {
         /// <summary>
         /// 协议升级为WebSocket使用的GUID

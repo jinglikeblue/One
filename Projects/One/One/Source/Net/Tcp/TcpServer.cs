@@ -27,12 +27,17 @@ namespace One
         /// </summary>
         ThreadSyncActions _tsa = new ThreadSyncActions();
 
-        List<TcpReomteProxy> _clientList = new List<TcpReomteProxy>();
+        List<TcpChannel> _channelList = new List<TcpChannel>();
 
         /// <summary>
         /// 监听的端口
         /// </summary>
         protected Socket _socket;
+
+        /// <summary>
+        /// 断开的通道集合
+        /// </summary>
+        HashSet<TcpChannel> _shutdownSet = new HashSet<TcpChannel>();
 
         /// <summary>
         /// 已连接的客户端总数
@@ -41,7 +46,7 @@ namespace One
         {
             get
             {
-                return _clientList.Count;
+                return _channelList.Count;
             }
         }
 
@@ -76,10 +81,13 @@ namespace One
         public void Refresh()
         {
             _tsa.RunSyncActions();
-            foreach(var client in _clientList)
+            foreach(var channel in _channelList)
             {
-                client.Refresh();
+                channel.Refresh();
             }
+
+            //清理断开的通道
+            RefreshShutdownSet();
         }
 
         /// <summary>
@@ -122,25 +130,37 @@ namespace One
         {
             //添加一个成功链接
             Enter(e.AcceptSocket);
-
             StartAccept(e);
         }
 
         void Enter(Socket clientSocket)
         {            
-            TcpReomteProxy client = new TcpReomteProxy(clientSocket, _bufferSize);           
-            client.onShutdown += OnClientShutdown;
-            _clientList.Add(client);            
-            Log.I("连接总数:{0}", ClientCount);
-            onClientEnter?.Invoke(client);            
+            TcpChannel channel = new TcpChannel(clientSocket, _bufferSize);           
+            channel.onShutdown += OnClientShutdown;
+            _channelList.Add(channel);            
+            Log.I("新的连接，连接总数:{0}", ClientCount);
+            onClientEnter?.Invoke(channel);            
         }
         
-        private void OnClientShutdown(TcpReomteProxy client)
+        private void OnClientShutdown(TcpChannel channel)
         {
-            client.onShutdown -= OnClientShutdown;
-            _clientList.Remove(client);
-            Log.I("连接总数:{0}", ClientCount);
-            onClientExit?.Invoke(client);
+            channel.onShutdown -= OnClientShutdown;
+            //先添加到集合，稍后处理，现在处理则ChannelList会异常
+            _shutdownSet.Add(channel);            
+        }
+
+        void RefreshShutdownSet()
+        {
+            if (_shutdownSet.Count > 0)
+            {
+                foreach (var channel in _shutdownSet)
+                {
+                    _channelList.Remove(channel);
+                    Log.I("连接断开，连接总数:{0}", ClientCount);
+                    onClientExit?.Invoke(channel);
+                }
+                _shutdownSet.Clear();
+            }
         }
     }
 }

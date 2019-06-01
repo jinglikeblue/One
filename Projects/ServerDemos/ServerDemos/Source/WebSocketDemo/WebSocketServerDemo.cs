@@ -27,17 +27,17 @@ namespace ServerDemo
             Console.ReadKey();
         }
 
-        private void OnClientExit(IRemoteProxy e)
+        private void OnClientExit(IChannel e)
         {
             
         }
 
-        private void OnClientEnter(IRemoteProxy e)
+        private void OnClientEnter(IChannel e)
         {
             e.onReceiveData += OnReceiveData;
         }
 
-        private void OnReceiveData(IRemoteProxy remoteProxy, byte[] data)
+        private void OnReceiveData(IChannel remoteProxy, byte[] data)
         {
             remoteProxy.Send(data);
         }

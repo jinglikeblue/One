@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class TcpReomteProxy : IChannel
+    public class TcpChannel : IChannel
     {
         SocketAsyncEventArgs _receiveEA;
 
@@ -23,9 +23,9 @@ namespace One
         /// <summary>
         /// 客户端连接关闭事件
         /// </summary>
-        internal event Action<TcpReomteProxy> onShutdown;
+        internal event Action<TcpChannel> onShutdown;
 
-        protected Socket _clientSocket;
+        protected Socket _socket;
 
         protected byte[] _buffer;
 
@@ -56,7 +56,7 @@ namespace One
         {
             get
             {
-                if (_clientSocket != null && _clientSocket.Connected)
+                if (_socket != null && _socket.Connected)
                 {
                     return true;
                 }
@@ -64,9 +64,9 @@ namespace One
             }
         }
 
-        public TcpReomteProxy(Socket clientSocket, int bufferSize)
+        public TcpChannel(Socket socket, int bufferSize)
         {
-            _clientSocket = clientSocket;
+            _socket = socket;
             _buffer = new byte[bufferSize];
 
             this.protocolProcess = new TcpProtocolProcess();
@@ -118,7 +118,7 @@ namespace One
 
             _receiveEA.SetBuffer(_buffer, _bufferAvailable, _buffer.Length - _bufferAvailable);
 
-            bool willRaiseEvent = _clientSocket.ReceiveAsync(_receiveEA);
+            bool willRaiseEvent = _socket.ReceiveAsync(_receiveEA);
             if (!willRaiseEvent)
             {
                 ProcessReceive(_receiveEA);
@@ -198,7 +198,7 @@ namespace One
 
             _sendBufferList.Clear();
 
-            bool willRaiseEvent = _clientSocket.SendAsync(_sendEA);
+            bool willRaiseEvent = _socket.SendAsync(_sendEA);
             if (!willRaiseEvent)
             {
                 ProcessSend(_sendEA);
@@ -228,18 +228,18 @@ namespace One
         /// </summary>
         public void Close()
         {
-            if (null != _clientSocket)
+            if (null != _socket)
             {
                 try
                 {
-                    _clientSocket.Shutdown(SocketShutdown.Send);
+                    _socket.Shutdown(SocketShutdown.Send);
                 }
                 catch
                 {
                 }
 
-                _clientSocket.Close();
-                _clientSocket = null;
+                _socket.Close();
+                _socket = null;
                 _buffer = null;
                 _receiveEA.Dispose();
                 _receiveEA = null;
@@ -248,6 +248,15 @@ namespace One
 
                 onShutdown?.Invoke(this);
             }
+        }
+
+        /// <summary>
+        /// 断开连接通道，并且不触发任何事件
+        /// </summary>
+        public void CloseSilently()
+        {
+            onShutdown = null;
+            Close();
         }
     }
 }

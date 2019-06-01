@@ -10,6 +10,10 @@ namespace One
     {
         List<Action> _toSyncActinList = new List<Action>();         
 
+        /// <summary>
+        /// 添加要同步到执行线程的Action
+        /// </summary>
+        /// <param name="action"></param>
         public void AddToSyncAction(Action action)
         {
             lock (_toSyncActinList)
@@ -18,20 +22,37 @@ namespace One
             }
         }
 
-        public void RunSyncActions()
+        /// <summary>
+        /// 清空所有要同步的Action
+        /// </summary>
+        public void Clear()
         {
-            List<Action> actionCacheList = null;
-
             lock (_toSyncActinList)
             {
-                actionCacheList = _toSyncActinList.GetRange(0, _toSyncActinList.Count);                
                 _toSyncActinList.Clear();
             }
+        }
 
-            for (int i = 0; i < actionCacheList.Count; i++)
+        /// <summary>
+        /// 在执行现场调用该方法，执行所有要同步的Action
+        /// </summary>
+        public void RunSyncActions()
+        {
+            if (_toSyncActinList.Count > 0)
             {
-                actionCacheList[i].Invoke();
-            }            
+                List<Action> actionCacheList = null;
+
+                lock (_toSyncActinList)
+                {
+                    actionCacheList = _toSyncActinList.GetRange(0, _toSyncActinList.Count);
+                    _toSyncActinList.Clear();
+                }
+
+                for (int i = 0; i < actionCacheList.Count; i++)
+                {
+                    actionCacheList[i].Invoke();
+                }
+            }
         }
     }
 }

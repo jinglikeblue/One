@@ -301,9 +301,9 @@ namespace One
             return ba.GetAvailableBytes();
         }
 
-        public byte[] Pack(byte[] protocolData)
+        public byte[] Pack(byte[] data)
         {
-            return CreateDataFrame(protocolData);
+            return CreateDataFrame(data);
         }
     }
 }
