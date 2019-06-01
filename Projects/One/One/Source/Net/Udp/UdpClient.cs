@@ -59,8 +59,7 @@ namespace One
 
         public UdpClient(IProtocolProcess protocolProcess)
         {
-            this.protocolProcess = protocolProcess;
-            protocolProcess.SetSender(this);
+            this.protocolProcess = protocolProcess;            
         }
 
         public void Bind(string remoteHost, int remotePort, int localPort, ushort bufferSize)
@@ -130,7 +129,7 @@ namespace One
         protected virtual void ProcessReceivedData()
         {
             //协议处理器处理协议数据
-            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);
+            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable, OnReceiveData);
 
             if (used > 0)
             {
@@ -143,6 +142,11 @@ namespace One
                     _receiveBuffer = newBytes;
                 }
             }
+        }
+
+        private void OnReceiveData(byte[] protocolData)
+        {
+            
         }
 
         /// <summary>

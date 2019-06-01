@@ -1,5 +1,4 @@
 ﻿using One;
-using ServerDemo;
 using System;
 using System.Threading;
 
@@ -12,7 +11,6 @@ namespace ClientDemo
     {
         static byte[] bytes;
 
-        AsyncSimpleTcpProtocolProcess _pp;
         TcpClient _client;
         int _id;
 
@@ -23,11 +21,8 @@ namespace ClientDemo
         }
 
         public void Start()
-        {
-            _pp = new AsyncSimpleTcpProtocolProcess();
-            _pp.onReceiveProtocol += OnReceiveProtocol;
-
-            _client = new TcpClient(_pp);
+        {           
+            _client = new TcpClient(new TcpProtocolProcess());
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             //_client.Connect("127.0.0.1", 1875, 4096);
@@ -45,18 +40,18 @@ namespace ClientDemo
             }
         }
 
-        private void OnReceiveProtocol(object sender, byte[] obj)
+        private void OnReceiveProtocol(byte[] obj)
         {
             //Console.WriteLine("回数据：{0}", Thread.CurrentThread.ManagedThreadId);
             //_client.Send(obj);
         }
 
-        private void OnDisconnect(object sender, IRemoteProxy e)
+        private void OnDisconnect(IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
 
-        private void OnConnectSuccess(object sender, IRemoteProxy e)
+        private void OnConnectSuccess(IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
                        

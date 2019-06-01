@@ -13,46 +13,46 @@ namespace ClientDemo
                 new TcpClientDemo();
             }
         }
-
-        BaseTcpProtocolProcess _pp;
+        
         TcpClient _client;        
 
         public TcpClientDemo()
         {
-            _client = new TcpClient(new BaseTcpProtocolProcess());
+            _client = new TcpClient(new TcpProtocolProcess());
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;
             _client.Connect("127.0.0.1", 1875, 4096);
 
-            _pp = _client.protocolProcess as BaseTcpProtocolProcess;
+            
             while (true)
             {
+                _client.Refresh();
                 if (_client.IsConnected)
-                {
-                    _pp.ReceiveProtocols(OnReceiveProtocol);
+                {                    
                     Send();
                 }
                 Thread.Sleep(1000);
             }            
         }
 
-        private void OnDisconnect(object sender, IRemoteProxy e)
+        private void OnDisconnect(IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
 
-        private void OnReceiveProtocol(BaseTcpProtocolBody obj)
+        private void OnReceiveProtocol(byte[] obj)
         {
-            long last = long.Parse(obj.value);
+            ByteArray ba = new ByteArray(obj);
+            var last = ba.ReadString();
             long now = DateTime.Now.ToFileTimeUtc();
 
-            Log.CI(ConsoleColor.DarkYellow, "[{0}] 收到消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), obj.value);
+            Log.CI(ConsoleColor.DarkYellow, "[{0}] 收到消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), last);
 
             //Console.WriteLine("T{0} 消息延迟：{1}",Thread.CurrentThread.ManagedThreadId, (now - last) / 10000);
         }
 
-        private void OnConnectSuccess(object sender, IRemoteProxy e)
+        private void OnConnectSuccess(IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
             Send();
@@ -60,13 +60,14 @@ namespace ClientDemo
 
         void Send()
         {
-            BaseTcpProtocolBody obj = new BaseTcpProtocolBody();
-            obj.value = DateTime.Now.ToFileTimeUtc().ToString();
-            _client.Send(_pp.Pack(obj));
-            Log.CI(ConsoleColor.DarkMagenta, "[{0}] 发送消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), obj.value);
+            ByteArray ba = new ByteArray();
+            ba.Write(DateTime.Now.ToFileTimeUtc().ToString());            
+            _client.Send(ba.GetAvailableBytes());
+            ba.SetPos(0);
+            Log.CI(ConsoleColor.DarkMagenta, "[{0}] 发送消息:{1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), ba.ReadString());
         }
 
-        private void OnConnectFail(object sender, IRemoteProxy e)
+        private void OnConnectFail(IRemoteProxy e)
         {
             Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
         }

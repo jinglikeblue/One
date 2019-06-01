@@ -27,12 +27,12 @@ namespace ServerDemo
             Console.ReadKey();
         }
 
-        private void OnClientExit(object sender, IRemoteProxy e)
+        private void OnClientExit(IRemoteProxy e)
         {
             
         }
 
-        private void OnClientEnter(object sender, IRemoteProxy e)
+        private void OnClientEnter(IRemoteProxy e)
         {
             (e.protocolProcess as WebSocketProtocolProcess).onReceiveProtocolEvent += OnReceiveData;
         }

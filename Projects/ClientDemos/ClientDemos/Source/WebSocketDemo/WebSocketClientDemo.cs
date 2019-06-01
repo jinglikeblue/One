@@ -44,7 +44,7 @@ namespace ClientDemo
             }
         }
 
-        private void OnDisconnect(object sender, IRemoteProxy e)
+        private void OnDisconnect(IRemoteProxy e)
         {
             Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
         }
@@ -57,14 +57,14 @@ namespace ClientDemo
             Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
         }
 
-        private void OnConnectSuccess(object sender, IRemoteProxy e)
+        private void OnConnectSuccess(IRemoteProxy e)
         {
             Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
             _client.SendData("hello");
             //Send();
         }        
 
-        private void OnConnectFail(object sender, IRemoteProxy e)
+        private void OnConnectFail(IRemoteProxy e)
         {
             Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
         }

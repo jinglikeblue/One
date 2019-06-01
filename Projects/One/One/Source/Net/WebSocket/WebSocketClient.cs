@@ -15,7 +15,7 @@ namespace One
 
         public WebSocketClient():base(new WebSocketProtocolProcess())
         {
-            base.protocolProcess.SetSender(this);
+            
         }
 
         protected override void OnConnectCompleted(object sender, SocketAsyncEventArgs e)

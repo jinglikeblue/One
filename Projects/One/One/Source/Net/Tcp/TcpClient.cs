@@ -5,22 +5,27 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class TcpClient<ProtocolProcess> : IRemoteProxy
+    public class TcpClient : IRemoteProxy
     {
         /// <summary>
         /// 连接成功事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onConnectSuccess;
+        public event Action<IRemoteProxy> onConnectSuccess;
 
         /// <summary>
         /// 连接断开事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onDisconnect;
+        public event Action<IRemoteProxy> onDisconnect;
 
         /// <summary>
         /// 连接失败事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onConnectFail;        
+        public event Action<IRemoteProxy> onConnectFail;
+
+        /// <summary>
+        /// 收到数据
+        /// </summary>
+        public event Action<byte[]> onReceiveData;
 
         /// <summary>
         /// 接收数据的SocketAsyncEventArgs
@@ -96,7 +101,6 @@ namespace One
         public TcpClient(IProtocolProcess protocolProcess)
         {
             this.protocolProcess = protocolProcess;
-            protocolProcess.SetSender(this);
         }
 
         /// <summary>
@@ -168,18 +172,18 @@ namespace One
                 _receiveBuffer = null;
                 _bufferAvailable = 0;
 
-                onDisconnect?.Invoke(this, this);
+                onDisconnect?.Invoke(this);
             }
         }
 
         protected void DispatchConnectFailEvent()
         {
-            onConnectFail?.Invoke(this, this);
+            onConnectFail?.Invoke(this);
         }
 
         protected void DispatchConnectSuccessEvent()
         {
-            onConnectSuccess?.Invoke(this, this);
+            onConnectSuccess?.Invoke(this);
         }
 
         /// <summary>
@@ -188,17 +192,14 @@ namespace One
         /// <param name="bytes"></param>
         public virtual void Send(byte[] bytes)
         {
-            lock (this)
+            if (false == IsConnected)
             {
-                if (null == _socket)
-                {
-                    return;
-                }
-
-                _sendBufferList.Add(new ArraySegment<byte>(bytes));
-
-                SendBufferList();
+                return;
             }
+
+            _sendBufferList.Add(new ArraySegment<byte>(bytes));
+
+            SendBufferList();            
         }
 
         void SendBufferList()
@@ -226,7 +227,7 @@ namespace One
         protected virtual void ProcessReceivedData()
         {
             //协议处理器处理协议数据
-            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);
+            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable, OnReceiveData);
 
             if (used > 0)
             {
@@ -242,11 +243,20 @@ namespace One
         }
 
         /// <summary>
+        /// 收到数据时触发
+        /// </summary>
+        /// <param name="protocolData"></param>
+        private void OnReceiveData(byte[] protocolData)
+        {
+            onReceiveData?.Invoke(protocolData);
+        }
+
+        /// <summary>
         /// 开始接受数据
         /// </summary>
         protected void StartReceive()
         {
-            if (IsFade)
+            if (false == IsConnected)
             {
                 return;
             }
@@ -312,9 +322,9 @@ namespace One
         {
             _tsa.AddToSyncAction(() =>
             {
+                _isSending = false;
                 if (e.SocketError == SocketError.Success)
-                {
-                    _isSending = false;
+                {                    
                     //尝试一次发送
                     SendBufferList();
                 }
@@ -323,22 +333,6 @@ namespace One
                     Close();
                 }
             });
-        }
-
-        /// <summary>
-        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
-        /// </summary>
-        bool IsFade
-        {
-            get
-            {
-                if (null == _socket)
-                {
-                    return true;
-                }
-
-                return false;
-            }
         }
     }
 }

@@ -6,7 +6,7 @@ namespace ServerDemo
     {
         public IRemoteProxy client { get; }
 
-        BaseTcpProtocolProcess _protocolProcess;
+        TcpProtocolProcess _protocolProcess;
 
         bool _destroyFlag = false;
 
@@ -21,7 +21,7 @@ namespace ServerDemo
         public User(IRemoteProxy client)
         {
             this.client = client;
-            _protocolProcess = client.protocolProcess as BaseTcpProtocolProcess;
+            _protocolProcess = client.protocolProcess as TcpProtocolProcess;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace ServerDemo
                 return false;
             }
 
-            _protocolProcess.ReceiveProtocols(OnReceiveProtocol);
+            //_protocolProcess.ReceiveProtocols(OnReceiveProtocol);
             return true;
         }
 
@@ -44,11 +44,11 @@ namespace ServerDemo
         /// 接收到协议的处理
         /// </summary>
         /// <param name="obj"></param>
-        private void OnReceiveProtocol(BaseTcpProtocolBody obj)
-        {
-            //Console.WriteLine("msg: {0}", obj.value);
-            client.Send(_protocolProcess.Pack(obj));
-        }
+        //private void OnReceiveProtocol(BaseTcpProtocolBody obj)
+        //{
+        //    //Console.WriteLine("msg: {0}", obj.value);
+        //    client.Send(_protocolProcess.Pack(obj));
+        //}
 
         public void Destroy()
         {

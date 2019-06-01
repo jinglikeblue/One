@@ -79,8 +79,13 @@ namespace One
         void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data, int available)
         {            
             UdpRemoteProxy client = new UdpRemoteProxy(_socket, remoteEndPOINT, new T());
-            client.protocolProcess.Unpack(data, data.Length);
+            client.protocolProcess.Unpack(data, data.Length, OnReceiveData);
             onReceiveDataEvent?.Invoke(this, client);
+        }
+
+        private void OnReceiveData(byte[] obj)
+        {
+            throw new NotImplementedException();
         }
     }
 }

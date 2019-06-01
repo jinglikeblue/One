@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -9,24 +10,30 @@ namespace One
     /// 提供基于TCP协议的套接字服务
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TcpServer<T> where T : IProtocolProcess, new()
+    public class TcpServer
     {
         /// <summary>
         /// 新的客户端进入的事件（非线程安全）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onClientEnterHandler;
+        public event Action<IRemoteProxy> onClientEnterHandler;
 
         /// <summary>
         /// 客户端退出的事件（非线程安全）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onClientExitHandler;
+        public event Action<IRemoteProxy> onClientExitHandler;
+
+        /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        ThreadSyncActions _tsa = new ThreadSyncActions();
+
+        List<TcpReomteProxy> _clientList = new List<TcpReomteProxy>();
 
         /// <summary>
         /// 监听的端口
         /// </summary>
         protected Socket _socket;
 
-        protected int _clientCount = 0;
         /// <summary>
         /// 已连接的客户端总数
         /// </summary>
@@ -34,7 +41,7 @@ namespace One
         {
             get
             {
-                return _clientCount;
+                return _clientList.Count;
             }
         }
 
@@ -66,6 +73,11 @@ namespace One
             }
         }
 
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+        }
+
         /// <summary>
         /// 开始接受链接
         /// </summary>
@@ -90,13 +102,16 @@ namespace One
         }
 
         /// <summary>
-        /// 接收到连接完成的事件
+        /// 接收到连接完成的事件（多线程事件）
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void OnAcceptCompleted(object sender, SocketAsyncEventArgs e)
         {
-            ProcessAccept(e);
+            _tsa.AddToSyncAction(() =>
+            {
+                ProcessAccept(e);
+            });
         }
 
         void ProcessAccept(SocketAsyncEventArgs e)
@@ -108,37 +123,30 @@ namespace One
         }
 
         void Enter(Socket clientSocket)
-        {
-            Interlocked.Increment(ref _clientCount);
-            TcpReomteProxy client = CreateRemoteProxy(clientSocket, _bufferSize, OnClientShutdown);
+        {            
+            TcpReomteProxy client = new TcpReomteProxy(clientSocket, new TcpProtocolProcess(), _bufferSize);           
+            client.onShutdown += OnClientShutdown;
+            _clientList.Add(client);
             DispatchRemoteProxyEnterEvent(client);
-            Console.WriteLine("Thread [{0}]: enter total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);            
+            Console.WriteLine("Thread [{0}]: enter total:{1}", Thread.CurrentThread.ManagedThreadId, ClientCount);
         }
 
         //object clientExitLock = new object();
         private void OnClientShutdown(TcpReomteProxy client)
         {
-            //lock (clientExitLock)
-            //{
-                Interlocked.Decrement(ref _clientCount);
-                DispatchRemoteProxyExitEvent(client);
-                Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, _clientCount);
-            //}
-        }
-
-        protected virtual TcpReomteProxy CreateRemoteProxy(Socket clientSocket, int bufferSize, Action<TcpReomteProxy> onShutdown)
-        {
-            return new TcpReomteProxy(clientSocket, new T(), bufferSize, onShutdown);
+            client.onShutdown -= OnClientShutdown;
+            DispatchRemoteProxyExitEvent(client);
+            Console.WriteLine("Thread [{0}]: exit total:{1}", Thread.CurrentThread.ManagedThreadId, ClientCount);
         }
 
         protected void DispatchRemoteProxyEnterEvent(IRemoteProxy remoteProxy)
         {
-            onClientEnterHandler?.Invoke(this, remoteProxy);
+            onClientEnterHandler?.Invoke(remoteProxy);
         }
 
         protected void DispatchRemoteProxyExitEvent(IRemoteProxy remoteProxy)
         {
-            onClientExitHandler?.Invoke(this, remoteProxy);
+            onClientExitHandler?.Invoke(remoteProxy);
         }
     }
 }

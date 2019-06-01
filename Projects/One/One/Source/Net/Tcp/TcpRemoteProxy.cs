@@ -11,9 +11,19 @@ namespace One
         SocketAsyncEventArgs _sendEA;
 
         /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        ThreadSyncActions _tsa = new ThreadSyncActions();
+
+        /// <summary>
+        /// 收到数据
+        /// </summary>
+        public event Action<byte[]> onReceiveData;
+
+        /// <summary>
         /// 客户端连接关闭事件
         /// </summary>
-        Action<TcpReomteProxy> _onShutdown;
+        public event Action<TcpReomteProxy> onShutdown;
 
         protected Socket _clientSocket;
 
@@ -49,14 +59,12 @@ namespace One
         /// </summary>
         bool _wantShutdown = false;
 
-        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize, Action<TcpReomteProxy> onShutDown)
+        public TcpReomteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize)
         {
-            _clientSocket = clientSocket;
-            _onShutdown = onShutDown;
+            _clientSocket = clientSocket;            
             _buffer = new byte[bufferSize];
 
             this.protocolProcess = protocolProcess;
-            protocolProcess.SetSender(this);
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += OnIOCompleted;
@@ -65,19 +73,30 @@ namespace One
             StartReceive();
         }
 
+        /// <summary>
+        /// 刷新
+        /// </summary>
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+        }
+
         private void OnIOCompleted(object sender, SocketAsyncEventArgs e)
         {
-            switch (e.LastOperation)
+            _tsa.AddToSyncAction(() =>
             {
-                case SocketAsyncOperation.Receive:
-                    ProcessReceive(e);
-                    break;
-                case SocketAsyncOperation.Send:
-                    ProcessSend(e);
-                    break;
-                default:
-                    throw new ArgumentException(string.Format("Wrong last operation : {0}", e.LastOperation));
-            }
+                switch (e.LastOperation)
+                {
+                    case SocketAsyncOperation.Receive:
+                        ProcessReceive(e);
+                        break;
+                    case SocketAsyncOperation.Send:
+                        ProcessSend(e);
+                        break;
+                    default:
+                        throw new ArgumentException(string.Format("Wrong last operation : {0}", e.LastOperation));
+                }
+            });
         }
 
         protected void StartReceive()
@@ -102,14 +121,13 @@ namespace One
         /// <param name="e"></param>
         virtual protected void ProcessReceive(SocketAsyncEventArgs e)
         {
+
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
-                int used = protocolProcess.Unpack(_buffer, _bufferAvailable);
-
-                //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);
+                int used = protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
 
                 if (used > 0)
                 {
@@ -131,6 +149,15 @@ namespace One
             }
         }
 
+        /// <summary>
+        /// 收到数据时触发
+        /// </summary>
+        /// <param name="protocolData"></param>
+        protected void OnReceiveData(byte[] protocolData)
+        {
+            onReceiveData?.Invoke(protocolData);
+        }
+
         virtual public void Send(byte[] bytes)
         {
             if (IsFade)
@@ -146,7 +173,7 @@ namespace One
         protected void SendBufferList()
         {
             if (IsFade)
-            {               
+            {
                 return;
             }
 
@@ -211,8 +238,8 @@ namespace One
                 isClosed = true;
                 _wantShutdown = false;
 
-                _onShutdown.Invoke(this);
-                
+                onShutdown?.Invoke(this);
+
             }
         }
 

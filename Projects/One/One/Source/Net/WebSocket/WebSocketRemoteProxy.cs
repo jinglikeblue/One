@@ -20,7 +20,7 @@ namespace One
         /// </summary>
         public bool isUpgraded { get; internal set; } = false;
 
-        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize, Action<TcpReomteProxy> onShutdown) : base(clientSocket, protocolProcess, bufferSize, onShutdown)
+        public WebSocketRemoteProxy(Socket clientSocket, IProtocolProcess protocolProcess, int bufferSize) : base(clientSocket, protocolProcess, bufferSize)
         {
             
         }
@@ -65,7 +65,7 @@ namespace One
                 }
                 else
                 {
-                    used = protocolProcess.Unpack(_buffer, _bufferAvailable);
+                    used = protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
                 }                
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);

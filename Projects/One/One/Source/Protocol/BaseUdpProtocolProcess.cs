@@ -34,7 +34,7 @@ namespace One
             
         }
 
-        public int Unpack(byte[] buf, int available)
+        public int Unpack(byte[] buf, int available, Action<byte[]> onReceiveData)
         {
             ByteArray ba = new ByteArray(buf, available);            
             if (null != onReceiveEvent)
