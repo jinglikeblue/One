@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace One
 {
     /// <summary>
     /// WebSocket协议处理器
     /// </summary>
-    public sealed class WebSocketProtocolProcess : IProtocolProcess
+    public sealed class WebSocketProtocolProcess
     {
         /// <summary>
-        /// 收到协议的事件，如果监听该事件，那么ReceiveProtocols方法将失效。
-        /// 多线程事件，如果需要单线程回调，请使用ReceiveProtocols方法
+        /// 协议升级为WebSocket使用的GUID
         /// </summary>
-        public Action<IChannel, byte[]> onReceiveProtocolEvent;
+        const string WEB_SOCKET_UPGRADE_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
         /// <summary>
         /// 负载数据内容
         /// </summary>
-        internal enum EOpcode
+        public enum EOpcode
         {
             /// <summary>
             /// 继续帧
@@ -39,49 +40,15 @@ namespace One
             PONG = 10,
         }
 
-        List<byte[]> _pbList = new List<byte[]>();
-
-        IChannel _sender;
-
-        public void SetSender(IChannel sender)
-        {
-            _sender = sender;
-        }
-
-        /// <summary>
-        /// 用传入的委托方法来接收协议处理器收集到的协议（线程安全）
-        /// </summary>
-        /// <param name="onReceiveProtocol"></param>
-        public void ReceiveProtocols(Action<byte[]> onReceiveProtocol)
-        {
-            if (0 == _pbList.Count)
-            {
-                return;
-            }
-
-            List<byte[]> pbList = new List<byte[]>();
-
-            lock (_pbList)
-            {
-                pbList.AddRange(_pbList);
-                _pbList.Clear();
-            }
-
-            for (int i = 0; i < pbList.Count; i++)
-            {
-                onReceiveProtocol(pbList[i]);
-            }
-        }
-
-        public int Unpack(byte[] buf, int available, Action<byte[]> onReceiveData)
+        public int Unpack(byte[] buf, int available, Action<EOpcode, byte[]> onReceiveData)
         {
             ByteArray ba = new ByteArray(buf, available, false);
             int used = 0;
-            Unpack(ba, ref used);
+            Unpack(ba, ref used, onReceiveData);
             return used;
         }
 
-        void Unpack(ByteArray ba, ref int used)
+        void Unpack(ByteArray ba, ref int used, Action<EOpcode, byte[]> onReceiveData)
         {
             if (ba.ReadEnableSize < 2 * ByteArray.BYTE_SIZE)
             {
@@ -145,7 +112,11 @@ namespace One
             switch (opcode)
             {
                 case EOpcode.CONTINUE:
+                case EOpcode.PING:
+                case EOpcode.PONG:
+                case EOpcode.CLOSE:
                     //使用率低，暂不处理这种情况
+                    onReceiveData?.Invoke(opcode, null);
                     break;
                 case EOpcode.TEXT:
                 case EOpcode.BYTE:
@@ -167,58 +138,28 @@ namespace One
                             }
                         }
 
-                        OnReceiveProtocol(payloadData);
+                        onReceiveData?.Invoke(opcode, payloadData);                        
                     }
-                    break;
-                case EOpcode.PING:
-                    SendPong();
-                    break;
-                case EOpcode.PONG:
-                    //忽略
-                    break;
-
-                case EOpcode.CLOSE:                                                         
-                default:
-                    Console.WriteLine("收到WS协议，操作：{0}", opcode);
-                    //不可识别的操作符
-                    _sender.Close();
-                    return; //注意这里不是break，是返回！！！                    
+                    break;                                                                         
+                default:                    
+                    throw new Exception(string.Format("不可识别的WS协议:{0}", opcode));                 
             }
 
             used += ba.Pos - startPos;
 
-            Unpack(ba, ref used);
+            Unpack(ba, ref used, onReceiveData);
         }
 
-        public void SendPing()
+        public byte[] CreatePingFrame()
         {
             byte[] pingFrame = CreateDataFrame(null, false, true, WebSocketProtocolProcess.EOpcode.PING);
-            _sender.Send(pingFrame);
+            return pingFrame;
         }
 
-        public void SendPong()
+        public byte[] CreatePongFrame()
         {
             byte[] pongFrame = CreateDataFrame(null, false, true, WebSocketProtocolProcess.EOpcode.PONG);
-            _sender.Send(pongFrame);
-        }
-
-        /// <summary>
-        /// 解包时拿到的数据帧中的应用数据
-        /// </summary>
-        /// <param name="data"></param>
-        public void OnReceiveProtocol(byte[] data)
-        {
-            if (null != onReceiveProtocolEvent)
-            {
-                onReceiveProtocolEvent.Invoke(_sender, data);
-            }
-            else
-            {
-                lock (_pbList)
-                {
-                    _pbList.Add(data);
-                }
-            }
+            return pongFrame;
         }
 
         /// <summary>
@@ -305,5 +246,58 @@ namespace One
         {
             return CreateDataFrame(data);
         }
+
+        /// <summary>
+        /// 创建WebSocket升级的返回数据
+        /// </summary>
+        /// <param name="keyValue"></param>
+        /// <returns></returns>
+        public byte[] CreateUpgradeResponse(string keyValue)
+        {
+            //生成升级协议确认KEY
+            string responseValue = keyValue + WEB_SOCKET_UPGRADE_GUID;
+            byte[] bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(responseValue));
+            string base64Value = Convert.ToBase64String(bytes);
+
+            //构建升级回复协议
+            var builder = new StringBuilder();
+            builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
+            builder.Append("Upgrade: websocket\r\n");
+            builder.Append("Connection: Upgrade\r\n");
+            builder.AppendFormat("Sec-WebSocket-Accept: {0}\r\n", base64Value);
+            builder.Append("\r\n");
+            string responseData = builder.ToString();
+
+            byte[] responseBytes = Encoding.ASCII.GetBytes(responseData);
+
+            return responseBytes;
+        }
+
+        /// <summary>
+        /// 创建WebSocket升级的请求数据
+        /// </summary>
+        /// <returns></returns>
+        public byte[] CreateUpgradeRequest()
+        {
+            //生成升级协议确认KEY
+            string requestValue = "One WebSocket";
+            byte[] bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(requestValue));
+            string base64Value = Convert.ToBase64String(bytes);
+
+            //构建升级回复协议
+            var builder = new StringBuilder();
+            builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
+            builder.Append("Upgrade: websocket\r\n");
+            builder.Append("Connection: Upgrade\r\n");
+            builder.Append("Sec-WebSocket-Version: 13\r\n");
+            builder.AppendFormat("Sec-WebSocket-Key: {0}\r\n", base64Value);
+            builder.Append("\r\n");
+            string requestData = builder.ToString();
+
+            byte[] responseBytes = Encoding.ASCII.GetBytes(requestData);
+
+            return responseBytes;
+        }
+
     }
 }

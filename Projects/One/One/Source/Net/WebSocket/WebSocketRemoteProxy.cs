@@ -22,7 +22,7 @@ namespace One
 
         public WebSocketRemoteProxy(Socket clientSocket,  int bufferSize) : base(clientSocket, bufferSize)
         {
-            protocolProcess = new WebSocketProtocolProcess();
+            _protocolProcess = new WebSocketProtocolProcess();
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace One
                 return;
             }
 
-            var bytes = protocolProcess.Pack(data);
+            var bytes = _protocolProcess.Pack(data);
 
             Send(bytes);
         }
@@ -65,7 +65,7 @@ namespace One
                 }
                 else
                 {
-                    used = protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
+                    used = _protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
                 }                
 
                 //Console.WriteLine("Thread [{0}] : bytes (receive [{1}] , totoal [{2}] , used [{3}] , remains [{4}])", Thread.CurrentThread.ManagedThreadId, e.BytesTransferred, _bufferAvailable, used, _bufferAvailable - used);

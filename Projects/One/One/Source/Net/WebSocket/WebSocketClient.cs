@@ -15,7 +15,12 @@ namespace One
         /// <summary>
         /// TCP连接（WebSocket其实就是基于Tcp连接的)
         /// </summary>
-        TcpClient _tcpClient;
+        WebSocketChannel _tcpClient;
+
+        /// <summary>
+        /// 收到数据
+        /// </summary>
+        public event Action<TcpClient, byte[]> onReceiveData;
 
         public WebSocketClient():base()
         {
@@ -80,55 +85,8 @@ namespace One
         //    SendData(bytes);
         //}        
 
-        //void RequestUpgrade()
-        //{
-        //    //生成升级协议确认KEY
-        //    string requestValue = "One WebSocket";
-        //    byte[] bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(requestValue));
-        //    string base64Value = Convert.ToBase64String(bytes);
 
-        //    //构建升级回复协议
-        //    var builder = new StringBuilder();
-        //    builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
-        //    builder.Append("Upgrade: websocket\r\n");
-        //    builder.Append("Connection: Upgrade\r\n");
-        //    builder.Append("Sec-WebSocket-Version: 13\r\n");
-        //    builder.AppendFormat("Sec-WebSocket-Key: {0}\r\n", base64Value);
-        //    builder.Append("\r\n");
-        //    string requestData = builder.ToString();
 
-        //    byte[] responseBytes = Encoding.ASCII.GetBytes(requestData);
-        //    //请求升级
-        //    Send(responseBytes);
-        //}
 
-        ///// <summary>
-        ///// 检查收到的协议是否是升级协议
-        ///// </summary>
-        //bool UpgradeResponse()
-        //{
-        //    //获取服务器发来的升级确认
-        //    ByteArray ba = new ByteArray(_receiveBuffer, _bufferAvailable);
-        //    string clientRequest = ba.ReadStringBytes(Encoding.ASCII, ba.ReadEnableSize);
-        //    string[] datas = clientRequest.Split(new String[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);            
-        //    try
-        //    {
-        //        for (int i = 0; i < datas.Length; i++)
-        //        {
-        //            if (datas[i].Contains("Sec-WebSocket-Accept"))
-        //            {
-        //                IsUpgrade = true;
-        //                Console.WriteLine("WS协议升级成功！");
-        //                break;
-        //            }
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e.Message);                
-        //    }
-
-        //    return IsUpgrade;
-        //}
     }
 }

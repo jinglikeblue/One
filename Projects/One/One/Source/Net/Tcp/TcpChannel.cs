@@ -47,7 +47,7 @@ namespace One
         /// <summary>
         /// 协议处理器
         /// </summary>
-        protected IProtocolProcess protocolProcess;
+        TcpProtocolProcess _protocolProcess;
 
         /// <summary>
         /// 是否客户端连接中
@@ -69,13 +69,18 @@ namespace One
             _socket = socket;
             _buffer = new byte[bufferSize];
 
-            this.protocolProcess = new TcpProtocolProcess();
+            CreateProtocolProcess();
             _receiveEA = new SocketAsyncEventArgs();
             _sendEA = new SocketAsyncEventArgs();
             _receiveEA.Completed += OnAsyncEventCompleted;
             _sendEA.Completed += OnAsyncEventCompleted;
 
             StartReceive();
+        }       
+        
+        virtual protected void CreateProtocolProcess()
+        {
+            _protocolProcess = new TcpProtocolProcess();
         }
 
         /// <summary>
@@ -129,14 +134,14 @@ namespace One
         /// 处理接收到的消息（多线程事件）
         /// </summary>
         /// <param name="e"></param>
-        virtual protected void ProcessReceive(SocketAsyncEventArgs e)
+        protected void ProcessReceive(SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
                 _bufferAvailable += e.BytesTransferred;
 
                 //协议处理器处理协议数据
-                int used = protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
+                int used = UnpackProtocolData();
 
                 if (used > 0)
                 {
@@ -158,6 +163,16 @@ namespace One
             }
         }
 
+        virtual protected int UnpackProtocolData()
+        {
+            return _protocolProcess.Unpack(_buffer, _bufferAvailable, OnReceiveData);
+        }
+
+        virtual protected byte[] PackProtocolData(byte[] bytes)
+        {
+            return _protocolProcess.Pack(bytes);
+        }
+
         /// <summary>
         /// 收到数据时触发
         /// </summary>
@@ -167,6 +182,10 @@ namespace One
             onReceiveData?.Invoke(this, protocolData);
         }
 
+        /// <summary>
+        /// 发送协议数据
+        /// </summary>
+        /// <param name="bytes"></param>
         virtual public void Send(byte[] bytes)
         {
             if (false == IsConnected)
@@ -174,8 +193,17 @@ namespace One
                 return;
             }
 
-            var protocolData = protocolProcess.Pack(bytes);
-            _sendBufferList.Add(new ArraySegment<byte>(protocolData));
+            var protocolData = PackProtocolData(bytes);
+            SendBytes(protocolData);
+        }
+
+        /// <summary>
+        /// 直接发送数据
+        /// </summary>
+        /// <param name="bytes"></param>
+        internal void SendBytes(byte[] bytes)
+        {
+            _sendBufferList.Add(new ArraySegment<byte>(bytes));
 
             SendBufferList();
         }
