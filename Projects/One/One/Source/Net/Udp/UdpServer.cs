@@ -6,26 +6,33 @@ namespace One
 {
     public class UdpServer
     {
-        /// <summary>
-        /// 收到UDP数据的事件（多线程事件）
-        /// </summary>
-        public event Action<UdpChannel, byte[]> onReceiveData;
+        UdpListener _listener;
 
         /// <summary>
-        /// 监听的端口
+        /// 收到UDP数据的事件
         /// </summary>
-        public Socket Socket { get; private set; }
-
-        IPEndPoint _endPoint;
-
-        SocketAsyncEventArgs _receiveEA;
-
-        byte[] _buffer;
+        public event Action<UdpServer, EndPoint, byte[]> onReceiveData;
 
         /// <summary>
         /// 线程同步器，将异步方法同步到调用Refresh的线程中
         /// </summary>
-        public ThreadSyncActions Tsa { get; } = new ThreadSyncActions();
+        ThreadSyncActions _tsa = new ThreadSyncActions();        
+
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+        }
+
+        public void Dispose()
+        {
+            _tsa.Clear();
+            if (_listener != null)
+            {
+                _listener.Dispose();
+                _listener = null;
+            }
+            onReceiveData = null;            
+        }
 
         /// <summary>
         /// 启动Socket服务
@@ -33,73 +40,29 @@ namespace One
         /// <param name="host">监听的地址</param>
         /// <param name="bindPort">坚挺的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
-        public void Start(int bindPort, int bufferSize)
+        public void Bind(int localPort, ushort bufferSize)
         {
-            Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, bindPort);
+            Log.CI(ConsoleColor.DarkGreen, "Bind Udp Lisening {0}:{1}", IPAddress.Any, localPort);           
 
-            Tsa.Clear();
-            _endPoint = new IPEndPoint(IPAddress.Any, bindPort);
-            Socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            Socket.Bind(_endPoint);
-            _buffer = new byte[bufferSize];
-            _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += OnAsyncEventCompleted;
-            _receiveEA.RemoteEndPoint = _endPoint;
-
-            StartReceive();
+            _listener = new UdpListener();
+            _listener.onReceiveData += OnReceiveData;
+            _listener.Bind(localPort, bufferSize, _tsa);
         }
 
-        public void Refresh()
+        private void OnReceiveData(EndPoint remoteEndPoint, byte[] data)
         {
-            Tsa.RunSyncActions();
-        }
+            onReceiveData?.Invoke(this, remoteEndPoint, data);
+        }        
 
         /// <summary>
-        /// 异步事件完成（多线程事件）
+        /// 创建一个信息发送通道
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
+        /// <param name="remoteEndPoint"></param>
+        /// <returns></returns>
+        public UdpSendChannel CreateSendChannel(EndPoint remoteEndPoint)
         {
-            Tsa.AddToSyncAction(() =>
-            {
-                ProcessReceive(e);
-            });
-        }
-
-        /// <summary>
-        /// 开始接受链接
-        /// </summary>
-        /// <param name="e"></param>
-        void StartReceive()
-        {
-            _receiveEA.SetBuffer(_buffer, 0, _buffer.Length);
-            bool willRaiseEvent = Socket.ReceiveFromAsync(_receiveEA);
-            if (!willRaiseEvent)
-            {
-                ProcessReceive(_receiveEA);
-            }
-        }
-
-        /// <summary>
-        /// 接收到连接完成的事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void ProcessReceive(SocketAsyncEventArgs e)
-        {
-            byte[] data = new byte[e.BytesTransferred];
-            Array.Copy(e.Buffer, data, e.BytesTransferred);
-
-            ProcessReceiveDataTask(e.RemoteEndPoint, data);
-
-            StartReceive();
-        }
-
-        void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data)
-        {
-            UdpChannel client = new UdpChannel(this, remoteEndPOINT);
-            onReceiveData?.Invoke(client, data);
+            var channel = new UdpSendChannel(_listener.Socket, remoteEndPoint, _tsa);
+            return channel;
         }
     }
 }

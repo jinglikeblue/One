@@ -11,14 +11,22 @@ namespace One
     {
         SocketAsyncEventArgs _receiveEA;
 
+        public Socket Socket
+        {
+            get
+            {
+                return _socket;
+            }
+        }
+
         protected Socket _socket;
 
         protected byte[] _receiveBuffer;
 
         /// <summary>
-        /// 收到UDP数据的事件（多线程事件）
+        /// 收到UDP数据的事件
         /// </summary>
-        public event Action<EndPoint, byte[]> onReceiveData;
+        public event UdpListenerReceiveDataEvent onReceiveData;
 
         /// <summary>
         /// 监听的端口
@@ -32,22 +40,29 @@ namespace One
         /// </summary>
         ThreadSyncActions _tsa;
 
-        public void Bind(int port, ushort bufferSize, ThreadSyncActions tsa)
+        public UdpListener()
         {
-            Dispose();
+           
+        }
 
+        public Socket Bind(int port, ushort bufferSize, ThreadSyncActions tsa)
+        {           
             Port = port;
             _receiveBuffer = new byte[bufferSize];
             _tsa = tsa;
 
-            _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += OnAsyncEventCompleted;
             _localEndPoint = new IPEndPoint(IPAddress.Any, port);
+
+            _receiveEA = new SocketAsyncEventArgs();
+            _receiveEA.Completed += OnAsyncEventCompleted;                        
+            _receiveEA.RemoteEndPoint = _localEndPoint;
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             _socket.Bind(_localEndPoint);
 
             StartReceive();
+
+            return _socket;
         }
 
         /// <summary>

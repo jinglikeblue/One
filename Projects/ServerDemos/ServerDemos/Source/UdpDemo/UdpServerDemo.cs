@@ -1,5 +1,6 @@
 ﻿using One;
 using System;
+using System.Net;
 using System.Threading;
 
 namespace ServerDemo
@@ -16,8 +17,6 @@ namespace ServerDemo
 
         public UdpServerDemo()
         {
-
-
             new Thread(LogicThraed).Start();
 
             Console.ReadKey();
@@ -29,8 +28,8 @@ namespace ServerDemo
         private void LogicThraed()
         {
             _server = new UdpServer();
-            _server.onReceiveData += OnReceiveDataEvent;
-            _server.Start(1875, 4096);
+            _server.onReceiveData += OnReceiveData;
+            _server.Bind(1875, 4096);
 
             Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
 
@@ -42,14 +41,24 @@ namespace ServerDemo
             }
         }
 
-        private void OnReceiveDataEvent(UdpChannel sender, byte[] data)
+        UdpSendChannel sendChannel;
+
+        private void OnReceiveData(UdpServer server, EndPoint ep, byte[] data)
         {
             ByteArray ba = new ByteArray(data);
             Log.I("收到数据:{0}", ba.ReadString());
 
             ba.Reset();
-            ba.Write("I Got It");
-            sender.Send(ba.GetAvailableBytes());
+            ba.Write("I Got It");            
+
+            if(null == sendChannel)
+            {
+                sendChannel = _server.CreateSendChannel(ep);
+            }
+            
+            sendChannel.Send(ba.GetAvailableBytes());
+
+            //server.Send(ba.GetAvailableBytes());
         }
     }
 }

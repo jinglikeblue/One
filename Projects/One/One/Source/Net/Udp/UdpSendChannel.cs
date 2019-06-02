@@ -9,13 +9,13 @@ namespace One
     /// <summary>
     /// UDP协议发送器
     /// </summary>
-    class UdpSendChannel
+    public class UdpSendChannel
     {
         SocketAsyncEventArgs _sendEA;
 
         protected Socket _socket;
 
-        IPEndPoint _remoteEndPoint;
+        public EndPoint RemoteEndPoint { get; private set; }
 
         /// <summary>
         /// 线程同步器
@@ -32,26 +32,26 @@ namespace One
         /// </summary>
         bool _isSending = false;
 
-        public UdpSendChannel(Socket socket, string remoteHost, int remotePort, ThreadSyncActions tsa)
+        internal UdpSendChannel(Socket socket, string remoteHost, int remotePort, ThreadSyncActions tsa)
         {
             var remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteHost), remotePort);
             Init(socket, remoteEndPoint, tsa);
         }
 
-        public UdpSendChannel(Socket socket, IPEndPoint remoteEndPoint, ThreadSyncActions tsa)
+        internal UdpSendChannel(Socket socket, EndPoint remoteEndPoint, ThreadSyncActions tsa)
         {
             Init(socket, remoteEndPoint, tsa);
         }
 
-        void Init(Socket socket, IPEndPoint remoteEndPoint, ThreadSyncActions tsa)
+        void Init(Socket socket, EndPoint remoteEndPoint, ThreadSyncActions tsa)
         {
             _socket = socket;
-            _remoteEndPoint = remoteEndPoint;
+            RemoteEndPoint = remoteEndPoint;
             _tsa = tsa;
 
             _sendEA = new SocketAsyncEventArgs();
             _sendEA.Completed += OnAsyncEventCompleted;
-            _sendEA.RemoteEndPoint = _remoteEndPoint;
+            _sendEA.RemoteEndPoint = RemoteEndPoint;
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace One
                 _sendEA.Dispose();
                 _sendEA = null;
             }
-            _remoteEndPoint = null;
+            RemoteEndPoint = null;
             _sendBufferList = null;
         }
 
