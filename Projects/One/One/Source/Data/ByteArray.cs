@@ -147,6 +147,7 @@ namespace One
         public ByteArray(byte[] bytes, bool isBigEndian = true)
         {
             Init(bytes, isBigEndian);
+            Available = bytes.Length;
         }
 
         public ByteArray(bool isBigEndian = true)

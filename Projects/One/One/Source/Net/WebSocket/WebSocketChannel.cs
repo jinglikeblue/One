@@ -19,6 +19,11 @@ namespace One
 
         bool _isUpgradeRequester = false;
 
+        /// <summary>
+        /// WebSocket升级结果
+        /// </summary>
+        internal event Action<WebSocketChannel, bool> onUpgradeResult;
+
         public WebSocketChannel(Socket socket, int bufferSize) : base(socket, bufferSize)
         {
         }
@@ -121,6 +126,7 @@ namespace One
             if (null == value)
             {
                 Log.E("WebSocket协议升级失败");
+                onUpgradeResult?.Invoke(this, false);
                 Close();
                 return 0;
             }
@@ -131,7 +137,7 @@ namespace One
             SendBytes(responseBytes);
             
             IsUpgrade = true;
-
+            onUpgradeResult?.Invoke(this, true);
             return bufferAvailable;
         }
 
@@ -151,6 +157,7 @@ namespace One
                     if (datas[i].Contains("Sec-WebSocket-Accept"))
                     {
                         IsUpgrade = true;
+                        onUpgradeResult?.Invoke(this, true);
                         Log.I("WS协议升级成功！");
                         break;
                     }
@@ -159,6 +166,12 @@ namespace One
             catch (Exception e)
             {
                 Log.E(e.Message);
+            }
+
+            if(false == IsUpgrade)
+            {
+                Log.E("WebSocket协议升级失败");
+                onUpgradeResult?.Invoke(this, false);
                 Close();
             }
 

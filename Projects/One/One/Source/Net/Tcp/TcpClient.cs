@@ -95,7 +95,7 @@ namespace One
 
         public void Reconnect()
         {
-            CloseSilently();
+            Close(true);
 
             _tsa.Clear();
             IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
@@ -119,18 +119,10 @@ namespace One
         }
 
         /// <summary>
-        /// 断开客户端连接，并且不触发任何事件
-        /// </summary>
-        public void CloseSilently()
-        {
-            onDisconnect = null;
-            Close();
-        }
-
-        /// <summary>
         /// 断开客户端连接
         /// </summary>
-        public void Close()
+        /// <param name="isSilently">如果为true，则不会触发任何事件</param>
+        public void Close(bool isSilently = false)
         {
             if (null != _connectEA)
             {
@@ -141,7 +133,7 @@ namespace One
 
             if (null != Channel)
             {
-                Channel.Close();
+                Channel.Close(isSilently);
                 Channel = null;
             }
         }

@@ -254,7 +254,8 @@ namespace One
         /// <summary>
         /// 关闭客户端连接
         /// </summary>
-        public void Close()
+        /// <param name="isSilently">如果为true，则不会触发任何事件</param>
+        public void Close(bool isSilently = false)
         {
             if (null != _socket)
             {
@@ -266,6 +267,7 @@ namespace One
                 {
                 }
 
+                _tsa.Clear();
                 _socket.Close();
                 _socket = null;
                 _buffer = null;
@@ -274,17 +276,11 @@ namespace One
                 _sendEA.Dispose();
                 _sendEA = null;
 
-                onShutdown?.Invoke(this);
+                if (false == isSilently)
+                {
+                    onShutdown?.Invoke(this);
+                }
             }
-        }
-
-        /// <summary>
-        /// 断开连接通道，并且不触发任何事件
-        /// </summary>
-        public void CloseSilently()
-        {
-            onShutdown = null;
-            Close();
         }
     }
 }

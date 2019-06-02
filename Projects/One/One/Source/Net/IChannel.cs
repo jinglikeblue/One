@@ -14,7 +14,7 @@
         /// <summary>
         /// 关闭远端代理
         /// </summary>
-        void Close();
+        void Close(bool isSilently = false);
 
         /// <summary>
         /// 是否连接中

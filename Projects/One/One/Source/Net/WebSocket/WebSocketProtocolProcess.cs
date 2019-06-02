@@ -141,8 +141,9 @@ namespace One
                         onReceiveData?.Invoke(opcode, payloadData);                        
                     }
                     break;                                                                         
-                default:                    
-                    throw new Exception(string.Format("不可识别的WS协议:{0}", opcode));                 
+                default:
+                    Log.E(string.Format("不可识别的WS协议:{0}", opcode));
+                    return;
             }
 
             used += ba.Pos - startPos;
