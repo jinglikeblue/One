@@ -42,22 +42,6 @@ namespace One
         /// </summary>
         ThreadSyncActions _tsa = new ThreadSyncActions();
 
-        /// <summary>
-        /// 是否已连接
-        /// </summary>
-        /// <returns></returns>
-        public bool IsConnected
-        {
-            get
-            {
-                if (null != _socket)
-                {
-                    return true;
-                }
-                return false;
-            }
-        }
-
         public UdpClient()
         {
           
@@ -120,11 +104,6 @@ namespace One
         /// </summary>
         protected void StartReceive()
         {
-            if (IsFade)
-            {
-                return;
-            }
-
             _receiveEA.SetBuffer(_receiveBuffer, 0, _receiveBuffer.Length);
 
             if (!_socket.ReceiveFromAsync(_receiveEA))
@@ -182,7 +161,7 @@ namespace One
             }
 
             _isSending = true;
-            _sendEA.BufferList = _sendBufferList;
+            _sendEA.BufferList = _sendBufferList.ToArray();
 
             _sendBufferList.Clear();
 
@@ -203,27 +182,6 @@ namespace One
             else
             {
                 //Close();
-            }
-        }
-
-        public void Close()
-        {
-            
-        }
-
-        /// <summary>
-        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
-        /// </summary>
-        bool IsFade
-        {
-            get
-            {
-                if (null == _socket)
-                {
-                    return true;
-                }
-
-                return false;
             }
         }
     }

@@ -29,10 +29,7 @@ namespace ClientDemo
             while (true)
             {
                 _client.Refresh();
-                if (_client.IsConnected)
-                {
-                    Send();
-                }
+                Send();                
                 Thread.Sleep(1000);
             }
         }

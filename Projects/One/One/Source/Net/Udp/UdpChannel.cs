@@ -55,6 +55,11 @@ namespace One
             SendBufferList();
         }
 
+        /// <summary>
+        /// 异步事件完成（多线程事件）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
         {
             _server.Tsa.AddToSyncAction(() =>
