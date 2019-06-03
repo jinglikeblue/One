@@ -13,6 +13,7 @@ namespace ServerDemo
         }
 
         TcpServer _tcpSrver;
+
         public TcpServerDemo()
         {            
             new Thread(LogicThraed).Start();
@@ -36,22 +37,30 @@ namespace ServerDemo
             while (true)
             {
                 _tcpSrver.Refresh();
-                UserMgr.Ins.Update();
-
                 Thread.Sleep(delay);
             }
         }
 
-        private void OnClientEnter(IChannel e)
+        private void OnClientEnter(IChannel channel)
         {
             Log.I("用户进入");
-            UserMgr.Ins.Enter(e);
+            channel.onReceiveData += OnReceiveData;
         }
 
-        private void OnClientExit(IChannel e)
+        private void OnClientExit(IChannel channel)
         {
             Log.I("用户退出");
-            UserMgr.Ins.Exit(e);
+            channel.onReceiveData -= OnReceiveData;
+        }
+
+        private void OnReceiveData(IChannel sender, byte[] data)
+        {
+            ByteArray ba = new ByteArray(data);
+            Log.I("收到消息:{0}", ba.ReadString());
+
+            ba.Reset();
+            ba.Write("Server Got It!");
+            sender.Send(ba.GetAvailableBytes());
         }
     }
 }
