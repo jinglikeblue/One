@@ -1,5 +1,6 @@
 ﻿using One;
 using System;
+using System.Threading;
 
 namespace ServerDemo
 {
@@ -14,33 +15,58 @@ namespace ServerDemo
         }
 
         public WebSocketServerDemo()
-        {
-            _server = new WebSocketServer();
-            _server.onClientEnterHandler += OnClientEnter;
-            _server.onClientExitHandler += OnClientExit;
-            _server.Start(1875, 80000);
-            
+        {           
 
-            //new Thread(LogicThraed).Start();
+            new Thread(LogicThraed).Start();
 
-            //Console.WriteLine("Thread [{0}]:Press any key to terminate the server process....", Thread.CurrentThread.ManagedThreadId);
+            Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
             Console.ReadKey();
         }
 
-        private void OnClientExit(object sender, IRemoteProxy e)
+        /// <summary>
+        /// 逻辑线程
+        /// </summary>
+        private void LogicThraed()
         {
-            
+            _server = new WebSocketServer();
+            _server.onClientEnter += OnClientEnter;
+            _server.onClientExit += OnClientExit;
+            _server.Start(1875, 80000);
+
+            Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
+            int delay = 10;
+            while (true)
+            {
+                _server.Refresh();
+
+                Thread.Sleep(delay);
+            }
         }
 
-        private void OnClientEnter(object sender, IRemoteProxy e)
+        private void OnClientExit(IChannel e)
         {
-            (e.protocolProcess as WebSocketProtocolProcess).onReceiveProtocolEvent += OnReceiveData;
+            e.onReceiveData -= OnReceiveData;
         }
 
-        private void OnReceiveData(IRemoteProxy sender, byte[] data)
+        private void OnClientEnter(IChannel e)
         {
-            //收到的数据原路返回(Test)
-            (sender as WebSocketRemoteProxy).SendData(data);
+            e.onReceiveData += OnReceiveData;
         }
+
+        private void OnReceiveData(IChannel remoteProxy, byte[] data)
+        {
+            ByteArray ba = new ByteArray(data);
+            Log.I("收到消息：{0}", ba.ReadStringBytes(ba.Available));
+            remoteProxy.Send(data);
+        }
+
+
+
+        //private void OnReceiveData(byte[] data)
+        //{
+        //    //收到的数据原路返回(Test)
+
+        //    (sender as WebSocketRemoteProxy).SendData(data);
+        //}
     }
 }

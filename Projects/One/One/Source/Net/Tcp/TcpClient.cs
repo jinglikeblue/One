@@ -5,51 +5,57 @@ using System.Net.Sockets;
 
 namespace One
 {
-    public class TcpClient : IRemoteProxy
+    public class TcpClient
     {
         /// <summary>
         /// 连接成功事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onConnectSuccess;
+        public event Action<TcpClient> onConnectSuccess;
 
         /// <summary>
         /// 连接断开事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onDisconnect;
+        public event Action<TcpClient> onDisconnect;
 
         /// <summary>
         /// 连接失败事件(多线程事件）
         /// </summary>
-        public event EventHandler<IRemoteProxy> onConnectFail;
-
-        SocketAsyncEventArgs _receiveEA;
-        SocketAsyncEventArgs _sendEA;
-        protected Socket _socket;
-
-        protected byte[] _receiveBuffer;
+        public event Action<TcpClient> onConnectFail;
 
         /// <summary>
-        /// 数据发送队列
+        /// 收到数据
         /// </summary>
-        List<ArraySegment<byte>> _sendBufferList = new List<ArraySegment<byte>>();
+        public event Action<TcpClient, byte[]> onReceiveData;
 
         /// <summary>
-        /// 是否正在发送数据
+        /// 主机地址
         /// </summary>
-        bool _isSending = false;
-
-        /// <summary>
-        /// 缓冲区可用字节长度
-        /// </summary>
-        protected int _bufferAvailable = 0;
-
-        /// <summary>
-        /// 协议处理器
-        /// </summary>
-        public IProtocolProcess protocolProcess { get; internal set; }
-
         public string Host { get; private set; }
+
+        /// <summary>
+        /// 主机端口
+        /// </summary>
         public int Port { get; private set; }
+
+        /// <summary>
+        /// 缓冲区大小
+        /// </summary>
+        public ushort BufferSize { get; private set; }
+
+        /// <summary>
+        /// 通信通道
+        /// </summary>
+        public TcpChannel Channel { get; private set; }
+
+        /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        ThreadSyncActions _tsa = new ThreadSyncActions();
+
+        /// <summary>
+        /// 连接异步事件
+        /// </summary>
+        SocketAsyncEventArgs _connectEA;
 
         /// <summary>
         /// 是否已连接
@@ -59,7 +65,7 @@ namespace One
         {
             get
             {
-                if (null != _socket)
+                if (Channel != null && Channel.IsConnected)
                 {
                     return true;
                 }
@@ -67,10 +73,9 @@ namespace One
             }
         }
 
-        public TcpClient(IProtocolProcess protocolProcess)
+        public TcpClient()
         {
-            this.protocolProcess = protocolProcess;
-            protocolProcess.SetSender(this);
+
         }
 
         /// <summary>
@@ -81,133 +86,55 @@ namespace One
         /// <param name="bufferSize"></param>
         public void Connect(string host, int port, ushort bufferSize)
         {
-            _receiveBuffer = new byte[bufferSize];
-            _sendEA = new SocketAsyncEventArgs();
-            _sendEA.Completed += OnSendCompleted;
-            _receiveEA = new SocketAsyncEventArgs();
-            _receiveEA.Completed += OnReceiveCompleted;
-
             Host = host;
             Port = port;
+            BufferSize = bufferSize;
 
             Reconnect();
+        }
+
+        public void Reconnect()
+        {
+            Close(true);
+
+            _tsa.Clear();
+            IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
+            Socket socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _connectEA = new SocketAsyncEventArgs();
+            _connectEA.RemoteEndPoint = ipe;
+            _connectEA.Completed += OnAsyncEventCompleted;
+            if (!socket.ConnectAsync(_connectEA))
+            {
+                OnAsyncEventCompleted(null, _connectEA);
+            }
+        }
+
+        /// <summary>
+        /// 刷新
+        /// </summary>
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+            Channel?.Refresh();
         }
 
         /// <summary>
         /// 断开客户端连接
         /// </summary>
-        public void Close()
+        /// <param name="isSilently">如果为true，则不会触发任何事件</param>
+        public void Close(bool isSilently = false)
         {
-            if (null != _socket)
+            if (null != _connectEA)
             {
-                try
-                {
-                    _socket.Shutdown(SocketShutdown.Send);
-                }
-                catch (Exception) { }
-                _socket.Close();
-                _socket = null;
-                _receiveBuffer = null;
-                _bufferAvailable = 0;
-
-                onDisconnect?.Invoke(this, this);
-            }
-        }
-
-        public void Reconnect()
-        {
-            Close();
-
-            IPEndPoint ipe = new IPEndPoint(IPAddress.Parse(Host), Port);
-            Socket socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            SocketAsyncEventArgs connectEA = new SocketAsyncEventArgs();
-            connectEA.RemoteEndPoint = ipe;
-            connectEA.Completed += OnConnectCompleted;
-            if (!socket.ConnectAsync(connectEA))
-            {
-                OnConnectCompleted(null, connectEA);
-            }
-        }
-
-        protected virtual void OnConnectCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            e.Completed -= OnConnectCompleted;
-            if (null == e.ConnectSocket)
-            {
-                DispatchConnectFailEvent();
-                return;
+                _connectEA.Completed -= OnAsyncEventCompleted;
+                _connectEA.Dispose();
+                _connectEA = null;
             }
 
-            _socket = e.ConnectSocket;
-            DispatchConnectSuccessEvent();
-            StartReceive();
-        }
-
-        protected void DispatchConnectFailEvent()
-        {
-            onConnectFail?.Invoke(this, this);
-        }
-
-        protected void DispatchConnectSuccessEvent()
-        {
-            onConnectSuccess?.Invoke(this, this);
-        }
-
-        /// <summary>
-        /// 开始接受数据
-        /// </summary>
-        protected void StartReceive()
-        {
-            if(IsFade)
+            if (null != Channel)
             {
-                return;
-            }
-
-            _receiveEA.SetBuffer(_receiveBuffer, _bufferAvailable, _receiveBuffer.Length - _bufferAvailable);
-
-            if (!_socket.ReceiveAsync(_receiveEA))
-            {
-                OnReceiveCompleted(null, _receiveEA);
-            }
-        }
-
-        /// <summary>
-        /// 处理接收到的消息（多线程事件）
-        /// </summary>        
-        void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
-            {
-                _bufferAvailable += e.BytesTransferred;
-
-                ProcessReceivedData();
-
-                StartReceive();
-            }
-            else
-            {
-                Close();
-            }
-        }
-
-        /// <summary>
-        /// 处理接收到的数据
-        /// </summary>
-        protected virtual void ProcessReceivedData()
-        {
-            //协议处理器处理协议数据
-            int used = protocolProcess.Unpack(_receiveBuffer, _bufferAvailable);
-
-            if (used > 0)
-            {
-                _bufferAvailable = _bufferAvailable - used;
-                if (0 != _bufferAvailable)
-                {
-                    //将还没有使用的数据移动到数据开头
-                    byte[] newBytes = new byte[_receiveBuffer.Length];
-                    Array.Copy(_receiveBuffer, used, newBytes, 0, _bufferAvailable);
-                    _receiveBuffer = newBytes;
-                }
+                Channel.Close(isSilently);
+                Channel = null;
             }
         }
 
@@ -217,70 +144,52 @@ namespace One
         /// <param name="bytes"></param>
         public virtual void Send(byte[] bytes)
         {
-            lock (this)
-            {
-                if (null == _socket)
-                {
-                    return;
-                }
-
-
-                _sendBufferList.Add(new ArraySegment<byte>(bytes));
-
-                SendBufferList();
-            }
-        }
-
-        void SendBufferList()
-        {
-            //如果没有在发送状态，则调用发送
-            if (_isSending || _sendBufferList.Count == 0)
-            {
-                return;
-            }
-
-            _isSending = true;
-            _sendEA.BufferList = _sendBufferList.ToArray();
-
-            _sendBufferList.Clear();
-
-            if (!_socket.SendAsync(_sendEA))
-            {
-                OnSendCompleted(null, _sendEA);
-            }
-        }
-
-        void OnSendCompleted(object sender, SocketAsyncEventArgs e)
-        {
-            lock (this)
-            {
-                if (e.SocketError == SocketError.Success)
-                {
-                    _isSending = false;
-                    //尝试一次发送
-                    SendBufferList();
-                }
-                else
-                {
-                    Close();
-                }
-            }
+            Channel.Send(bytes);
         }
 
         /// <summary>
-        /// 是否关闭，进行检查，如果返回true，则表示该远端代理结束
+        /// 连接完成（多线程事件）
         /// </summary>
-        bool IsFade
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected virtual void OnAsyncEventCompleted(object sender, SocketAsyncEventArgs e)
         {
-            get
-            {
-                if (null == _socket)
+            _tsa.AddToSyncAction(
+                () =>
                 {
-                    return true;
-                }
+                    OnConnectCompleted(e);
+                });
+        }
 
-                return false;
+        void OnConnectCompleted(SocketAsyncEventArgs e)
+        {
+            e.Completed -= OnAsyncEventCompleted;
+            if (null == e.ConnectSocket)
+            {
+                onConnectFail?.Invoke(this);
+                return;
             }
+
+            InitChannel(e.ConnectSocket, BufferSize);
+            onConnectSuccess?.Invoke(this);
+        }
+
+        void InitChannel(Socket socket, int bufferSize)
+        {
+            Channel = new TcpChannel(socket, bufferSize);
+            Channel.onReceiveData += OnReceiveData;
+            Channel.onShutdown += OnShutdown;
+        }
+
+        private void OnReceiveData(IChannel sender, byte[] data)
+        {
+            onReceiveData?.Invoke(this, data);
+        }
+
+        private void OnShutdown(TcpChannel obj)
+        {
+            Channel = null;
+            onDisconnect?.Invoke(this);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace One
 {
@@ -19,6 +20,11 @@ namespace One
         /// </summary>
         public static ELogLevel logLevel = ELogLevel.INFO;
 
+        public static void LogLine(object message)
+        {
+            Console.WriteLine("[Thread:{0}] [Date:{1}] {2}", Thread.CurrentThread.ManagedThreadId, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), message);
+        }
+
         /// <summary>
         /// 打印信息
         /// </summary>
@@ -30,7 +36,7 @@ namespace One
                 return;
             }
 
-            Console.WriteLine(message);
+            LogLine(message);
         }
 
         /// <summary>
@@ -43,7 +49,7 @@ namespace One
                 return;
             }
 
-            Console.WriteLine(format, args);            
+            LogLine(string.Format(format, args));            
         }
 
         /// <summary>
@@ -140,7 +146,7 @@ namespace One
         {
             var old = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            Console.WriteLine(message);
+            LogLine(message);
             Console.ForegroundColor = old;
         }
 
@@ -153,7 +159,8 @@ namespace One
         {
             var old = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            Console.WriteLine(format, args);
+            var s = string.Format(format, args);
+            LogLine(s);
             Console.ForegroundColor = old;
         }
     }

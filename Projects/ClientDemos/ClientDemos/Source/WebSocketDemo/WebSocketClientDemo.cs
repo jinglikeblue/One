@@ -18,55 +18,58 @@ namespace ClientDemo
         }
 
         WebSocketClient _client;
-        WebSocketProtocolProcess _pp;
 
         public WebSocketClientDemo()
         {
-            var client = new WebSocketClient();
-            _pp = client.protocolProcess as WebSocketProtocolProcess;
-            _client = client;
+            _client = new WebSocketClient();            
             _client.onConnectSuccess += OnConnectSuccess;
             _client.onDisconnect += OnDisconnect;
             _client.onConnectFail += OnConnectFail;
+            _client.onReceiveData += OnReceiveProtocol;
             _client.Connect("127.0.0.1", 1875, 4096);
 
-            //_client.Connect("121.40.165.18", 8800, 4096);
-
-            //_pp = _client.protocolProcess as WebSocketProtocolProcess;
             while (true)
             {
+                _client.Refresh();
                 if (_client.IsConnected)
                 {
-                    _pp.ReceiveProtocols(OnReceiveProtocol);
-                    //Send();
+                    //client.Refresh();
+                    Send();
                 }
                 Thread.Sleep(1000);
             }
         }
 
-        private void OnDisconnect(object sender, IRemoteProxy e)
+        void Send()
         {
-            Console.WriteLine("连接断开：{0}", Thread.CurrentThread.ManagedThreadId);
+            ByteArray ba = new ByteArray();
+            ba.WriteStringBytes(DateTime.Now.ToFileTimeUtc().ToString());
+            _client.Send(ba.GetAvailableBytes());
+            ba.SetPos(0);
+            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadStringBytes(ba.Available));
         }
 
-        private void OnReceiveProtocol(byte[] obj)
+        private void OnDisconnect(WebSocketClient e)
         {
-            var s = Encoding.UTF8.GetString(obj);
-            //long last = long.Parse(obj.value);
-            //long now = DateTime.Now.ToFileTimeUtc();
-            Console.WriteLine("服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, s);
+            Log.I("连接断开");
         }
 
-        private void OnConnectSuccess(object sender, IRemoteProxy e)
+        private void OnReceiveProtocol(WebSocketClient client, byte[] obj)
         {
-            Console.WriteLine("连接成功：{0}", Thread.CurrentThread.ManagedThreadId);
-            _client.SendData("hello");
+            var ba = new ByteArray(obj);
+            Log.I("服务器返回消息：{0}", ba.ReadStringBytes(ba.Available));
+        }
+
+        private void OnConnectSuccess(WebSocketClient e)
+        {
+            Log.I("连接成功");
+            //_client.SendData("hello");
             //Send();
-        }        
+        }
 
-        private void OnConnectFail(object sender, IRemoteProxy e)
+        private void OnConnectFail(WebSocketClient e)
         {
-            Console.WriteLine("连接失败：{0}", Thread.CurrentThread.ManagedThreadId);
+            Log.I("连接失败");
         }
     }
 }

@@ -147,6 +147,7 @@ namespace One
         public ByteArray(byte[] bytes, bool isBigEndian = true)
         {
             Init(bytes, isBigEndian);
+            Available = bytes.Length;
         }
 
         public ByteArray(bool isBigEndian = true)
@@ -175,6 +176,10 @@ namespace One
         /// </summary>
         public void Reset()
         {
+            if(Bytes.Length != defaultBufferSize)
+            {
+                Bytes = new byte[defaultBufferSize];
+            }
             Available = 0;
             SetPos(0);
         }

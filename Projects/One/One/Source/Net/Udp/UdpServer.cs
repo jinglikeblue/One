@@ -1,27 +1,38 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace One
 {
-    public class UdpServer<T> where T : IProtocolProcess, new()
-    {       
-        /// <summary>
-        /// 收到UDP数据的事件（多线程事件）
-        /// </summary>
-        public event EventHandler<UdpRemoteProxy> onReceiveDataEvent;
+    public class UdpServer
+    {
+        UdpListener _listener;
 
         /// <summary>
-        /// 监听的端口
+        /// 收到UDP数据的事件
         /// </summary>
-        protected Socket _socket;
+        public event Action<UdpServer, EndPoint, byte[]> onReceiveData;
 
-        IPEndPoint _endPoint;
+        /// <summary>
+        /// 线程同步器，将异步方法同步到调用Refresh的线程中
+        /// </summary>
+        ThreadSyncActions _tsa = new ThreadSyncActions();        
 
-        SocketAsyncEventArgs _receiveEA;
+        public void Refresh()
+        {
+            _tsa.RunSyncActions();
+        }
 
-        byte[] _buffer;
+        public void Dispose()
+        {
+            _tsa.Clear();
+            if (_listener != null)
+            {
+                _listener.Dispose();
+                _listener = null;
+            }
+            onReceiveData = null;            
+        }
 
         /// <summary>
         /// 启动Socket服务
@@ -29,58 +40,29 @@ namespace One
         /// <param name="host">监听的地址</param>
         /// <param name="bindPort">坚挺的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
-        public void Start(int bindPort, int bufferSize)
+        public void Bind(int localPort, ushort bufferSize)
         {
-            Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, bindPort);
+            Log.CI(ConsoleColor.DarkGreen, "Bind Udp Lisening {0}:{1}", IPAddress.Any, localPort);           
 
-            _endPoint = new IPEndPoint(IPAddress.Any, bindPort);
-            _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            _socket.Bind(_endPoint);
-            _buffer = new byte[bufferSize];
-            _receiveEA = new SocketAsyncEventArgs();            
-            _receiveEA.Completed += OnReceiveCompleted;
-            _receiveEA.RemoteEndPoint = _endPoint;
-
-            StartReceive();
+            _listener = new UdpListener();
+            _listener.onReceiveData += OnReceiveData;
+            _listener.Bind(localPort, bufferSize, _tsa);
         }
 
-        /// <summary>
-        /// 开始接受链接
-        /// </summary>
-        /// <param name="e"></param>
-        void StartReceive()
+        private void OnReceiveData(EndPoint remoteEndPoint, byte[] data)
         {
-            _receiveEA.SetBuffer(_buffer, 0, _buffer.Length);
-            bool willRaiseEvent = _socket.ReceiveFromAsync(_receiveEA);
-            if (!willRaiseEvent)
-            {
-                OnReceiveCompleted(null, _receiveEA);
-            }
+            onReceiveData?.Invoke(this, remoteEndPoint, data);
         }        
 
         /// <summary>
-        /// 接收到连接完成的事件
+        /// 创建一个信息发送通道
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void OnReceiveCompleted(object sender, SocketAsyncEventArgs e)
+        /// <param name="remoteEndPoint"></param>
+        /// <returns></returns>
+        public UdpSendChannel CreateSendChannel(EndPoint remoteEndPoint)
         {
-            byte[] data = new byte[e.BytesTransferred];
-            Array.Copy(e.Buffer,data,e.BytesTransferred);          
-
-            Task.Run(
-                ()=> ProcessReceiveDataTask(e.RemoteEndPoint, data, data.Length)
-            );
-            
-            StartReceive();
-        }
-
-
-        void ProcessReceiveDataTask(EndPoint remoteEndPOINT, byte[] data, int available)
-        {            
-            UdpRemoteProxy client = new UdpRemoteProxy(_socket, remoteEndPOINT, new T());
-            client.protocolProcess.Unpack(data, data.Length);
-            onReceiveDataEvent?.Invoke(this, client);
+            var channel = new UdpSendChannel(_listener.Socket, remoteEndPoint, _tsa);
+            return channel;
         }
     }
 }
