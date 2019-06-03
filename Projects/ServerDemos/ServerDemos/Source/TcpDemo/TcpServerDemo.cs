@@ -43,20 +43,20 @@ namespace ServerDemo
 
         private void OnClientEnter(IChannel channel)
         {
-            Log.I("用户进入");
+            //Log.I("用户进入");
             channel.onReceiveData += OnReceiveData;
         }
 
         private void OnClientExit(IChannel channel)
         {
-            Log.I("用户退出");
+            //Log.I("用户退出");
             channel.onReceiveData -= OnReceiveData;
         }
 
         private void OnReceiveData(IChannel sender, byte[] data)
         {
             ByteArray ba = new ByteArray(data);
-            Log.I("收到消息:{0}", ba.ReadString());
+            //Log.I("收到消息:{0}", ba.ReadString());
 
             ba.Reset();
             ba.Write("Server Got It!");

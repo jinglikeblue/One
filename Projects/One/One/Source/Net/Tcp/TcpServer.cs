@@ -62,14 +62,15 @@ namespace One
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(int port, int bufferSize)
         {
-            Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, port);
+            Log.CI(ConsoleColor.DarkGreen, "Tcp Server Start! Lisening {0}:{1}", IPAddress.Any, port);
 
             _bufferSize = bufferSize;
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 _socket.Bind(new IPEndPoint(IPAddress.Any, port));
-                _socket.Listen(100);
+                _socket.Blocking = false;
+                _socket.Listen(1000);
                 StartAccept(null);
             }
             catch (Exception e)
