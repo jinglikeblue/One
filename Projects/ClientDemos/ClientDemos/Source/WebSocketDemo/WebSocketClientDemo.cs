@@ -2,6 +2,7 @@
 using System;
 using System.Text;
 using System.Threading;
+using WebSocketSharp;
 
 namespace ClientDemo
 {
@@ -17,27 +18,47 @@ namespace ClientDemo
             Console.ReadKey();
         }
 
-        WebSocketClient _client;
+        WebSocket _client;
+        
 
         public WebSocketClientDemo()
         {
-            _client = new WebSocketClient();            
-            _client.onConnectSuccess += OnConnectSuccess;
-            _client.onDisconnect += OnDisconnect;
-            _client.onConnectFail += OnConnectFail;
-            _client.onReceiveData += OnReceiveProtocol;
-            _client.Connect("127.0.0.1", 1875, 4096);
+            _client = new WebSocket("ws://127.0.0.1:1875");
+            _client.OnOpen += OnConnectSuccess;
+            _client.OnMessage += OnMessage;
+            _client.OnClose += OnClose;
+            _client.OnError += OnError;
+            _client.Connect();
 
             while (true)
-            {
-                _client.Refresh();
-                if (_client.IsConnected)
-                {
-                    //client.Refresh();
+            {                                
+                if (_client.IsAlive)
+                {                                       
                     Send();
                 }
                 Thread.Sleep(1000);
             }
+        }
+
+        private void OnError(object sender, ErrorEventArgs e)
+        {
+            Log.I("[{0}] 连接失败", Thread.CurrentThread.ManagedThreadId);
+        }
+
+        private void OnClose(object sender, CloseEventArgs e)
+        {
+            Log.I("[{0}] 连接断开", Thread.CurrentThread.ManagedThreadId);
+        }
+
+        private void OnMessage(object sender, MessageEventArgs e)
+        {
+            var ba = new ByteArray(e.RawData);
+            Log.I("[{0}] 服务器返回消息：{1}", Thread.CurrentThread.ManagedThreadId, ba.ReadStringBytes(ba.Available));
+        }
+
+        private void OnConnectSuccess(object sender, EventArgs e)
+        {
+            Log.I("[{0}] 连接成功", Thread.CurrentThread.ManagedThreadId);
         }
 
         void Send()
@@ -46,30 +67,8 @@ namespace ClientDemo
             ba.WriteStringBytes(DateTime.Now.ToFileTimeUtc().ToString());
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
-            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadStringBytes(ba.Available));
-        }
-
-        private void OnDisconnect(WebSocketClient e)
-        {
-            Log.I("连接断开");
-        }
-
-        private void OnReceiveProtocol(WebSocketClient client, byte[] obj)
-        {
-            var ba = new ByteArray(obj);
-            Log.I("服务器返回消息：{0}", ba.ReadStringBytes(ba.Available));
-        }
-
-        private void OnConnectSuccess(WebSocketClient e)
-        {
-            Log.I("连接成功");
-            //_client.SendData("hello");
-            //Send();
-        }
-
-        private void OnConnectFail(WebSocketClient e)
-        {
-            Log.I("连接失败");
+            
+            Log.CI(ConsoleColor.DarkMagenta, "[{1}] 发送消息:{0}", ba.ReadStringBytes(ba.Available), Thread.CurrentThread.ManagedThreadId);
         }
     }
 }
