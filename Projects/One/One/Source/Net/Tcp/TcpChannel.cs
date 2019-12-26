@@ -143,6 +143,12 @@ namespace One
                 //协议处理器处理协议数据
                 int used = UnpackProtocolData();
 
+                if(false == IsConnected)
+                {
+                    //处理协议中导致通道关闭了
+                    return;
+                }
+
                 if (used > 0)
                 {
                     _bufferAvailable = _bufferAvailable - used;
@@ -161,6 +167,7 @@ namespace One
             {
                 Close();
             }
+            
         }
 
         virtual protected int UnpackProtocolData()

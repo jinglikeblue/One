@@ -114,7 +114,7 @@ namespace One
                 case EOpcode.CONTINUE:
                 case EOpcode.PING:
                 case EOpcode.PONG:
-                case EOpcode.CLOSE:
+                case EOpcode.CLOSE:                    
                     //使用率低，暂不处理这种情况
                     onReceiveData?.Invoke(opcode, null);
                     break;
