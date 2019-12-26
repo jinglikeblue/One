@@ -60,7 +60,7 @@ namespace One
         /// <param name="port">监听的端口</param>
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(int port, int bufferSize)
-        {
+        {            
             Log.CI(ConsoleColor.DarkGreen, "Start Lisening {0}:{1}", IPAddress.Any, port);
 
             _bufferSize = bufferSize;

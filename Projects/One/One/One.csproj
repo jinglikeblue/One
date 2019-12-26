@@ -5,11 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Source\Net\WebSocket\WebSocketChannelcs" />
+    <Compile Remove="Source\Protocol\**" />
+    <EmbeddedResource Remove="Source\Protocol\**" />
+    <None Remove="Source\Protocol\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Source\Protocol\" />
+    <None Remove="Source\Net\WebSocket\WebSocketChannelcs" />
   </ItemGroup>
 
 </Project>

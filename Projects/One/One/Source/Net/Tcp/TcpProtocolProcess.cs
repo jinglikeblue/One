@@ -7,7 +7,7 @@ namespace One
     /// 协议处理器  
     /// 协议包结构为 | ushort：协议数据长度 | 协议数据 |
     /// </summary>
-    internal class TcpProtocolProcess : IProtocolProcess
+    internal class TcpProtocolProcess
     {
         /// <summary>
         /// 解包协议数据
