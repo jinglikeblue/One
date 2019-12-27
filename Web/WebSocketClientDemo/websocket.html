@@ -8,7 +8,8 @@
         var socket;  
         function Connect(){  
             try{  
-                socket=new WebSocket('ws://127.0.0.1:1875');  
+                var address = document.getElementById("inputHost").value;
+                socket=new WebSocket(address);  
             }catch(e){  
                 console.log('error');  
                 return;  
@@ -80,13 +81,15 @@
                 var tempSocket = new WebSocket(host);  
                 tempSocket.onopen = ()=>{
                     console.log("open");
-                    intervalId = setInterval(send2Server.bind(this), 1000, tempSocket, content);                    
+                    send2Server(tempSocket, content);
+                    // intervalId = setInterval(send2Server.bind(this), 1000, tempSocket, content);                    
                 };
                 tempSocket.onerror = (e)=>{
                     console.log("error " + e);
                 };
                 tempSocket.onmessage= (msg)=>{
                     console.log("msg");                    
+                    send2Server(tempSocket, content);
                 };
                 tempSocket.onclose= ()=>{
                     console.log("close");
@@ -103,7 +106,7 @@
    
 <body>  
 Host: 
-<input id="inputHost" type="text" value="ws://192.168.0.77:1875">  
+<input id="inputHost" type="text" value="ws://127.0.0.1:1875">  
 <button id="connect" onclick="Connect();">Connect</button>  
 <button id="close" onclick="Close();">Close</button>
 <p></p>
@@ -115,7 +118,7 @@ Message:
 <button id="send100frame" onclick="send100frame();">send100frame</button>
 <br/><p></p>
 压力测试:
-<input id="inputStreeTestingCount" type="text" value="250">  
+<input id="inputStreeTestingCount" type="text" value="10">  
 <button id="StreeTesting" onclick="StreeTesting();">StreeTesting</button>
 </body>  
    

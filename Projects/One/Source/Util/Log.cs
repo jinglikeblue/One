@@ -22,7 +22,8 @@ namespace One
 
         public static void LogLine(object message)
         {
-            Console.WriteLine("[Thread:{0}] [Date:{1}] {2}", Thread.CurrentThread.ManagedThreadId, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), message);
+            var now = DateTime.UtcNow;
+            Console.WriteLine("[Thread:{0}, Date:{1}, UTC:{2}] {3}", Thread.CurrentThread.ManagedThreadId.ToString("000"), now.ToString("yyyy-MM-dd HH:mm:ss"), now.ToFileTimeUtc() / 10000, message);
         }
 
         /// <summary>
