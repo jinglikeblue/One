@@ -15,11 +15,23 @@ namespace OneServer
             new Program();
         }
 
+        CoreModel _core;
+
         public Program()
         {
             try
             {
-                Startup();                
+                _core = Global.Ins.core;
+                new Thread(Startup).Start();
+                //while (false == _core.isExit)
+                //{
+                //    string input = Console.ReadLine();
+                //    if(input == "exit")
+                //    {
+                //        _core.isExit = true;
+                //    }
+                //    Log.I("指令:{0}", input);
+                //}
             }
             catch (Exception e)
             {
@@ -31,15 +43,20 @@ namespace OneServer
         {
             var settingsPath = "../../../Configs/settings.json";
             var content = File.ReadAllText(settingsPath);
-            Global.Ins.core.settings = LitJson.JsonMapper.ToObject<SettingsConfigVO>(content);
-            Global.Ins.core.server = new WebSocketServer(Global.Ins.core.settings.port);
+            _core.settings = LitJson.JsonMapper.ToObject<SettingsConfigVO>(content);
+            _core.server = new WebSocketServer(_core.settings.port);
 
-            Global.Ins.core.server.Start();
+            _core.server.Start();
 
-            while (true)
-            {
-                Global.Ins.core.SyncMainThreadActions();
-                Thread.Sleep(100);
+            _core.RegisterMainLogicLoop(new CheckCloseCommand());
+
+            while (false == _core.isExit)
+            {                
+                //执行同步的线程方法
+                _core.SyncMainThreadActions();
+                //执行主线程循环逻辑代码
+                _core.RunMainLogicLoop();
+                Thread.Sleep(_core.settings.mainLogicLoopIntervalMS);
             }
         }
     }

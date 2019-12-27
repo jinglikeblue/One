@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <StartupObject>OneServerDemo.Program</StartupObject>
+    <StartupObject></StartupObject>
     <RootNamespace>OneServer</RootNamespace>
   </PropertyGroup>
 
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="Libs\LitJson\" />
+    <Folder Include="Sources\Net\Receivers\" />
   </ItemGroup>
 
 </Project>

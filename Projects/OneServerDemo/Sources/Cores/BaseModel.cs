@@ -6,12 +6,6 @@ namespace OneServer
 {
     abstract class BaseModel
     {
-        public BaseModel()
-        {
-            OnInit();
-        }
-
-        protected abstract void OnInit();
-        protected abstract void OnDestroy();
+        protected abstract void Reset();
     }
 }

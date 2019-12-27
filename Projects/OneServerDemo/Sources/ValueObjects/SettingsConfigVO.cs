@@ -8,5 +8,6 @@ namespace OneServer
     {
         public string host;
         public int port;
+        public int mainLogicLoopIntervalMS;
     }
 }
