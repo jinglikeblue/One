@@ -68,7 +68,7 @@ namespace WebSocketClientDemo
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
 
-            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadStringBytes(ba.Available));
+            Log.I(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadStringBytes(ba.Available));
         }
     }
 }

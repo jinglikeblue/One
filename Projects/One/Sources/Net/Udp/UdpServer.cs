@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jing;
+using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -42,7 +43,7 @@ namespace One
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Bind(int localPort, ushort bufferSize)
         {
-            Log.CI(ConsoleColor.DarkGreen, "Bind Udp Lisening {0}:{1}", IPAddress.Any, localPort);           
+            Log.I(ConsoleColor.DarkGreen, "Bind Udp Lisening {0}:{1}", IPAddress.Any, localPort);           
 
             _listener = new UdpListener();
             _listener.onReceiveData += OnReceiveData;

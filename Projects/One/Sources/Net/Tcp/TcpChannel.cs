@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jing;
+using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
@@ -166,8 +167,7 @@ namespace One
             else
             {
                 Close();
-            }
-            
+            }            
         }
 
         virtual protected int UnpackProtocolData()

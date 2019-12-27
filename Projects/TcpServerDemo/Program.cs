@@ -18,7 +18,7 @@ namespace TcpServerDemo
         {
             new Thread(LogicThraed).Start();
 
-            Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
+            Log.I(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
             Console.ReadKey();
         }
 
@@ -32,7 +32,7 @@ namespace TcpServerDemo
             _tcpSrver.onClientExit += OnClientExit;
             _tcpSrver.Start(1875, 4096);
 
-            Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
+            Log.I(ConsoleColor.DarkGreen, "Logic Thread Start");
             int delay = 10;
             while (true)
             {

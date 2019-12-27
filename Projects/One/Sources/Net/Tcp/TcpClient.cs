@@ -1,42 +1,32 @@
-﻿using System;
+﻿using Jing;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace One
 {
-    public class WebSocketClient
+    public class TcpClient
     {
-        /// <summary>
-        /// 协议是否已升级
-        /// </summary>
-        public bool IsUpgrade { get; internal set; } = false;
-
-        /// <summary>
-        /// TCP连接（WebSocket其实就是基于Tcp连接的)
-        /// </summary>
-        public WebSocketChannel Channel { get; private set; }
-
         /// <summary>
         /// 连接成功事件(多线程事件）
         /// </summary>
-        public event Action<WebSocketClient> onConnectSuccess;
+        public event Action<TcpClient> onConnectSuccess;
 
         /// <summary>
         /// 连接断开事件(多线程事件）
         /// </summary>
-        public event Action<WebSocketClient> onDisconnect;
+        public event Action<TcpClient> onDisconnect;
 
         /// <summary>
         /// 连接失败事件(多线程事件）
         /// </summary>
-        public event Action<WebSocketClient> onConnectFail;
+        public event Action<TcpClient> onConnectFail;
 
         /// <summary>
         /// 收到数据
         /// </summary>
-        public event Action<WebSocketClient, byte[]> onReceiveData;
+        public event Action<TcpClient, byte[]> onReceiveData;
 
         /// <summary>
         /// 主机地址
@@ -52,6 +42,11 @@ namespace One
         /// 缓冲区大小
         /// </summary>
         public ushort BufferSize { get; private set; }
+
+        /// <summary>
+        /// 通信通道
+        /// </summary>
+        public TcpChannel Channel { get; private set; }
 
         /// <summary>
         /// 线程同步器，将异步方法同步到调用Refresh的线程中
@@ -71,7 +66,7 @@ namespace One
         {
             get
             {
-                if (Channel != null && Channel.IsConnected && Channel.IsUpgrade)
+                if (Channel != null && Channel.IsConnected)
                 {
                     return true;
                 }
@@ -79,9 +74,9 @@ namespace One
             }
         }
 
-        public WebSocketClient()
+        public TcpClient()
         {
-            
+
         }
 
         /// <summary>
@@ -127,6 +122,7 @@ namespace One
         /// <summary>
         /// 断开客户端连接
         /// </summary>
+        /// <param name="isSilently">如果为true，则不会触发任何事件</param>
         public void Close(bool isSilently = false)
         {
             if (null != _connectEA)
@@ -149,10 +145,7 @@ namespace One
         /// <param name="bytes"></param>
         public virtual void Send(byte[] bytes)
         {
-            if (Channel.IsUpgrade)
-            {
-                Channel.Send(bytes);
-            }
+            Channel.Send(bytes);
         }
 
         /// <summary>
@@ -178,28 +171,15 @@ namespace One
                 return;
             }
 
-            InitChannel(e.ConnectSocket, BufferSize);            
+            InitChannel(e.ConnectSocket, BufferSize);
+            onConnectSuccess?.Invoke(this);
         }
 
         void InitChannel(Socket socket, int bufferSize)
         {
-            Channel = new WebSocketChannel(socket, bufferSize);
+            Channel = new TcpChannel(socket, bufferSize);
             Channel.onReceiveData += OnReceiveData;
             Channel.onShutdown += OnShutdown;
-            Channel.onUpgradeResult += OnUpgradeResult;
-            Channel.RequestUpgrade();
-        }
-
-        private void OnUpgradeResult(WebSocketChannel channel, bool success)
-        {
-            if(true == success)
-            {
-                onConnectSuccess?.Invoke(this);
-            }
-            else
-            {
-                onConnectFail?.Invoke(this);
-            }
         }
 
         private void OnReceiveData(IChannel sender, byte[] data)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jing;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -62,7 +63,7 @@ namespace One
         /// <param name="bufferSize">每一个连接的缓冲区大小</param>
         public void Start(int port, int bufferSize)
         {
-            Log.CI(ConsoleColor.DarkGreen, "Tcp Server Start! Lisening {0}:{1}", IPAddress.Any, port);
+            Log.I(ConsoleColor.DarkGreen, "Tcp Server Start! Lisening {0}:{1}", IPAddress.Any, port);
 
             _bufferSize = bufferSize;
             _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);

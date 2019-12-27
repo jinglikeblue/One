@@ -31,7 +31,7 @@ namespace UdpServerDemo
             _server.onReceiveData += OnReceiveData;
             _server.Bind(1875, 4096);
 
-            Log.CI(ConsoleColor.DarkGreen, "Logic Thread Start");
+            Log.I(ConsoleColor.DarkGreen, "Logic Thread Start");
 
             int delay = 10;
             while (true)

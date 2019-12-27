@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{EF1829E6-CBEA-4332-BE73-B3B757F729F9}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientDemos", "ClientDemos", "{6487E706-E636-40E5-AC77-940952F7857B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServerDemos", "ServerDemos", "{E8DED894-63E3-4766-94DC-83D86270B698}"
@@ -22,6 +20,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpServerDemo", "Projects\UdpServerDemo\UdpServerDemo.csproj", "{85A10EB9-C4BD-415E-A798-9DE9358B1735}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServerDemo", "Projects\WebSocketServerDemo\WebSocketServerDemo.csproj", "{59C26488-BFB7-47BE-98F3-3653884FD2BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneServerDemo", "Projects\OneServerDemo\OneServerDemo.csproj", "{B3AFEFAF-C44A-43B1-994B-992B29954C46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JingLibrary", "Projects\JingLibrary\JingLibrary.csproj", "{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,12 +59,19 @@ Global
 		{59C26488-BFB7-47BE-98F3-3653884FD2BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59C26488-BFB7-47BE-98F3-3653884FD2BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59C26488-BFB7-47BE-98F3-3653884FD2BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3AFEFAF-C44A-43B1-994B-992B29954C46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3AFEFAF-C44A-43B1-994B-992B29954C46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3AFEFAF-C44A-43B1-994B-992B29954C46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3AFEFAF-C44A-43B1-994B-992B29954C46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{ECE329B6-E5B3-44A9-BFC0-86280DA6B659} = {EF1829E6-CBEA-4332-BE73-B3B757F729F9}
 		{861E93F5-F11E-4D06-812F-AB6E781FE16F} = {6487E706-E636-40E5-AC77-940952F7857B}
 		{CAA16ED5-478F-4F54-87CD-DC6CC58AFBA4} = {6487E706-E636-40E5-AC77-940952F7857B}
 		{D18BDE11-E605-48B4-9DDD-48A517BF540F} = {6487E706-E636-40E5-AC77-940952F7857B}

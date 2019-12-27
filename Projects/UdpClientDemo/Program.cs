@@ -40,7 +40,7 @@ namespace UdpClientDemo
             ba.Write(DateTime.Now.ToFileTimeUtc().ToString());
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
-            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
+            Log.I(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
         }
 
         private void OnReceiveEvent(UdpClient sender, byte[] data)

@@ -58,7 +58,7 @@ namespace One
         /// </summary>
         /// <param name="color"></param>
         /// <param name="message"></param>
-        public static void CI(ConsoleColor color, object message)
+        public static void I(ConsoleColor color, object message)
         {
             if (logLevel < ELogLevel.INFO)
             {
@@ -73,7 +73,7 @@ namespace One
         /// </summary>
         /// <param name="color"></param>
         /// <param name="message"></param>
-        public static void CI(ConsoleColor color, string format, params object[] args)
+        public static void I(ConsoleColor color, string format, params object[] args)
         {
             if (logLevel < ELogLevel.INFO)
             {
@@ -161,7 +161,7 @@ namespace One
             var old = Console.ForegroundColor;
             Console.ForegroundColor = color;
             var s = string.Format(format, args);
-            LogLine(s);
+            LogLine(s);            
             Console.ForegroundColor = old;
         }
     }

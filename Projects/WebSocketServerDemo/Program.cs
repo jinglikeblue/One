@@ -1,6 +1,5 @@
-﻿using System;
-using System.Threading;
-using WebSocketSharp.Server;
+﻿using One;
+using System;
 
 namespace WebSocketServerDemo
 {
@@ -16,12 +15,13 @@ namespace WebSocketServerDemo
         public Program()
         {
 
-            _server = new WebSocketServer("ws://0.0.0.0:1875");
-            //_server.WaitTime = new TimeSpan(100);
-            _server.AddWebSocketService<Echo>("/");
+            _server = new WebSocketServer(1875);
+            //_server.RegisterSeesionType();
+            //_server.AddWebSocketService<Echo>("/");
+            _server.AddReceiverType(typeof(DataReceiver));
             _server.Start();
-
-            One.Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
+            
+            One.Log.I(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
             Console.ReadKey();
         }
     }

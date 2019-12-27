@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text;
 
-namespace One
+namespace Jing
 {
     /// <summary>
     /// 字节数组操作

@@ -1,17 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Source\Protocol\**" />
-    <EmbeddedResource Remove="Source\Protocol\**" />
-    <None Remove="Source\Protocol\**" />
+    <Compile Remove="Sources\Protocol\**" />
+    <EmbeddedResource Remove="Sources\Protocol\**" />
+    <None Remove="Sources\Protocol\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Source\Net\WebSocket\WebSocketChannelcs" />
+    <None Remove="Sources\Net\WebSocket\WebSocketChannelcs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JingLibrary\JingLibrary.csproj" />
   </ItemGroup>
 
 </Project>

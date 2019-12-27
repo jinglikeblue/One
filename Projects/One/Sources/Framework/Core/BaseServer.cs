@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace One
+{
+    /// <summary>
+    /// 服务器基类
+    /// </summary>
+    public abstract class BaseServer
+    {       
+        public Type sessionType { get; private set; }
+
+        public SessionCenter sessions { get; private set; } = new SessionCenter();
+
+        List<Type> _receiverTypeList = new List<Type>();        
+
+        /// <summary>
+        /// 启动服务
+        /// </summary>
+        public abstract void Start();
+
+        /// <summary>
+        /// 停止服务
+        /// </summary>
+        public abstract void Stop();
+
+        /// <summary>
+        /// 注册Session的类型
+        /// </summary>
+        /// <param name="sessionType"></param>
+        public void RegisterSeesionType(Type sessionType)
+        {
+            this.sessionType = sessionType;
+        }
+
+        /// <summary>
+        /// 注册接收器类型
+        /// </summary>
+        /// <param name="receiverType"></param>
+        public void AddReceiverType(Type receiverType)
+        {
+            _receiverTypeList.Add(receiverType);
+        }
+    }
+}

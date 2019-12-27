@@ -50,7 +50,7 @@ namespace TcpClientDemo
             var last = ba.ReadString();
             long now = DateTime.Now.ToFileTimeUtc();
 
-            Log.CI(ConsoleColor.DarkYellow, "收到消息:{0}", last);
+            Log.I(ConsoleColor.DarkYellow, "收到消息:{0}", last);
         }
 
         private void OnConnectSuccess(TcpClient client)
@@ -65,7 +65,7 @@ namespace TcpClientDemo
             ba.Write(DateTime.Now.ToFileTimeUtc().ToString());
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
-            Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
+            Log.I(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
         }
 
         private void OnConnectFail(TcpClient client)
