@@ -49,7 +49,13 @@ namespace OneServer
             _core.server.RegisterSeesionType(typeof(Session));
             _core.server.Start();
 
-            Log.I(ConsoleColor.DarkGreen, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
+            if(_core.settings.logOutputEnable > 0)
+            {
+                Log.isConsoleOutput = false;
+                Log.UseLogFile(_core.settings.logOutputDir, _core.settings.logKeepDays);
+            }
+
+            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             _core.RegisterMainLogicLoop(new CheckCloseCommand());
 

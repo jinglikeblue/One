@@ -1,5 +1,6 @@
 ﻿using Jing;
 using One;
+using System;
 
 namespace OneServer
 {
@@ -7,7 +8,7 @@ namespace OneServer
     {
         protected override void OnClose()
         {
-            Log.I("连接关闭：{0}", id);
+            Log.I(ConsoleColor.DarkCyan, "连接关闭：{0}", id);
         }
 
         protected override void OnError()
@@ -32,7 +33,7 @@ namespace OneServer
 
         protected override void OnOpen()
         {
-            Log.I("建立连接：{0}", id);
+            Log.I(ConsoleColor.DarkMagenta, "建立连接：{0}", id);
         }
     }
 }
