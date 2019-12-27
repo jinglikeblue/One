@@ -2,20 +2,20 @@
 using System;
 using System.Threading;
 
-namespace ServerDemo
+namespace WebSocketServerDemo
 {
-    class WebSocketServerDemo
+    class Program
     {
-        WebSocketServer _server;
-
-        public static void Main(string[] args)
-        {           
+        static void Main(string[] args)
+        {
             ByteArray.defaultBufferSize = 4096;
-            new WebSocketServerDemo();
+            new Program();
         }
 
-        public WebSocketServerDemo()
-        {           
+        WebSocketServer _server;
+
+        public Program()
+        {
 
             new Thread(LogicThraed).Start();
 
@@ -59,14 +59,5 @@ namespace ServerDemo
             Log.I("收到消息：{0}", ba.ReadStringBytes(ba.Available));
             remoteProxy.Send(data);
         }
-
-
-
-        //private void OnReceiveData(byte[] data)
-        //{
-        //    //收到的数据原路返回(Test)
-
-        //    (sender as WebSocketRemoteProxy).SendData(data);
-        //}
     }
 }

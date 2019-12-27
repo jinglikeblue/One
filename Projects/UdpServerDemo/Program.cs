@@ -3,19 +3,19 @@ using System;
 using System.Net;
 using System.Threading;
 
-namespace ServerDemo
+namespace UdpServerDemo
 {
-    public class UdpServerDemo
+    class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             ByteArray.defaultBufferSize = 4096;
-            new UdpServerDemo();
+            new Program();
         }
 
         private UdpServer _server;
 
-        public UdpServerDemo()
+        public Program()
         {
             new Thread(LogicThraed).Start();
 
@@ -49,13 +49,13 @@ namespace ServerDemo
             Log.I("收到数据:{0}", ba.ReadString());
 
             ba.Reset();
-            ba.Write("I Got It");            
+            ba.Write("I Got It");
 
-            if(null == sendChannel)
+            if (null == sendChannel)
             {
                 sendChannel = _server.CreateSendChannel(ep);
             }
-            
+
             sendChannel.Send(ba.GetAvailableBytes());
 
             //server.Send(ba.GetAvailableBytes());

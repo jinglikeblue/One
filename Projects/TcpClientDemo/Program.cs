@@ -2,21 +2,23 @@
 using System;
 using System.Threading;
 
-namespace ClientDemo
+namespace TcpClientDemo
 {
-    class TcpClientDemo
+    class Program
     {
         static void Main(string[] args)
         {
             for (int i = 0; i < 3; i++)
             {
-                new TcpClientDemo();
+                new Program();
             }
-        }
-        
-        TcpClient _client;        
 
-        public TcpClientDemo()
+            Console.ReadKey();
+        }
+
+        TcpClient _client;
+
+        public Program()
         {
             _client = new TcpClient();
             _client.onConnectSuccess += OnConnectSuccess;
@@ -25,16 +27,16 @@ namespace ClientDemo
             _client.onConnectFail += OnConnectFail;
             _client.Connect("127.0.0.1", 1875, 4096);
 
-            
+
             while (true)
             {
                 _client.Refresh();
                 if (_client.IsConnected)
-                {                    
+                {
                     Send();
                 }
                 Thread.Sleep(1000);
-            }            
+            }
         }
 
         private void OnDisconnect(TcpClient e)
@@ -48,7 +50,7 @@ namespace ClientDemo
             var last = ba.ReadString();
             long now = DateTime.Now.ToFileTimeUtc();
 
-            Log.CI(ConsoleColor.DarkYellow, "收到消息:{0}", last);            
+            Log.CI(ConsoleColor.DarkYellow, "收到消息:{0}", last);
         }
 
         private void OnConnectSuccess(TcpClient client)
@@ -60,7 +62,7 @@ namespace ClientDemo
         void Send()
         {
             ByteArray ba = new ByteArray();
-            ba.Write(DateTime.Now.ToFileTimeUtc().ToString());            
+            ba.Write(DateTime.Now.ToFileTimeUtc().ToString());
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
             Log.CI(ConsoleColor.DarkMagenta, "发送消息:{0}", ba.ReadString());
@@ -70,7 +72,5 @@ namespace ClientDemo
         {
             Log.I("连接失败");
         }
-
-
     }
 }

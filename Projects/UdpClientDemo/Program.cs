@@ -3,15 +3,15 @@ using System;
 using System.Text;
 using System.Threading;
 
-namespace ClientDemo
+namespace UdpClientDemo
 {
-    class UdpClientDemo
+    class Program
     {
         static void Main(string[] args)
         {
             for (int i = 0; i < 1; i++)
             {
-                new UdpClientDemo();
+                new Program();
             }
 
             Console.ReadKey();
@@ -19,9 +19,9 @@ namespace ClientDemo
 
         UdpClient _client;
 
-        public UdpClientDemo()
-        {            
-            var client = new UdpClient();            
+        public Program()
+        {
+            var client = new UdpClient();
             _client = client;
             _client.onReceiveData += OnReceiveEvent;
             _client.Bind("127.0.0.1", 1875, 1874, 4096);
@@ -29,7 +29,7 @@ namespace ClientDemo
             while (true)
             {
                 _client.Refresh();
-                Send();                
+                Send();
                 Thread.Sleep(1000);
             }
         }
@@ -46,7 +46,7 @@ namespace ClientDemo
         private void OnReceiveEvent(UdpClient sender, byte[] data)
         {
             ByteArray ba = new ByteArray(data);
-            Log.I("服务器返回消息：{0}", ba.ReadString());            
+            Log.I("服务器返回消息：{0}", ba.ReadString());
         }
     }
 }

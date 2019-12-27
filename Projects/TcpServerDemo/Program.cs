@@ -2,26 +2,26 @@
 using System;
 using System.Threading;
 
-namespace ServerDemo
+namespace TcpServerDemo
 {
-    class TcpServerDemo
+    class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             ByteArray.defaultBufferSize = 4096;
-            new TcpServerDemo();
+            new Program();
         }
 
         TcpServer _tcpSrver;
 
-        public TcpServerDemo()
-        {            
+        public Program()
+        {
             new Thread(LogicThraed).Start();
 
-            Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process...."); 
-            Console.ReadKey();            
+            Log.CI(ConsoleColor.DarkGreen, "Press any key to terminate the server process....");
+            Console.ReadKey();
         }
-        
+
         /// <summary>
         /// 逻辑线程
         /// </summary>

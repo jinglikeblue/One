@@ -4,24 +4,24 @@ using System.Text;
 using System.Threading;
 using WebSocketSharp;
 
-namespace ClientDemo
+namespace WebSocketClientDemo
 {
-    class WebSocketClientDemo
+    class Program
     {
         static void Main(string[] args)
         {
             for (int i = 0; i < 1; i++)
             {
-                new WebSocketClientDemo();
+                new Program();
             }
 
             Console.ReadKey();
         }
 
         WebSocket _client;
-        
 
-        public WebSocketClientDemo()
+
+        public Program()
         {
             _client = new WebSocket("ws://127.0.0.1:1875");
             _client.OnOpen += OnConnectSuccess;
@@ -31,9 +31,9 @@ namespace ClientDemo
             _client.Connect();
 
             while (true)
-            {                                
+            {
                 if (_client.IsAlive)
-                {                                       
+                {
                     Send();
                 }
                 Thread.Sleep(1000);
@@ -67,7 +67,7 @@ namespace ClientDemo
             ba.WriteStringBytes(DateTime.Now.ToFileTimeUtc().ToString());
             _client.Send(ba.GetAvailableBytes());
             ba.SetPos(0);
-            
+
             Log.CI(ConsoleColor.DarkMagenta, "[{1}] 发送消息:{0}", ba.ReadStringBytes(ba.Available), Thread.CurrentThread.ManagedThreadId);
         }
     }

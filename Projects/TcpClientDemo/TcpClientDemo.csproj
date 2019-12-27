@@ -1,13 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <StartupObject>ClientDemo.TcpClientDemo</StartupObject>    
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\One\One\One.csproj" />
+    <ProjectReference Include="..\One\One.csproj" />
   </ItemGroup>
 
 </Project>
