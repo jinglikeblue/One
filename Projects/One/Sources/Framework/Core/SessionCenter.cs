@@ -9,9 +9,14 @@ namespace One
     /// </summary>
     public class SessionCenter
     {
-        Type sessionType;
+        public Type sessionType { get; private set; }
 
         Dictionary<string, BaseSession> _sessionDic = new Dictionary<string, BaseSession>();
+
+        public SessionCenter(Type sessionType)
+        {
+            this.sessionType = sessionType;
+        }
 
         /// <summary>
         /// 创建一个ID

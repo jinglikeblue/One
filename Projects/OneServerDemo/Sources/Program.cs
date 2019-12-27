@@ -45,8 +45,11 @@ namespace OneServer
             var content = File.ReadAllText(settingsPath);
             _core.settings = LitJson.JsonMapper.ToObject<SettingsConfigVO>(content);
             _core.server = new WebSocketServer(_core.settings.port);
-
+            //注册连接Session类型
+            _core.server.RegisterSeesionType(typeof(Session));
             _core.server.Start();
+
+            Log.I(ConsoleColor.DarkGreen, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             _core.RegisterMainLogicLoop(new CheckCloseCommand());
 

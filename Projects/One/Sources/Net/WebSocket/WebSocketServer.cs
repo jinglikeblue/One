@@ -10,21 +10,31 @@
 
         WebSocketSharp.Server.WebSocketServer _server;
 
+        public string host { get; private set; } = "0.0.0.0";
+        public int port { get; private set; }
+        public string Url
+        {
+            get
+            {
+                return string.Format("ws://{0}:{1}", host, port);
+            }
+        }
+
         public WebSocketServer(int port)
         {
-            current = this;            
+            current = this;
+            this.port = port;
 
-            var url = string.Format("ws://0.0.0.0:{0}", port);
-            _server = new WebSocketSharp.Server.WebSocketServer(url);                  
+            _server = new WebSocketSharp.Server.WebSocketServer(Url);
             _server.Log.Level = WebSocketSharp.LogLevel.Error;
             _server.AddWebSocketService<RootBehavior>("/");
-            
+
             RegisterSeesionType(typeof(WebSocketSession));
         }
 
         public override void Start()
         {
-            _server.Start();            
+            _server.Start();
         }
 
         public override void Stop()

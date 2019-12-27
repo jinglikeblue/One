@@ -8,12 +8,22 @@ namespace One
     /// 服务器基类
     /// </summary>
     public abstract class BaseServer
-    {       
-        public Type sessionType { get; private set; }
+    {
+        public Type sessionType
+        {
+            get
+            {
+                if(null == sessions)
+                {
+                    throw new Exception("Please RegisterSeesionType");
+                }
+                return sessions.sessionType;
+            }
+        }
 
-        public SessionCenter sessions { get; private set; } = new SessionCenter();
+        public SessionCenter sessions { get; private set; }
 
-        List<Type> _receiverTypeList = new List<Type>();        
+        List<Type> _receiverTypeList = new List<Type>();
 
         /// <summary>
         /// 启动服务
@@ -31,7 +41,7 @@ namespace One
         /// <param name="sessionType"></param>
         public void RegisterSeesionType(Type sessionType)
         {
-            this.sessionType = sessionType;
+            sessions = new SessionCenter(sessionType);            
         }
 
         /// <summary>
