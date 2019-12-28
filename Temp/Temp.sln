@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29209.62
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisDemo", "RedisDemo\RedisDemo.csproj", "{EF3F1B3B-D144-43CE-9613-73E2BD26EA23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JingLibrary", "..\Projects\JingLibrary\JingLibrary.csproj", "{CBEBA8CB-5334-4AD3-813D-20A3BD3CA452}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF3F1B3B-D144-43CE-9613-73E2BD26EA23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF3F1B3B-D144-43CE-9613-73E2BD26EA23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF3F1B3B-D144-43CE-9613-73E2BD26EA23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF3F1B3B-D144-43CE-9613-73E2BD26EA23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBEBA8CB-5334-4AD3-813D-20A3BD3CA452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBEBA8CB-5334-4AD3-813D-20A3BD3CA452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBEBA8CB-5334-4AD3-813D-20A3BD3CA452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBEBA8CB-5334-4AD3-813D-20A3BD3CA452}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F0237379-7444-4E7B-A61F-CF44A7ACCA37}
+	EndGlobalSection
+EndGlobal
