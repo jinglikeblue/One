@@ -4,7 +4,7 @@ using WebSocketSharp.Server;
 
 namespace One
 {
-    class RootBehavior : WebSocketBehavior
+    public class RootBehavior : WebSocketBehavior
     {
         public event Action onClose;
         public event Action onError;

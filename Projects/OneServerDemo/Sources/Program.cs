@@ -42,7 +42,8 @@ namespace OneServer
             _core.server = new WebSocketServer(_core.settings.port);            
             _core.server.RegisterSeesionType(typeof(Session));
             _core.server.Start();
-            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);
+            new RegisterReceiversCommand().Excute();
+            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             //日志控制
             Log.isConsoleOutput = _core.settings.logConsoleEnable;
@@ -54,7 +55,13 @@ namespace OneServer
             RegisterMainLogicLoopCommand();
 
             //redis初始化
-            RedisMgr.Ins.Connect();            
+            RedisMgr.Ins.Connect();
+
+            //执行测试代码 
+            new Tests.TestMain();
+
+            //全局异常捕获
+            AppDomain.CurrentDomain.UnhandledException += OnException;
 
             //如果服务器没有收到关闭信号，则一直执行
             while (false == _core.isExit)
@@ -65,9 +72,12 @@ namespace OneServer
                 _core.RunMainLogicLoop();
                 Thread.Sleep(_core.settings.mainLogicLoopIntervalMS);
             }
+        }
 
-            //执行测试代码 
-            new Tests.TestMain();
+        private void OnException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Log.E("捕获到异常:");
+            Log.E(e.ToString());
         }
 
         /// <summary>
@@ -76,6 +86,6 @@ namespace OneServer
         void RegisterMainLogicLoopCommand()
         {            
             _core.RegisterMainLogicLoop(new CheckCloseCommand());
-        }
+        }        
     }
 }

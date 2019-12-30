@@ -9,10 +9,9 @@ namespace OneServer
 {
     class LoginRequestReceiver : BaseMessageReceiver<LoginRequestVO>
     {
-        public override bool OnReceive(BaseSession session, LoginRequestVO msg)
-        {
-            Log.I("收到协议:" + JsonConvert.SerializeObject(msg));            
-            return true;
+        protected override void OnReceive(BaseSession session, long requestId, LoginRequestVO data)
+        {            
+            Log.I("收到协议:" + JsonConvert.SerializeObject(data));            
         }
     }
 }

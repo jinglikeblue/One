@@ -18,6 +18,7 @@ namespace OneServer
         public WebSocketServer server;
 
         ThreadSyncActions _tsa;
+
         List<IMainLoopLogic> _mainLoopLogicList;
 
         public bool isExit = false;
