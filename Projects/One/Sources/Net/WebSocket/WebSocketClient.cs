@@ -95,6 +95,7 @@ namespace One
             _socket.OnClose += OnClose;
             _socket.OnError += OnError;
             _socket.OnMessage += OnMessage;
+            _socket.Connect();
         }
 
         private void OnOpen(object sender, EventArgs e)

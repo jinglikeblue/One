@@ -48,7 +48,7 @@ namespace OneClient
             var msgInfo = msgInfoTable.GetMsgInfo(mp.id);
             if (null != msgInfo)
             {
-                Log.I("收到协议: {0}({1}) \r\n {2}", mp.id, msgInfo.name, mp.content);
+                Log.I("收到协议: [0]{1} \r\n {2}", mp.id, msgInfo.name, mp.content);
 
                 var dataObj = JsonConvert.DeserializeObject(mp.content, msgInfo.dataType);
                 var receiverIns = Activator.CreateInstance(msgInfo.receiverType);
@@ -78,9 +78,9 @@ namespace OneClient
             mp.id = msgInfo.id;
             mp.requestId = _requestId++;
             mp.content = JsonConvert.SerializeObject(data);
-            string msg = JsonConvert.SerializeObject(mp);
-
-            Log.I("发送协议: {0}({1}) \r\n {2}", msgInfo.id, msgInfo.name, mp.content);
+            string msg = JsonConvert.SerializeObject(mp);            
+                
+            Log.I("发送协议: [{0}]{1} \r\n {2}", msgInfo.id, msgInfo.name, mp.content);
 
             ws.Send(msg);
         }

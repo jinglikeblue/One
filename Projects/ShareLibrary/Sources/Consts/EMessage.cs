@@ -12,6 +12,7 @@ namespace Share
     public enum EC2S
     {
         //请求部分
+        START_FLAG = 0,
         PING,        
         LOGIN_REQUEST,
     }
@@ -19,6 +20,7 @@ namespace Share
     public enum ES2C
     {
         //响应部分
+        START_FLAG = 1000,
         PONG,
         LOGIN_RESPONSE,
 

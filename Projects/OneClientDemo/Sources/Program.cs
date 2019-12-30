@@ -14,8 +14,10 @@ namespace OneClient
         public Program()
         {
             new InitMsgInfoTableCommand().Excute();
-            Global.Ins.net.ws.Connect("127.0.0.1", 1875);
             Global.Ins.net.ws.onOpen += OnOpen;
+            Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
+
+            Console.ReadKey();
         }
 
         private static void OnOpen()
@@ -24,7 +26,7 @@ namespace OneClient
             vo.deviceId = "a";
             vo.account = "tester";
             vo.pwd = "hello";
-            Global.Ins.net.ws.Send(vo);
+            Global.Ins.net.Send(vo);
         }
     }
 }

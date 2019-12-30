@@ -58,7 +58,7 @@ namespace OneServer
             RedisMgr.Ins.Connect();
 
             //执行测试代码 
-            new Tests.TestMain();
+            //new Tests.TestMain();
 
             //全局异常捕获
             AppDomain.CurrentDomain.UnhandledException += OnException;

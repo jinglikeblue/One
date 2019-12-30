@@ -11,7 +11,10 @@ namespace OneServer
     {
         protected override void OnReceive(BaseSession session, long requestId, LoginRequestVO data)
         {            
-            Log.I("收到协议:" + JsonConvert.SerializeObject(data));            
+            Log.I("收到协议:" + JsonConvert.SerializeObject(data));
+            var vo = new LoginResponseVO();
+            vo.nickname = "fuck";
+            session.Send(vo);
         }
     }
 }

@@ -30,24 +30,26 @@ namespace OneClient
                 RegisterDataTypeToMsgId(type);
             }
 
-            MsgInfoTable table = new MsgInfoTable();
+            MsgInfoTable table = Global.Ins.net.msgInfoTable;
             //构建协议映射表
             foreach (var kv in _dataTypeToMsgAtt)
             {
+                var vo = new MsgInfoVO();
+                vo.id = kv.Value.id;
+                vo.name = kv.Value.name;
+                vo.dataType = kv.Key;
+
                 if (_dataTypeToReceiverType.ContainsKey(kv.Key))
                 {
-                    var vo = new MsgInfoVO();
-                    vo.id = kv.Value.id;
-                    vo.name = kv.Value.name;
-                    vo.dataType = kv.Key;
                     vo.receiverType = _dataTypeToReceiverType[kv.Key];
-                    vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);
-                    table.AddMsgInfo(vo);
+                    vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);                 
                 }
                 else
                 {
                     Log.E("协议[{0}]没有对应的Receiver", kv.Value.name);
                 }
+
+                table.AddMsgInfo(vo);
             }
             onCreated?.Invoke(table);
         }
