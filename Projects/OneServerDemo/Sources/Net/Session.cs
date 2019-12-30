@@ -38,6 +38,12 @@ namespace OneServer
             Log.I("收到协议: {0}({1}) \r\n {2}", mp.id, "", mp.content);
 
             //创建对应的Receiver对象
+
+            var msgInfo = Global.Ins.core.msgInfoTable.GetMsgInfo(mp.id);
+            var dataObj = JsonConvert.DeserializeObject(mp.content, msgInfo.dataType);
+            var receiverIns = Activator.CreateInstance(msgInfo.receiverType);
+            msgInfo.receiveMethodInfo.Invoke(receiverIns, new object[] { this, mp.requestId, dataObj });
+
             //IMessageReceiver receiver = null;
             //Type dataType = null;// receiver.GetDataType();
             //var dataObj = JsonConvert.DeserializeObject(mp.content, dataType);

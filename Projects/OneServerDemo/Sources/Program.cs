@@ -42,7 +42,7 @@ namespace OneServer
             _core.server = new WebSocketServer(_core.settings.port);            
             _core.server.RegisterSeesionType(typeof(Session));
             _core.server.Start();
-            new RegisterReceiversCommand().Excute();
+            new InitMsgInfoTableCommand().Excute();
             Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             //日志控制

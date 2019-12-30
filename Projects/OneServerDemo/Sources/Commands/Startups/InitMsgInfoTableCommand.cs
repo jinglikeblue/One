@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using One;
 using Share;
 
 namespace OneServer
@@ -9,28 +10,46 @@ namespace OneServer
     /// <summary>
     /// 注册协议接收器
     /// </summary>
-    class RegisterReceiversCommand : BaseCommand
+    class InitMsgInfoTableCommand : BaseCommand
     {
         static readonly Type baseReceiverType = typeof(BaseMessageReceiver<>);
 
         Dictionary<Type, Type> _dataTypeToReceiverType = new Dictionary<Type, Type>();
-        Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();        
+        Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();                 
 
         public override void Excute()
         {                     
             var allTypes = baseReceiverType.Assembly.GetTypes();
-
             foreach (var type in allTypes)
             {
                 RegisterDataTypeToReceiverType(type);
+            }
+
+            var shareTypes = typeof(MsgAttribute).Assembly.GetTypes();
+            foreach (var type in shareTypes)
+            {                
                 RegisterDataTypeToMsgId(type);
             }
 
-
-
-            //找到所有的协议数据对象
-
-            //确定泛型数据类型和协议数据对象一致的，拿到协议ID，建立映射
+            MsgInfoTable table = Global.Ins.core.msgInfoTable;
+            //构建协议映射表
+            foreach (var kv in _dataTypeToMsgAtt)
+            {
+                if (_dataTypeToReceiverType.ContainsKey(kv.Key))
+                {
+                    var vo = new MsgInfoVO();
+                    vo.id = kv.Value.id;
+                    vo.name = kv.Value.name;
+                    vo.dataType = kv.Key;
+                    vo.receiverType = _dataTypeToReceiverType[kv.Key];
+                    vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);
+                    table.AddMsgInfo(vo);                    
+                }
+                else
+                {
+                    Log.E("协议[{0}]没有对应的Receiver", kv.Value.name);
+                }
+            }
         }
 
         /// <summary>
@@ -48,7 +67,7 @@ namespace OneServer
             {
                 var getDataTypeMethod = type.BaseType.GetMethod("GetDataType", BindingFlags.Static | BindingFlags.Public);
                 var dataType = getDataTypeMethod.Invoke(null, null);
-                _dataTypeToReceiverType[type] = (Type)dataType;
+                _dataTypeToReceiverType[(Type)dataType] = type;
             }
         }
 

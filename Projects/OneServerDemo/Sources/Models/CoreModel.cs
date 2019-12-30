@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Jing;
+using Share;
 
 namespace OneServer
 {
@@ -22,6 +23,11 @@ namespace OneServer
         List<IMainLoopLogic> _mainLoopLogicList;
 
         public bool isExit = false;
+
+        /// <summary>
+        /// 协议信息表
+        /// </summary>
+        public MsgInfoTable msgInfoTable { get; private set; } = new MsgInfoTable();
 
         public CoreModel()
         {

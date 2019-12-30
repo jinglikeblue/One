@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 
 namespace Share
 {
     /// <summary>
     /// 协议信息数据
     /// </summary>
-    class MsgInfoVO
+    public class MsgInfoVO
     {
         /// <summary>
         /// 协议ID
@@ -28,5 +27,10 @@ namespace Share
         /// 接收器类型
         /// </summary>
         public Type receiverType;
+
+        /// <summary>
+        /// 接收器的接收方法
+        /// </summary>
+        public MethodInfo receiveMethodInfo;
     }
 }

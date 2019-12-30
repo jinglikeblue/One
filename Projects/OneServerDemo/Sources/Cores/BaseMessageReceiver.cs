@@ -14,6 +14,11 @@ namespace OneServer
             return typeof(Data);
         }
 
+        public static void Create()
+        {
+            
+        }
+
         /// <summary>
         /// 收到协议
         /// </summary>
