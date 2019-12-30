@@ -9,16 +9,20 @@ namespace Share
         S2C,
     }
 
-
     public enum EC2S
     {
-        PING,
-        LOGIN_REQUEST
+        //请求部分
+        PING,        
+        LOGIN_REQUEST,
     }
 
     public enum ES2C
     {
+        //响应部分
         PONG,
-        LOGIN_RESPONSE
+        LOGIN_RESPONSE,
+
+        //推送部分
+        UTC_PUSH,
     }
 }

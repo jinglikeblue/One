@@ -1,4 +1,5 @@
 ﻿using Jing;
+using Newtonsoft.Json;
 using One;
 using Share;
 using System;
@@ -42,14 +43,24 @@ namespace OneServer
         public override void Send(object data)
         {
             var dataType = data.GetType();
-            var atts = dataType.GetCustomAttributes(_msgAtt, false);
-            if(atts.Length == 0)
+            MsgAttribute att;
+            try
             {
-                throw new Exception($"{dataType.FullName} 不是一个协议数据对象");
+                att = (MsgAttribute)dataType.GetCustomAttributes(_msgAtt, false)[0];
             }
-            var msgId = (atts[0] as MsgAttribute).id;
+            catch(Exception e)
+            {
+                throw new Exception($"{dataType.FullName} 不是一个正确的协议数据对象");
+            }            
 
-            base.Send(data);
+            MsgPackageVO mp = new MsgPackageVO();
+            mp.id = att.id;
+            mp.content = JsonConvert.SerializeObject(data);
+            string msg = JsonConvert.SerializeObject(mp);
+
+            Log.I("发送协议: {0}({1}) \r\n {2}", att.id, att.name, mp.content);
+
+            base.Send(msg);
         }
     }
 }
