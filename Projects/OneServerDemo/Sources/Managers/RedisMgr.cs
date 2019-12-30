@@ -81,7 +81,7 @@ namespace OneServer
         }
 
         public void LoadAsync(string key, Action<string> onComplete, int db = RedisDBDefine.SYSTEM)
-        {
+        {            
             var task = conn.GetDatabase(db).StringGetAsync(key);
             task.ContinueWith((rv) =>
             {

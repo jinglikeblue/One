@@ -13,10 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\One\One.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Sources\Net\Receivers\" />
+    <ProjectReference Include="..\ShareLibrary\ShareLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>

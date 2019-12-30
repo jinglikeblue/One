@@ -9,21 +9,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServerDemos", "ServerDemos"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "One", "Projects\One\One.csproj", "{ECE329B6-E5B3-44A9-BFC0-86280DA6B659}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpClientDemo", "Projects\TcpClientDemo\TcpClientDemo.csproj", "{861E93F5-F11E-4D06-812F-AB6E781FE16F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpClientDemo", "Projects\TcpClientDemo\TcpClientDemo.csproj", "{861E93F5-F11E-4D06-812F-AB6E781FE16F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpClientDemo", "Projects\UdpClientDemo\UdpClientDemo.csproj", "{CAA16ED5-478F-4F54-87CD-DC6CC58AFBA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UdpClientDemo", "Projects\UdpClientDemo\UdpClientDemo.csproj", "{CAA16ED5-478F-4F54-87CD-DC6CC58AFBA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketClientDemo", "Projects\WebSocketClientDemo\WebSocketClientDemo.csproj", "{D18BDE11-E605-48B4-9DDD-48A517BF540F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketClientDemo", "Projects\WebSocketClientDemo\WebSocketClientDemo.csproj", "{D18BDE11-E605-48B4-9DDD-48A517BF540F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TcpServerDemo", "Projects\TcpServerDemo\TcpServerDemo.csproj", "{A7629BD5-3B75-4582-8B42-F2F78963CBDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpServerDemo", "Projects\TcpServerDemo\TcpServerDemo.csproj", "{A7629BD5-3B75-4582-8B42-F2F78963CBDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UdpServerDemo", "Projects\UdpServerDemo\UdpServerDemo.csproj", "{85A10EB9-C4BD-415E-A798-9DE9358B1735}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UdpServerDemo", "Projects\UdpServerDemo\UdpServerDemo.csproj", "{85A10EB9-C4BD-415E-A798-9DE9358B1735}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketServerDemo", "Projects\WebSocketServerDemo\WebSocketServerDemo.csproj", "{59C26488-BFB7-47BE-98F3-3653884FD2BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketServerDemo", "Projects\WebSocketServerDemo\WebSocketServerDemo.csproj", "{59C26488-BFB7-47BE-98F3-3653884FD2BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneServerDemo", "Projects\OneServerDemo\OneServerDemo.csproj", "{B3AFEFAF-C44A-43B1-994B-992B29954C46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneServerDemo", "Projects\OneServerDemo\OneServerDemo.csproj", "{B3AFEFAF-C44A-43B1-994B-992B29954C46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JingLibrary", "Projects\JingLibrary\JingLibrary.csproj", "{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JingLibrary", "Projects\JingLibrary\JingLibrary.csproj", "{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareLibrary", "Projects\ShareLibrary\ShareLibrary.csproj", "{CCA37491-0D57-48CA-A42E-CF81D3AA2F7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,10 @@ Global
 		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC7E552E-0D0C-4AAF-BA46-07431D4AC7B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA37491-0D57-48CA-A42E-CF81D3AA2F7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA37491-0D57-48CA-A42E-CF81D3AA2F7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA37491-0D57-48CA-A42E-CF81D3AA2F7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA37491-0D57-48CA-A42E-CF81D3AA2F7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -13,6 +13,15 @@ namespace OneServer.Tests
             TTT t = new TTT();
             Log.I("开始测试Rediss");
             RedisMgr.Ins.SaveAsync("test_redis", t, OnSave);
+            RedisMgr.Ins.conn.GetDatabase().HashSet("a", "a1", "a11");
+            Log.I("HashSet保存成功");
+            //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "a1", "a12");
+            //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "b1", "b11");
+            //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "b1", "b12");
+
+            var db = RedisMgr.Ins.conn.GetDatabase(3);
+            db.StringSetAsync("t", "1");
+            db.StringSet("t", "2");
         }
 
         private void OnSave(bool obj)
