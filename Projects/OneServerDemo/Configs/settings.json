@@ -2,7 +2,8 @@
   "host": "0.0.0.0",
   "port": 1875,
   "mainLogicLoopIntervalMS": 20,
-  "logOutputEnable": 0,
+  "logConsoleEnable": true,
+  "logOoutputEnable": true,
   "logOutputDir": "output/logs",
   "logKeepDays": 1,
   "redis": {

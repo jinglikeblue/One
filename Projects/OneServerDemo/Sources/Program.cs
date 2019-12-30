@@ -24,15 +24,6 @@ namespace OneServer
             {
                 _core = Global.Ins.core;
                 new Thread(Startup).Start();
-                //while (false == _core.isExit)
-                //{
-                //    string input = Console.ReadLine();
-                //    if(input == "exit")
-                //    {
-                //        _core.isExit = true;
-                //    }
-                //    Log.I("指令:{0}", input);
-                //}
             }
             catch (Exception e)
             {
@@ -42,28 +33,30 @@ namespace OneServer
 
         void Startup()
         {
+            //读取服务器配置
             var settingsPath = "../../../Configs/settings.json";
-            var content = File.ReadAllText(settingsPath);            
+            var content = File.ReadAllText(settingsPath);                  
             _core.settings = JsonConvert.DeserializeObject<SettingsConfigVO>(content);
-            _core.server = new WebSocketServer(_core.settings.port);
-            //注册连接Session类型
+
+            //启动通信服务
+            _core.server = new WebSocketServer(_core.settings.port);            
             _core.server.RegisterSeesionType(typeof(Session));
             _core.server.Start();
+            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);
 
-            if(_core.settings.logOutputEnable > 0)
-            {
-                Log.isConsoleOutput = false;
+            //日志控制
+            Log.isConsoleOutput = _core.settings.logConsoleEnable;
+            if (_core.settings.logOutputEnable)
+            {                
                 Log.UseLogFile(_core.settings.logOutputDir, _core.settings.logKeepDays);
-            }
+            }                      
+            
+            RegisterMainLogicLoopCommand();
 
-            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
+            //redis初始化
+            RedisMgr.Ins.Connect();            
 
-            _core.RegisterMainLogicLoop(new CheckCloseCommand());
-
-            RedisMgr.Ins.Connect();
-
-            new Tests.TestMain();
-
+            //如果服务器没有收到关闭信号，则一直执行
             while (false == _core.isExit)
             {                
                 //执行同步的线程方法
@@ -72,6 +65,17 @@ namespace OneServer
                 _core.RunMainLogicLoop();
                 Thread.Sleep(_core.settings.mainLogicLoopIntervalMS);
             }
+
+            //执行测试代码 
+            new Tests.TestMain();
+        }
+
+        /// <summary>
+        /// 注册主逻辑循环调用指令
+        /// </summary>
+        void RegisterMainLogicLoopCommand()
+        {            
+            _core.RegisterMainLogicLoop(new CheckCloseCommand());
         }
     }
 }

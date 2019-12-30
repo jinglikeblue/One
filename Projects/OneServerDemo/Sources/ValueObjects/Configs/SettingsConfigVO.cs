@@ -25,9 +25,14 @@ namespace OneServer
         public int mainLogicLoopIntervalMS = 25;
 
         /// <summary>
+        /// 是否允许控制台输出
+        /// </summary>
+        public bool logConsoleEnable = true;
+
+        /// <summary>
         /// 是否允许日志输出，1为true
         /// </summary>
-        public int logOutputEnable = 0;
+        public bool logOutputEnable = true;
 
         /// <summary>
         /// 日志文件输出目录
