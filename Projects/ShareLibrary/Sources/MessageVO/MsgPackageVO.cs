@@ -9,6 +9,9 @@ namespace Share
     /// </summary>
     public class MsgPackageVO
     {
+        /// <summary>
+        /// 消息的ID
+        /// </summary>
         public int id;
         public string content;
     }
