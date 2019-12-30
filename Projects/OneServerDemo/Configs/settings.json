@@ -2,7 +2,11 @@
   "host": "0.0.0.0",
   "port": 1875,
   "mainLogicLoopIntervalMS": 20,
-  "logOutputEnable": 1,
+  "logOutputEnable": 0,
   "logOutputDir": "output/logs",
-  "logKeepDays": 1
+  "logKeepDays": 1,
+  "redis": {
+    "address": "47.52.33.131:9530",
+    "pwd": "!QAZ2wsx"
+  }
 }

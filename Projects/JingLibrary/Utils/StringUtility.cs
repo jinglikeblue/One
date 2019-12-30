@@ -1,6 +1,6 @@
 ﻿namespace Jing
 {
-    public class StringUtil
+    public class StringUtility
     {
         /// <summary>
         /// 精简字符串

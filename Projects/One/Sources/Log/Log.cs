@@ -81,7 +81,14 @@ namespace One
                 return;
             }
 
-            ColorInfo(defaultColor, string.Format(format, args));            
+            if (args.Length > 0)
+            {
+                ColorInfo(defaultColor, string.Format(format, args));
+            }
+            else
+            {
+                ColorInfo(defaultColor, format);
+            }
         }
 
         /// <summary>
@@ -189,7 +196,7 @@ namespace One
         {
             var old = Console.ForegroundColor;
             Console.ForegroundColor = color;
-            var s = string.Format(format, args);
+            var s = args.Length > 0 ? string.Format(format, args) : format;
             LogLine(s);            
             Console.ForegroundColor = old;
         }

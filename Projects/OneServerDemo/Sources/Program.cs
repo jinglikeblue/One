@@ -1,4 +1,5 @@
 ﻿using Jing;
+using Newtonsoft.Json;
 using One;
 using System;
 using System.IO;
@@ -42,8 +43,8 @@ namespace OneServer
         void Startup()
         {
             var settingsPath = "../../../Configs/settings.json";
-            var content = File.ReadAllText(settingsPath);
-            _core.settings = LitJson.JsonMapper.ToObject<SettingsConfigVO>(content);
+            var content = File.ReadAllText(settingsPath);            
+            _core.settings = JsonConvert.DeserializeObject<SettingsConfigVO>(content);
             _core.server = new WebSocketServer(_core.settings.port);
             //注册连接Session类型
             _core.server.RegisterSeesionType(typeof(Session));
@@ -58,6 +59,10 @@ namespace OneServer
             Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             _core.RegisterMainLogicLoop(new CheckCloseCommand());
+
+            RedisMgr.Ins.Connect();
+
+            new Tests.TestMain();
 
             while (false == _core.isExit)
             {                

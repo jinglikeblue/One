@@ -38,5 +38,10 @@ namespace OneServer
         /// 日志保留天数
         /// </summary>
         public int logKeepDays = 7;
+
+        /// <summary>
+        /// redis配置
+        /// </summary>
+        public RedisConfigVO redis;
     }
 }

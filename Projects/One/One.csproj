@@ -9,8 +9,11 @@
 
   <ItemGroup>
     <Compile Remove="Sources\Protocol\**" />
+    <Compile Remove="Sources\Util\**" />
     <EmbeddedResource Remove="Sources\Protocol\**" />
+    <EmbeddedResource Remove="Sources\Util\**" />
     <None Remove="Sources\Protocol\**" />
+    <None Remove="Sources\Util\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +22,6 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Sources\Util\" />
   </ItemGroup>
 
   <ItemGroup>
