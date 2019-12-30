@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OneServer
+namespace One
 {
-    abstract class BaseCommand
+    public abstract class BaseCommand
     {
         public abstract void Excute();
         public abstract void Terminate();

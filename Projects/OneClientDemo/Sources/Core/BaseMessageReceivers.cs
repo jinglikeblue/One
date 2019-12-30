@@ -1,7 +1,6 @@
-﻿using One;
-using System;
+﻿using System;
 
-namespace OneServer
+namespace OneClient
 {
     /// <summary>
     /// 消息接收器基类
@@ -19,6 +18,6 @@ namespace OneServer
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected abstract void OnReceive(BaseSession session, long requestId, TData data);
+        protected abstract void OnReceive(long requestId, TData data);
     }
 }

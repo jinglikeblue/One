@@ -1,24 +1,23 @@
-﻿using System;
+﻿using One;
+using Share;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
-using One;
-using Share;
 
 namespace OneServer
 {
-    /// <summary>
-    /// 注册协议接收器
-    /// </summary>
     class InitMsgInfoTableCommand : BaseCommand
     {
+        public event Action<MsgInfoTable> onCreated;
+
         static readonly Type baseReceiverType = typeof(BaseMessageReceiver<>);
 
         Dictionary<Type, Type> _dataTypeToReceiverType = new Dictionary<Type, Type>();
-        Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();                 
+        Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();
+
 
         public override void Excute()
-        {                     
+        {
             var allTypes = baseReceiverType.Assembly.GetTypes();
             foreach (var type in allTypes)
             {
@@ -27,11 +26,11 @@ namespace OneServer
 
             var shareTypes = typeof(MsgAttribute).Assembly.GetTypes();
             foreach (var type in shareTypes)
-            {                
+            {
                 RegisterDataTypeToMsgId(type);
             }
 
-            MsgInfoTable table = Global.Ins.core.msgInfoTable;
+            MsgInfoTable table = new MsgInfoTable();
             //构建协议映射表
             foreach (var kv in _dataTypeToMsgAtt)
             {
@@ -43,13 +42,14 @@ namespace OneServer
                     vo.dataType = kv.Key;
                     vo.receiverType = _dataTypeToReceiverType[kv.Key];
                     vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);
-                    table.AddMsgInfo(vo);                    
+                    table.AddMsgInfo(vo);
                 }
                 else
                 {
                     Log.E("协议[{0}]没有对应的Receiver", kv.Value.name);
                 }
             }
+            onCreated?.Invoke(table);
         }
 
         /// <summary>
