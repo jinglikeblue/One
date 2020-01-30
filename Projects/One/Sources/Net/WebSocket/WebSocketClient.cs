@@ -87,6 +87,7 @@ namespace One
         /// <param name="port"></param>
         public void Connect(string host, int port)
         {
+            Log.I("连接服务器 {0}:{1}", host, port);
             Host = host;
             Port = port;
             Close();
@@ -95,7 +96,7 @@ namespace One
             _socket.OnClose += OnClose;
             _socket.OnError += OnError;
             _socket.OnMessage += OnMessage;
-            _socket.Connect();
+            _socket.Connect();            
         }
 
         private void OnOpen(object sender, EventArgs e)
