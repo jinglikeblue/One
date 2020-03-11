@@ -11,7 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\One\One.csproj" />
+    <ProjectReference Include="..\JingLibrary\JingLibrary.csproj" />
+    <ProjectReference Include="..\OneLibrary\OneLibrary.csproj" />
     <ProjectReference Include="..\ShareLibrary\ShareLibrary.csproj" />
   </ItemGroup>
 
