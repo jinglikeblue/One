@@ -5,6 +5,7 @@
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
+    <RootNamespace>One</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Sources\Net\WebSocket\WebSocketChannelcs" />
+    <None Remove="Sources\Old\Net\WebSocket\WebSocketChannelcs" />
   </ItemGroup>
 
   <ItemGroup>

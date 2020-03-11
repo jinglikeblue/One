@@ -23,6 +23,8 @@ One作者Jing的基础代码库,目标框架.net Standard 2.0
 
 #### OneLibrary
 One代码库，目标框架.net Standard 2.0。 含有通信内容的封装，基于C#开发的前后端都可以使用（兼容Unity)
+- 逻辑代码架构
+- 协议处理架构
 
 #### ClientDemo
 客户端Demo
