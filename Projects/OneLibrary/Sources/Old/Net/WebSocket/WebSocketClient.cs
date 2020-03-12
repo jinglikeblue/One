@@ -8,7 +8,7 @@ namespace One
     /// </summary>
     public class WebSocketClient : BaseClient
     {
-        WebSocket _socket;
+        WebSocketSharp.WebSocket _socket;
 
         /// <summary>
         /// 连接打开
@@ -91,7 +91,7 @@ namespace One
             Host = host;
             Port = port;
             Close();
-            _socket = new WebSocket(Url);
+            _socket = new WebSocketSharp.WebSocket(Url);
             _socket.OnOpen += OnOpen;
             _socket.OnClose += OnClose;
             _socket.OnError += OnError;

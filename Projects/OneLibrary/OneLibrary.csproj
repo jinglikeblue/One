@@ -8,6 +8,10 @@
     <RootNamespace>One</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Sources\Protocol\**" />
     <Compile Remove="Sources\Util\**" />

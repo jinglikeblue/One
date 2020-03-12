@@ -7,7 +7,7 @@ namespace OneClient
 {
     class Global:ASingleton<Global>
     {
-        public readonly NetModel net = new NetModel();
+        //public readonly NetModel net = new NetModel();
 
         protected override void Init()
         {

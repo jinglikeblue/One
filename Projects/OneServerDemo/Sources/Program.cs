@@ -1,6 +1,7 @@
 ﻿using Jing;
 using Newtonsoft.Json;
 using One;
+using One.WebSocket;
 using System;
 using System.IO;
 using System.Threading;
@@ -39,10 +40,9 @@ namespace OneServer
             _core.settings = JsonConvert.DeserializeObject<SettingsConfigVO>(content);
 
             //启动通信服务
-            _core.server = new WebSocketServer(_core.settings.port);            
-            _core.server.RegisterSeesionType(typeof(Session));
+            _core.server = new Server(_core.settings.port);                        
             _core.server.Start();
-            new InitMsgInfoTableCommand().Excute();
+            
             Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
 
             //日志控制

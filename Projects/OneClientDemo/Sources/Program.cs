@@ -1,5 +1,4 @@
 ﻿using System;
-using Share;
 
 namespace OneClient
 {
@@ -12,20 +11,20 @@ namespace OneClient
 
         public Program()
         {
-            new InitMsgInfoTableCommand().Excute();
-            Global.Ins.net.ws.onOpen += OnOpen;
-            Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
+            //new InitMsgInfoTableCommand().Excute();
+            //Global.Ins.net.ws.onOpen += OnOpen;
+            //Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
 
             Console.ReadKey();
         }
 
         private static void OnOpen()
         {
-            var vo = new LoginRequestVO();
-            vo.deviceId = "a";
-            vo.account = "tester";
-            vo.pwd = "hello";
-            Global.Ins.net.Send(vo);
+            //var vo = new LoginRequestVO();
+            //vo.deviceId = "a";
+            //vo.account = "tester";
+            //vo.pwd = "hello";
+            //Global.Ins.net.Send(vo);
         }
     }
 }

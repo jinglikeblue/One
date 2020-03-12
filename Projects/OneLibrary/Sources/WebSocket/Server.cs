@@ -9,6 +9,8 @@ namespace One.WebSocket
     /// </summary>
     public class Server
     {
+        public event Action<Session> onCreateSession;
+
         public string host { get; private set; } = "0.0.0.0";
         public int port { get; private set; }
         public string Url
@@ -21,18 +23,29 @@ namespace One.WebSocket
 
         WebSocketSharp.Server.WebSocketServer _server;
 
+        /// <summary>
+        /// 会话管理器
+        /// </summary>
+        public SessionManager sessionManager { get; private set; }
+
         public Server(int port)
         {            
             this.port = port;
 
+            sessionManager = new SessionManager();
             _server = new WebSocketSharp.Server.WebSocketServer(Url);
             _server.Log.Level = WebSocketSharp.LogLevel.Error;
-            _server.AddWebSocketService<Session>("/", onCreateSession);            
+            _server.AddWebSocketService<Behavior>("/", onBehaviorInitialized);            
         }
 
-        private void onCreateSession(Session session)
+        /// <summary>
+        /// 当会话被创建时触发
+        /// </summary>
+        /// <param name="behavior"></param>
+        private void onBehaviorInitialized(Behavior behavior)
         {
-            
+            var session = sessionManager.CreateSession(behavior);
+            onCreateSession?.Invoke(session);
         }
 
         public void Start()
@@ -43,6 +56,15 @@ namespace One.WebSocket
         public void Stop()
         {
             _server.Stop();            
+        }
+
+        /// <summary>
+        /// 全服推送消息
+        /// </summary>
+        /// <param name="data"></param>
+        public void Push(byte[] data)
+        {
+
         }
     }
 }

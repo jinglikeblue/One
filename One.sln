@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Librarys", "Librarys", "{EC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneLibrary", "Projects\OneLibrary\OneLibrary.csproj", "{CD7D4CDC-4305-4CCD-A4F2-3D7AC9BE070A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneServerDemo", "Projects\OneServerDemo\OneServerDemo.csproj", "{C13CDFC2-082F-432A-B2E3-095A55DFCCC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneClientDemo", "Projects\OneClientDemo\OneClientDemo.csproj", "{3CDB25BE-07A0-44D3-8BC0-2A27DDF58010}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,14 @@ Global
 		{CD7D4CDC-4305-4CCD-A4F2-3D7AC9BE070A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD7D4CDC-4305-4CCD-A4F2-3D7AC9BE070A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD7D4CDC-4305-4CCD-A4F2-3D7AC9BE070A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C13CDFC2-082F-432A-B2E3-095A55DFCCC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C13CDFC2-082F-432A-B2E3-095A55DFCCC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C13CDFC2-082F-432A-B2E3-095A55DFCCC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C13CDFC2-082F-432A-B2E3-095A55DFCCC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CDB25BE-07A0-44D3-8BC0-2A27DDF58010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CDB25BE-07A0-44D3-8BC0-2A27DDF58010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CDB25BE-07A0-44D3-8BC0-2A27DDF58010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CDB25BE-07A0-44D3-8BC0-2A27DDF58010}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

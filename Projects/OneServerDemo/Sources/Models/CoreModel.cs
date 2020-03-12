@@ -1,9 +1,8 @@
 ﻿using One;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Jing;
-using Share;
+using One.WebSocket;
 
 namespace OneServer
 {
@@ -16,7 +15,7 @@ namespace OneServer
 
         public SettingsConfigVO settings;
 
-        public WebSocketServer server;
+        public Server server;
 
         ThreadSyncActions _tsa;
 
@@ -27,7 +26,7 @@ namespace OneServer
         /// <summary>
         /// 协议信息表
         /// </summary>
-        public MsgInfoTable msgInfoTable { get; private set; } = new MsgInfoTable();
+        //public MsgInfoTable msgInfoTable { get; private set; } = new MsgInfoTable();
 
         public CoreModel()
         {

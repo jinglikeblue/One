@@ -1,91 +1,85 @@
-﻿using One;
-using Share;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-
-namespace OneClient
+﻿namespace OneClient
 {
-    class InitMsgInfoTableCommand : BaseCommand
-    {
-        public event Action<MsgInfoTable> onCreated;
+    //class InitMsgInfoTableCommand : BaseCommand
+    //{
+    //    public event Action<MsgInfoTable> onCreated;
 
-        static readonly Type baseReceiverType = typeof(BaseMessageReceiver<>);
+    //    static readonly Type baseReceiverType = typeof(BaseMessageReceiver<>);
 
-        Dictionary<Type, Type> _dataTypeToReceiverType = new Dictionary<Type, Type>();
-        Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();
+    //    Dictionary<Type, Type> _dataTypeToReceiverType = new Dictionary<Type, Type>();
+    //    Dictionary<Type, MsgAttribute> _dataTypeToMsgAtt = new Dictionary<Type, MsgAttribute>();
 
 
-        public override void Excute()
-        {
-            var allTypes = baseReceiverType.Assembly.GetTypes();
-            foreach (var type in allTypes)
-            {
-                RegisterDataTypeToReceiverType(type);
-            }
+    //    public override void Excute()
+    //    {
+    //        var allTypes = baseReceiverType.Assembly.GetTypes();
+    //        foreach (var type in allTypes)
+    //        {
+    //            RegisterDataTypeToReceiverType(type);
+    //        }
 
-            var shareTypes = typeof(MsgAttribute).Assembly.GetTypes();
-            foreach (var type in shareTypes)
-            {
-                RegisterDataTypeToMsgId(type);
-            }
+    //        var shareTypes = typeof(MsgAttribute).Assembly.GetTypes();
+    //        foreach (var type in shareTypes)
+    //        {
+    //            RegisterDataTypeToMsgId(type);
+    //        }
 
-            MsgInfoTable table = Global.Ins.net.msgInfoTable;
-            //构建协议映射表
-            foreach (var kv in _dataTypeToMsgAtt)
-            {
-                var vo = new MsgInfoVO();
-                vo.id = kv.Value.id;
-                vo.name = kv.Value.name;
-                vo.dataType = kv.Key;
+    //        MsgInfoTable table = Global.Ins.net.msgInfoTable;
+    //        //构建协议映射表
+    //        foreach (var kv in _dataTypeToMsgAtt)
+    //        {
+    //            var vo = new MsgInfoVO();
+    //            vo.id = kv.Value.id;
+    //            vo.name = kv.Value.name;
+    //            vo.dataType = kv.Key;
 
-                if (_dataTypeToReceiverType.ContainsKey(kv.Key))
-                {
-                    vo.receiverType = _dataTypeToReceiverType[kv.Key];
-                    vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);                 
-                }
-                else
-                {
-                    Log.E("协议[{0}]没有对应的Receiver", kv.Value.name);
-                }
+    //            if (_dataTypeToReceiverType.ContainsKey(kv.Key))
+    //            {
+    //                vo.receiverType = _dataTypeToReceiverType[kv.Key];
+    //                vo.receiveMethodInfo = vo.receiverType.GetMethod("OnReceive", BindingFlags.NonPublic | BindingFlags.Instance);                 
+    //            }
+    //            else
+    //            {
+    //                Log.E("协议[{0}]没有对应的Receiver", kv.Value.name);
+    //            }
 
-                table.AddMsgInfo(vo);
-            }
-            onCreated?.Invoke(table);
-        }
+    //            table.AddMsgInfo(vo);
+    //        }
+    //        onCreated?.Invoke(table);
+    //    }
 
-        /// <summary>
-        /// 找到所有继承了BaseMessageReceiver接口的对象,获取Receiver对象的泛型数据类型
-        /// </summary>
-        /// <param name="type"></param>
-        void RegisterDataTypeToReceiverType(Type type)
-        {
-            if (type.BaseType == null || false == type.BaseType.IsGenericType)
-            {
-                return;
-            }
+    //    /// <summary>
+    //    /// 找到所有继承了BaseMessageReceiver接口的对象,获取Receiver对象的泛型数据类型
+    //    /// </summary>
+    //    /// <param name="type"></param>
+    //    void RegisterDataTypeToReceiverType(Type type)
+    //    {
+    //        if (type.BaseType == null || false == type.BaseType.IsGenericType)
+    //        {
+    //            return;
+    //        }
 
-            if (type.BaseType.GetGenericTypeDefinition() == baseReceiverType)
-            {
-                var getDataTypeMethod = type.BaseType.GetMethod("GetDataType", BindingFlags.Static | BindingFlags.Public);
-                var dataType = getDataTypeMethod.Invoke(null, null);
-                _dataTypeToReceiverType[(Type)dataType] = type;
-            }
-        }
+    //        if (type.BaseType.GetGenericTypeDefinition() == baseReceiverType)
+    //        {
+    //            var getDataTypeMethod = type.BaseType.GetMethod("GetDataType", BindingFlags.Static | BindingFlags.Public);
+    //            var dataType = getDataTypeMethod.Invoke(null, null);
+    //            _dataTypeToReceiverType[(Type)dataType] = type;
+    //        }
+    //    }
 
-        void RegisterDataTypeToMsgId(Type type)
-        {
-            var msgAtt = type.GetCustomAttribute<MsgAttribute>();
+    //    void RegisterDataTypeToMsgId(Type type)
+    //    {
+    //        var msgAtt = type.GetCustomAttribute<MsgAttribute>();
 
-            if (null != msgAtt)
-            {
-                _dataTypeToMsgAtt[type] = msgAtt;
-            }
-        }
+    //        if (null != msgAtt)
+    //        {
+    //            _dataTypeToMsgAtt[type] = msgAtt;
+    //        }
+    //    }
 
-        public override void Terminate()
-        {
-            
-        }
-    }
+    //    public override void Terminate()
+    //    {
+
+    //    }
+    //}
 }
