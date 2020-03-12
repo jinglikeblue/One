@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Google.Protobuf;
+using System.Text;
 
 namespace One.WebSocket
 {
@@ -22,6 +23,11 @@ namespace One.WebSocket
         public static string TransformData(byte[] data)
         {
             return Encoding.UTF8.GetString(data);
+        }
+
+        public static byte[] TransformData(IMessage msg)
+        {
+            return msg.ToByteArray();
         }
     }
 }
