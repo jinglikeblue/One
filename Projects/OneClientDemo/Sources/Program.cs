@@ -1,4 +1,5 @@
-﻿using System;
+﻿using One.WebSocket;
+using System;
 
 namespace OneClient
 {
@@ -9,22 +10,22 @@ namespace OneClient
             new Program();
         }
 
+        Client client;
+
         public Program()
         {
             //new InitMsgInfoTableCommand().Excute();
-            //Global.Ins.net.ws.onOpen += OnOpen;
+            client = new Client();
+            client.onOpen += OnOpen;
+            client.Connect("127.0.0.1", 1875);
             //Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
 
             Console.ReadKey();
         }
 
-        private static void OnOpen()
+        private void OnOpen()
         {
-            //var vo = new LoginRequestVO();
-            //vo.deviceId = "a";
-            //vo.account = "tester";
-            //vo.pwd = "hello";
-            //Global.Ins.net.Send(vo);
+            client.Send(MessageUtility.TransformData("hello world"));
         }
     }
 }

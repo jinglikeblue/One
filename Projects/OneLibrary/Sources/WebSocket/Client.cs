@@ -54,11 +54,6 @@ namespace One.WebSocket
         public event Action onClose;
 
         /// <summary>
-        /// 连接出错
-        /// </summary>
-        public event Action onError;
-
-        /// <summary>
         /// 收到消息
         /// </summary>
         public event Action<byte[]> onMessage;
@@ -67,6 +62,23 @@ namespace One.WebSocket
         /// 关闭连接
         /// </summary>        
         public void Close()
+        {
+            if (null != _socket)
+            {
+                _socket.OnOpen -= OnOpen;
+                _socket.OnClose -= OnClose;
+                _socket.OnError -= OnError;
+                _socket.OnMessage -= OnMessage;
+                _socket.CloseAsync();
+                _socket = null;
+                onClose?.Invoke();
+            }
+        }
+
+        /// <summary>
+        /// 关闭链接，并且不触发任何事件
+        /// </summary>
+        public void CloseSliently()
         {
             if (null != _socket)
             {
@@ -96,7 +108,7 @@ namespace One.WebSocket
         /// </summary>
         public void Reconnect()
         {
-            Close();
+            CloseSliently();
             Log.I("连接WebSocket服务 {0}", Url);
             _socket = new WebSocketSharp.WebSocket(Url);
             _socket.OnOpen += OnOpen;
@@ -120,17 +132,20 @@ namespace One.WebSocket
 
         private void OnOpen(object sender, EventArgs e)
         {
+            One.Log.I(ConsoleColor.DarkGreen, "连接打开");
             onOpen?.Invoke();
         }
 
         private void OnClose(object sender, CloseEventArgs e)
         {
-            onClose?.Invoke();
+            One.Log.I(ConsoleColor.DarkGreen, "连接关闭");
+            Close();
         }
 
         private void OnError(object sender, ErrorEventArgs e)
         {
-            onError?.Invoke();
+            One.Log.I(ConsoleColor.DarkGreen, "连接出错");
+            Close();
         }
 
         private void OnMessage(object sender, MessageEventArgs e)
@@ -138,10 +153,12 @@ namespace One.WebSocket
             byte[] data = null;
             if (e.IsText)
             {
+                One.Log.I(ConsoleColor.DarkGreen, string.Format("收到文本消息: {0}", e.Data));
                 data = MessageUtility.TransformData(e.Data);
             }
             else if (e.IsBinary)
             {
+                One.Log.I(ConsoleColor.DarkGreen, string.Format("收到二进制消息: {0}", e.RawData.ToString()));
                 data = e.RawData;
             }
             onMessage?.Invoke(data);

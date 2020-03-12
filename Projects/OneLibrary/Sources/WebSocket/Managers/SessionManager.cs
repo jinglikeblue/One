@@ -2,43 +2,73 @@
 
 namespace One.WebSocket
 {
+    /// <summary>
+    /// 会话管理器
+    /// </summary>
     public class SessionManager
     {
-        Dictionary<string, Session> _sessionDic = new Dictionary<string, Session>();
+        Dictionary<string, Session> _sessionDic = new Dictionary<string, Session>();        
 
-        /// <summary>
-        /// 针对behavior创建会话
-        /// </summary>
-        /// <param name="behavior"></param>
-        /// <returns></returns>
-        public Session CreateSession(Behavior behavior)
+        public int Count
         {
-            var session = new Session(behavior, this);
-            _sessionDic[session.id] = session;
-            return session;
+            get
+            {
+                return _sessionDic.Count;
+            }            
         }
 
         /// <summary>
-        /// 移除会话，如果会话没有关闭，则将其关闭
+        /// 获取会话列表
         /// </summary>
-        /// <param name="id"></param>
-        public void RemoveSession(string id)
+        /// <returns></returns>
+        public Session[] GetSessionList()
         {
-            if (_sessionDic.ContainsKey(id))
+            Session[] list = new Session[_sessionDic.Count];
+            _sessionDic.Values.CopyTo(list, 0);
+            return list;
+        }
+
+        /// <summary>
+        /// 添加会话
+        /// </summary>
+        /// <param name="session"></param>
+        internal void Add(Session session)
+        {
+            _sessionDic[session.id] = session;
+        }
+
+        /// <summary>
+        /// 移除会话
+        /// </summary>
+        /// <param name="session"></param>
+        internal void Remove(Session session)
+        {
+            if (_sessionDic.ContainsKey(session.id))
             {
-                var session = _sessionDic[id];
-                _sessionDic.Remove(id);
-                session.Close();
+                _sessionDic.Remove(session.id);
             }
         }
 
         /// <summary>
-        /// 移除会话，如果会话没有关闭，则将其关闭
+        /// 关闭会话，如果会话没有关闭，则将其关闭
+        /// </summary>
+        /// <param name="id"></param>
+        public void CloseSession(string id)
+        {
+            if (_sessionDic.ContainsKey(id))
+            {
+                var session = _sessionDic[id];
+                CloseSession(session);
+            }
+        }
+
+        /// <summary>
+        /// 关闭会话，如果会话没有关闭，则将其关闭
         /// </summary>
         /// <param name="session"></param>
-        public void RemoveSession(Session session)
+        public void CloseSession(Session session)
         {
-            RemoveSession(session.id);
+            session.Close();
         }
 
         /// <summary>

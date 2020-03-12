@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace One.WebSocket
 {
@@ -9,7 +7,7 @@ namespace One.WebSocket
     /// </summary>
     public class Server
     {
-        public event Action<Session> onCreateSession;
+        public event Action<Session> onNewSession;
 
         public string host { get; private set; } = "0.0.0.0";
         public int port { get; private set; }
@@ -34,8 +32,10 @@ namespace One.WebSocket
 
             sessionManager = new SessionManager();
             _server = new WebSocketSharp.Server.WebSocketServer(Url);
+            _server.KeepClean = true;
             _server.Log.Level = WebSocketSharp.LogLevel.Error;
-            _server.AddWebSocketService<Behavior>("/", onBehaviorInitialized);            
+            _server.AddWebSocketService<Behavior>("/", onBehaviorInitialized);
+            
         }
 
         /// <summary>
@@ -44,27 +44,24 @@ namespace One.WebSocket
         /// <param name="behavior"></param>
         private void onBehaviorInitialized(Behavior behavior)
         {
-            var session = sessionManager.CreateSession(behavior);
-            onCreateSession?.Invoke(session);
+            var session = new Session(behavior, sessionManager);
+            onNewSession?.Invoke(session);
         }
 
+        /// <summary>
+        /// 启动服务
+        /// </summary>
         public void Start()
         {
             _server.Start();
         }
 
+        /// <summary>
+        /// 停止服务
+        /// </summary>
         public void Stop()
         {
             _server.Stop();            
-        }
-
-        /// <summary>
-        /// 全服推送消息
-        /// </summary>
-        /// <param name="data"></param>
-        public void Push(byte[] data)
-        {
-
         }
     }
 }

@@ -40,7 +40,8 @@ namespace OneServer
             _core.settings = JsonConvert.DeserializeObject<SettingsConfigVO>(content);
 
             //启动通信服务
-            _core.server = new Server(_core.settings.port);                        
+            _core.server = new Server(_core.settings.port);
+            _core.server.onNewSession += OnNewSession;
             _core.server.Start();
             
             Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
@@ -72,6 +73,13 @@ namespace OneServer
                 _core.RunMainLogicLoop();
                 Thread.Sleep(_core.settings.mainLogicLoopIntervalMS);
             }
+        }
+
+        private void OnNewSession(Session obj)
+        {
+            obj.onMessage += (session, msg) => {
+                Log.W(MessageUtility.TransformData(msg));
+            };
         }
 
         private void OnException(object sender, UnhandledExceptionEventArgs e)

@@ -20,20 +20,17 @@ namespace One.WebSocket
         }
 
         protected override void OnOpen()
-        {
-            Console.WriteLine("连接打开");
+        {            
             onOpen?.Invoke();                
         }
 
         protected override void OnClose(CloseEventArgs e)
-        {
-            Console.WriteLine("连接关闭");
+        {         
             onClose?.Invoke(e);
         }
 
         protected override void OnError(ErrorEventArgs e)
-        {
-            Console.WriteLine("连接出错");
+        {         
             onError?.Invoke(e);
         }
 
@@ -56,7 +53,14 @@ namespace One.WebSocket
             onClose = null;
             onError = null;
             onMessage = null;
-            base.CloseAsync();
+            try
+            {
+                base.CloseAsync();
+            }
+            catch(Exception e)
+            {
+                One.Log.W(e.Message);
+            }
         }
     }
 }

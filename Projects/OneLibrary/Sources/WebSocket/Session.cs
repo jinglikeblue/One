@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
 using WebSocketSharp;
-using WebSocketSharp.Server;
 
 namespace One.WebSocket
 {
@@ -15,22 +11,17 @@ namespace One.WebSocket
         /// <summary>
         /// 会话开启事件
         /// </summary>
-        public event Action onOpen;
+        public event Action<Session> onOpen;
 
         /// <summary>
         /// 会话关闭事件
         /// </summary>
-        public event Action onClose;
-
-        /// <summary>
-        /// 会话出错事件
-        /// </summary>
-        public event Action onError;
+        public event Action<Session> onClose;
 
         /// <summary>
         /// 接收数据的事件，如果发过来的本来是字符串，请使用TransformData方法转换byte[] => string
         /// </summary>
-        public event Action<byte[]> onMessage;
+        public event Action<Session, byte[]> onMessage;
 
         /// <summary>
         /// 会话状态改变事件
@@ -60,33 +51,40 @@ namespace One.WebSocket
         /// <summary>
         /// 是否关闭了
         /// </summary>
-        public bool isClosed { get; private set; } = false;
+        public bool IsClosed {
+            get
+            {
+                return this.behavior == null ? true : false;
+            }
+        }
 
-        public Session(Behavior behavior, SessionManager sessionMgr)
+        internal Session(Behavior behavior, SessionManager sessionMgr)
         {            
-            this.behavior = behavior;            
+            this.behavior = behavior;
+            this.sessionManager = sessionMgr;
             behavior.BindingCallback(onBehaviorOpen, onBehaviorClose, onBehaviorError, onBehaviorMessage);
         }
 
         void onBehaviorOpen()
         {
-            Console.WriteLine("连接打开");
+            sessionManager.Add(this);
+            One.Log.I(ConsoleColor.DarkGreen, id + " 连接打开");
             SwitchState(ESessionState.OPEN);
-            onOpen?.Invoke();
+            onOpen?.Invoke(this);
         }
 
         void onBehaviorClose(CloseEventArgs e)
         {
-            Console.WriteLine("连接关闭");
-            SwitchState(ESessionState.CLOSE);
-            onClose?.Invoke();
+            One.Log.I(ConsoleColor.DarkGreen, id + " 连接关闭");
+            SwitchState(ESessionState.CLOSE);           
+            Close();
         }
 
         void onBehaviorError(ErrorEventArgs e)
         {
-            Console.WriteLine("连接出错");
-            SwitchState(ESessionState.ERROR);
-            onError?.Invoke();
+            One.Log.I(ConsoleColor.DarkGreen, id + " 连接出错");
+            SwitchState(ESessionState.ERROR);            
+            Close();
         }
 
         void onBehaviorMessage(MessageEventArgs e)
@@ -95,15 +93,15 @@ namespace One.WebSocket
             if (e.IsBinary)
             {
                 msgBytes = e.RawData;
-                Console.WriteLine(string.Format("收到二进制消息: {0}", e.RawData.ToString()));
+                One.Log.I(ConsoleColor.DarkGreen, string.Format(id + " 收到二进制消息: {0}", e.RawData.ToString()));
             }
             else if (e.IsText)
             {
                 msgBytes = MessageUtility.TransformData(e.Data);
-                Console.WriteLine(string.Format("收到文本消息: {0}", e.Data));
+                One.Log.I(ConsoleColor.DarkGreen, string.Format(id + " 收到文本消息: {0}", e.Data));
             }
 
-            onMessage?.Invoke(msgBytes);
+            onMessage?.Invoke(this, msgBytes);
         }
 
         /// <summary>
@@ -111,16 +109,13 @@ namespace One.WebSocket
         /// </summary>
         public void Close()
         {
-            if (!isClosed)
+            if (!IsClosed)
             {
-                if (behavior != null)
-                {
-                    behavior.CloseSliently();
-                    behavior = null;
-                }
+                sessionManager.Remove(this);                
+                behavior.CloseSliently();
+                behavior = null;
 
-                isClosed = true;
-                sessionManager.RemoveSession(this);
+                onClose?.Invoke(this);
             }
         }
 
@@ -130,8 +125,11 @@ namespace One.WebSocket
         /// <param name="data"></param>
         public void Send(byte[] data)
         {
-            Console.WriteLine("发送二进制消息：" + data.ToString());
-            behavior.Send(data);
+            if (behavior.ConnectionState == WebSocketState.Open)
+            {
+                Console.WriteLine("发送二进制消息：" + data.ToString());
+                behavior.Send(data);
+            }
         }
 
         void SwitchState(ESessionState state)
