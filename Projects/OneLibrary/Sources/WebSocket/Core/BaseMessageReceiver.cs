@@ -1,6 +1,6 @@
 ﻿using Google.Protobuf;
 
-namespace One.Sources.WebSocket.Core
+namespace One.WebSocket
 {
     class BaseMessageReceiver<TProtobuf> where TProtobuf: Google.Protobuf.IMessage,new()
     {
