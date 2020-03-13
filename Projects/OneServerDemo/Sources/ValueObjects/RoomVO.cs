@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace OneServer
 {
@@ -9,11 +7,11 @@ namespace OneServer
         /// <summary>
         /// 角色列表
         /// </summary>
-        public List<RoleVO> roles;
+        public List<RoleVO> roles = new List<RoleVO>();
 
         /// <summary>
         /// 聊天内容列表
         /// </summary>
-        public List<ChatVO> chats;
+        public List<ChatVO> chats = new List<ChatVO>();
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using One.WebSocket;
 
 namespace OneServer
 {
@@ -19,6 +17,11 @@ namespace OneServer
         /// <summary>
         /// 昵称
         /// </summary>
-        public string nickname;        
+        public string nickname;
+
+        /// <summary>
+        /// 关联的会话
+        /// </summary>
+        public Session session;
     }
 }

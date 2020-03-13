@@ -1,6 +1,0 @@
-{
-  "protoSourceDir": "protos",
-  "csharpOutputDir": "csharp",
-  "protocFile": "protoc.exe",
-  "copyPath": null
-}

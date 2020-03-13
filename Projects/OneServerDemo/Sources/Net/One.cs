@@ -10,88 +10,6 @@ namespace One {
 
   #region Messages
   /// <summary>
-  ///消息协议包
-  /// </summary>
-  public sealed class ProtoPackage : pb::IMessage {
-    private static readonly pb::MessageParser<ProtoPackage> _parser = new pb::MessageParser<ProtoPackage>(() => new ProtoPackage());
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<ProtoPackage> Parser { get { return _parser; } }
-
-    /// <summary>Field number for the "msgId" field.</summary>
-    public const int MsgIdFieldNumber = 1;
-    private int msgId_;
-    /// <summary>
-    ///消息Id
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int MsgId {
-      get { return msgId_; }
-      set {
-        msgId_ = value;
-      }
-    }
-
-    /// <summary>Field number for the "msgBody" field.</summary>
-    public const int MsgBodyFieldNumber = 2;
-    private pb::ByteString msgBody_ = pb::ByteString.Empty;
-    /// <summary>
-    ///消息体
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pb::ByteString MsgBody {
-      get { return msgBody_; }
-      set {
-        msgBody_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (MsgId != 0) {
-        output.WriteRawTag(8);
-        output.WriteInt32(MsgId);
-      }
-      if (MsgBody.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteBytes(MsgBody);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (MsgId != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(MsgId);
-      }
-      if (MsgBody.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeBytesSize(MsgBody);
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            input.SkipLastField();
-            break;
-          case 8: {
-            MsgId = input.ReadInt32();
-            break;
-          }
-          case 18: {
-            MsgBody = input.ReadBytes();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  /// <summary>
   ///请求登录
   /// </summary>
   public sealed class ReqLogin : pb::IMessage {
@@ -99,8 +17,22 @@ namespace One {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<ReqLogin> Parser { get { return _parser; } }
 
+    /// <summary>Field number for the "account" field.</summary>
+    public const int AccountFieldNumber = 1;
+    private string account_ = "";
+    /// <summary>
+    ///账号
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Account {
+      get { return account_; }
+      set {
+        account_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     /// <summary>Field number for the "nickname" field.</summary>
-    public const int NicknameFieldNumber = 1;
+    public const int NicknameFieldNumber = 2;
     private string nickname_ = "";
     /// <summary>
     ///昵称	
@@ -115,8 +47,12 @@ namespace One {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Nickname.Length != 0) {
+      if (Account.Length != 0) {
         output.WriteRawTag(10);
+        output.WriteString(Account);
+      }
+      if (Nickname.Length != 0) {
+        output.WriteRawTag(18);
         output.WriteString(Nickname);
       }
     }
@@ -124,6 +60,9 @@ namespace One {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (Account.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Account);
+      }
       if (Nickname.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Nickname);
       }
@@ -139,6 +78,10 @@ namespace One {
             input.SkipLastField();
             break;
           case 10: {
+            Account = input.ReadString();
+            break;
+          }
+          case 18: {
             Nickname = input.ReadString();
             break;
           }
