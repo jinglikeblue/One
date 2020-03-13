@@ -17,7 +17,7 @@ namespace OneClient
 
         public Program()
         {
-            pe.AutoRegister(typeof(OneMsgId), typeof(BaseClientProtobufReceiver<>));
+            pe.AutoRegister(typeof(OneMsgId), typeof(BaseClientReceiver<>));
 
             //new InitMsgInfoTableCommand().Excute();
             client = new Client();

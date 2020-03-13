@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace OneServer
 {
-    class ReqLoginReceiver : BaseServerProtobufReceiver<ReqLogin>
+    class ReqLoginReceiver : BaseServerReceiver<ReqLogin>
     {
         protected override void OnReceive(Session session, ReqLogin pbObj)
         {

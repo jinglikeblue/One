@@ -6,7 +6,7 @@ using System.Text;
 
 namespace OneServer
 {
-    class PushRoleReceiver : BaseClientProtobufReceiver<PushRole>
+    class PushRoleReceiver : BaseClientReceiver<PushRole>
     {
         protected override void OnReceive(Client client, PushRole pbObj)
         {

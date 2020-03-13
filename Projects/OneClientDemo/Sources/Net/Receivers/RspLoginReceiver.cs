@@ -6,7 +6,7 @@ using System.Text;
 
 namespace OneClient
 {
-    class RspLoginReceiver : BaseClientProtobufReceiver<RspLogin>
+    class RspLoginReceiver : BaseClientReceiver<RspLogin>
     {
         protected override void OnReceive(Client client, RspLogin pbObj)
         {

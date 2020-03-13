@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace OneServer
 {
-    class ReqMsgReceiver : BaseServerProtobufReceiver<ReqMsg>
+    class ReqMsgReceiver : BaseServerReceiver<ReqMsg>
     {
         protected override void OnReceive(Session session, ReqMsg pbObj)
         {

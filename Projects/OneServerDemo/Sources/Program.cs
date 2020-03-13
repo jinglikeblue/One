@@ -82,7 +82,7 @@ namespace OneServer
 
         void InitMessageExpress()
         {
-            pe.AutoRegister(typeof(OneMsgId), typeof(BaseServerProtobufReceiver<>));
+            pe.AutoRegister(typeof(OneMsgId), typeof(BaseServerReceiver<>));
         }
 
         private void OnNewSession(Session obj)
