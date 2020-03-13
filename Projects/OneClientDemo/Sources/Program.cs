@@ -26,8 +26,6 @@ namespace OneClient
             client.Connect("127.0.0.1", 1875);
             //Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
 
-
-            
             Console.ReadKey();
         }
 

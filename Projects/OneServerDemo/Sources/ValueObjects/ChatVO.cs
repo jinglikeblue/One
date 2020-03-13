@@ -4,16 +4,16 @@ using System.Text;
 
 namespace OneServer
 {
-    public class RedisConfigVO
+    class ChatVO
     {
         /// <summary>
-        /// Redis服务器地址
+        /// UTC
         /// </summary>
-        public string address;
+        public long time;
 
         /// <summary>
-        /// Redis密码
+        /// 内容
         /// </summary>
-        public string pwd;
+        public string content;
     }
 }

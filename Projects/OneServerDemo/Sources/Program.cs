@@ -1,5 +1,4 @@
-﻿using Jing;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using One;
 using One.WebSocket;
 using System;
@@ -87,8 +86,15 @@ namespace OneServer
         }
 
         private void OnNewSession(Session obj)
-        {
+        {            
             obj.messageExpress = pe;
+            obj.onOpen += (session) => {
+                OneLog.W("连接用户数：{0}", session.sessionManager.Count);
+            };
+
+            obj.onClose += (session) => {
+                OneLog.W("连接用户数：{0}", session.sessionManager.Count);
+            };
         }
 
         private void OnException(object sender, UnhandledExceptionEventArgs e)

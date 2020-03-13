@@ -9,6 +9,10 @@ namespace OneServer
     {
         public readonly CoreModel core = new CoreModel();
 
+        public readonly RoomModel room = new RoomModel();
+
+        public readonly RoleModel roles = new RoleModel();
+
         protected override void Init()
         {
         
