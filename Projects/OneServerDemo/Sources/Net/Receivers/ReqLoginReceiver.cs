@@ -10,7 +10,19 @@ namespace OneServer
         {
             OneLog.D("[T:{0} S:{1}],登录请求：{2}", Thread.CurrentThread.ManagedThreadId, session.id, pbObj.Nickname);            
 
-            var role = Global.Ins.roles.GetRole(pbObj.Account, pbObj.Nickname);
+            var role = Global.Ins.roles.FindRole(pbObj.Account);
+            if(null == role)
+            {
+                //创建一个角色
+                role = Global.Ins.roles.CreateRole(pbObj.Account, pbObj.Nickname);                
+            }
+            else
+            {                
+                role.session?.Close();                
+            }
+
+            role.session = session;
+
             Global.Ins.room.AddRole(role);
 
             RspLogin rsp = new RspLogin();

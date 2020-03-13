@@ -19,7 +19,9 @@ namespace OneServer
 
 
             PushMsg pushMsg = new PushMsg();
-            pushMsg.Id = 
+            pushMsg.Id = role.id;
+            pushMsg.Content = pbObj.Content;
+            session.sessionManager.PushPackage(pushMsg);
         }
     }
 }
