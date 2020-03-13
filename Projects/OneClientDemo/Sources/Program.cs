@@ -1,5 +1,6 @@
 ﻿using One;
 using One.WebSocket;
+using OneServer;
 using System;
 
 namespace OneClient
@@ -15,13 +16,17 @@ namespace OneClient
 
         ProtobufExpress pe = new ProtobufExpress();
 
+        JsonExpress je = new JsonExpress();
+
         public Program()
         {
             pe.AutoRegister(typeof(OneMsgId), typeof(BaseClientReceiver<>));
 
+            je.AutoRegister(GetType().Assembly, typeof(BaseClientReceiver<>));
+
             //new InitMsgInfoTableCommand().Excute();
             client = new Client();
-            client.messageExpress = pe;
+            client.messageExpress = je;
             client.onOpen += OnOpen;
             client.Connect("127.0.0.1", 1875);
             //Global.Ins.net.ws.Connect("127.0.0.1", 1875);            
@@ -31,8 +36,12 @@ namespace OneClient
 
         private void OnOpen(Client client)
         {
-            ReqLogin msg = new ReqLogin();
-            msg.Nickname = "jing";
+            LoginRequestVO msg = new LoginRequestVO();
+            msg.account = "jing";
+            msg.nickname = "帅到想毁容";
+
+            //ReqLogin msg = new ReqLogin();
+            //msg.Nickname = "jing";
             client.SendPackage(msg);
         }
     }

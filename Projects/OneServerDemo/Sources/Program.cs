@@ -3,6 +3,7 @@ using One;
 using One.WebSocket;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 
 namespace OneServer
@@ -79,15 +80,17 @@ namespace OneServer
         }
 
         ProtobufExpress pe = new ProtobufExpress();
+        JsonExpress je = new JsonExpress();
 
         void InitMessageExpress()
-        {
+        {            
             pe.AutoRegister(typeof(OneMsgId), typeof(BaseServerReceiver<>));
+            je.AutoRegister(GetType().Assembly, typeof(BaseServerReceiver<>));
         }
 
         private void OnNewSession(Session obj)
         {            
-            obj.messageExpress = pe;
+            obj.messageExpress = je;
             obj.onOpen += (session) => {
                 OneLog.W("Open 连接用户数：{0}", session.sessionManager.Count);
             };

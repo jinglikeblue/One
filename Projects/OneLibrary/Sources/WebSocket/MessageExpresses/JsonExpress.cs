@@ -9,20 +9,58 @@ namespace One.WebSocket
     {
         class MsgVO
         {
-            public int id;
+            public string id;
             public string data;
         }
 
-        Dictionary<Type, int> _idDic;
-        Dictionary<int, Type> _pbTypeDic;
-        Dictionary<int, Type> _receiverTypeDic;
+        Dictionary<Type, string> _idDic;
+        Dictionary<string, Type> _pbTypeDic;
+        Dictionary<string, Type> _receiverTypeDic;
+
+        public JsonExpress()
+        {
+            _idDic = new Dictionary<Type, string>();
+            _pbTypeDic = new Dictionary<string, Type>();
+            _receiverTypeDic = new Dictionary<string, Type>();
+        }
+
+        public void AutoRegister(Assembly assembly, Type baseReceiverType)
+        {
+            var voIType = typeof(IMessageVO);
+
+            Dictionary<Type, Type> receiverDic = new Dictionary<Type, Type>();
+            var types = assembly.GetTypes();
+            foreach (var type in types)
+            {
+                if (voIType.IsAssignableFrom(type))
+                {
+                    RegisterMsg(type.FullName, type);
+                }
+
+                var baseType = type.BaseType;
+                if (baseType != null && baseType.IsGenericType && baseType.GetGenericTypeDefinition() == baseReceiverType)
+                {
+                    var voType = baseType.GenericTypeArguments[0];
+                    receiverDic[voType] = type;
+                }
+            }      
+            
+            foreach(var kv in receiverDic)
+            {
+                if (_idDic.ContainsKey(kv.Key))
+                {
+                    var msgId = _idDic[kv.Key];
+                    RegisterReceiver(msgId, kv.Value);
+                }
+            }
+        }
 
         /// <summary>
         /// 注册协议Id和对应的结构体
         /// </summary>
         /// <param name="msgId"></param>
         /// <param name="pbType"></param>
-        public void RegisterMsg(int msgId, Type voType)
+        public void RegisterMsg(string msgId, Type voType)
         {
             _idDic[voType] = msgId;
             _pbTypeDic[msgId] = voType;
@@ -33,7 +71,7 @@ namespace One.WebSocket
         /// </summary>
         /// <param name="msgId"></param>
         /// <param name="pbType"></param>
-        public void RegisterReceiver(int msgId, Type receiverType)
+        public void RegisterReceiver(string msgId, Type receiverType)
         {
             _receiverTypeDic[msgId] = receiverType;
         }
