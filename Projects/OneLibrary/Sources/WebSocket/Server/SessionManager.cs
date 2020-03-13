@@ -7,14 +7,14 @@ namespace One.WebSocket
     /// </summary>
     public class SessionManager
     {
-        Dictionary<string, Session> _sessionDic = new Dictionary<string, Session>();        
+        Dictionary<string, Session> _sessionDic = new Dictionary<string, Session>();
 
         public int Count
         {
             get
             {
                 return _sessionDic.Count;
-            }            
+            }
         }
 
         /// <summary>
@@ -75,11 +75,36 @@ namespace One.WebSocket
         /// 给所有会话推送消息
         /// </summary>
         /// <param name="data"></param>
-        public void Push(byte[] data)
+        public void Push(byte[] bytes)
         {
-            foreach(var session in _sessionDic.Values)
+            foreach (var session in _sessionDic.Values)
             {
-                session.Send(data);
+                session.Send(bytes);
+            }
+        }
+
+        /// <summary>
+        /// 给所有会话推送消息
+        /// </summary>
+        /// <param name="str"></param>
+        public void Push(string str)
+        {
+            foreach (var session in _sessionDic.Values)
+            {
+                session.Send(str);
+            }
+        }
+
+        /// <summary>
+        /// 发送消息，如果messageExpress存在，则会对数据进行Pack
+        /// </summary>
+        /// <param name="msgId"></param>
+        /// <param name="msg"></param>
+        public void PushPackage(object msg)
+        {
+            foreach (var session in _sessionDic.Values)
+            {
+                session.SendPackage(msg);
             }
         }
     }
