@@ -87,7 +87,7 @@ namespace One
         /// <param name="port"></param>
         public void Connect(string host, int port)
         {
-            Log.I("连接服务器 {0}:{1}", host, port);
+            OneLog.I("连接服务器 {0}:{1}", host, port);
             Host = host;
             Port = port;
             Close();

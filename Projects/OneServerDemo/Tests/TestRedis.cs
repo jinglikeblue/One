@@ -11,10 +11,10 @@ namespace OneServer.Tests
             RedisMgr.Ins.LoadAsync<TTT>("test_redis", OnLoad);
 
             TTT t = new TTT();
-            Log.I("开始测试Rediss");
+            OneLog.I("开始测试Rediss");
             RedisMgr.Ins.SaveAsync("test_redis", t, OnSave);
             RedisMgr.Ins.conn.GetDatabase().HashSet("a", "a1", "a11");
-            Log.I("HashSet保存成功");
+            OneLog.I("HashSet保存成功");
             //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "a1", "a12");
             //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "b1", "b11");
             //RedisMgr.Ins.conn.GetDatabase().HashSet("a", "b1", "b12");
@@ -26,14 +26,14 @@ namespace OneServer.Tests
 
         private void OnSave(bool obj)
         {
-            Log.I("保存成功");
+            OneLog.I("保存成功");
             RedisMgr.Ins.LoadAsync<TTT>("test_redis", OnLoad);
         }
 
         private void OnLoad(TTT obj)
         {
-            Log.I("读取成功");
-            Log.I(JsonConvert.SerializeObject(obj,Formatting.Indented));
+            OneLog.I("读取成功");
+            OneLog.I(JsonConvert.SerializeObject(obj,Formatting.Indented));
         }
     }
 }

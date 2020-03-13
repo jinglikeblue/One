@@ -36,12 +36,17 @@ namespace One.WebSocket
 
         protected override void OnMessage(MessageEventArgs e)
         {
-            onMessage?.Invoke(e);
+            onMessage?.Invoke(e);            
         }
 
-        public new void Send(byte[] data)
+        public new void Send(string str)
+        {
+            base.Send(str);
+        }
+
+        public new void Send(byte[] bytes)
         {               
-            base.Send(data);
+            base.Send(bytes);
         }
 
         /// <summary>
@@ -55,11 +60,11 @@ namespace One.WebSocket
             onMessage = null;
             try
             {
-                base.CloseAsync();
+                base.Close();
             }
             catch(Exception e)
             {
-                One.Log.W(e.Message);
+                OneLog.W(e.Message);
             }
         }
     }

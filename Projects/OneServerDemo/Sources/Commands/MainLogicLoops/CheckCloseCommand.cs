@@ -11,7 +11,7 @@ namespace OneServer
         {
             if (Global.Ins.core.isExit)
             {
-                Log.I("退出程序");
+                OneLog.I("退出程序");
             }
         }
 

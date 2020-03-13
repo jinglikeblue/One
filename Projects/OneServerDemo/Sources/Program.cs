@@ -19,6 +19,8 @@ namespace OneServer
 
         CoreModel _core;
 
+        
+
         public Program()
         {
             try
@@ -28,29 +30,31 @@ namespace OneServer
             }
             catch (Exception e)
             {
-                Log.E(e.Message);
+                OneLog.E(e.Message);
             }
         }
 
         void Startup()
         {
+            
             //读取服务器配置
             var settingsPath = "../../../Configs/settings.json";
             var content = File.ReadAllText(settingsPath);                  
             _core.settings = JsonConvert.DeserializeObject<SettingsConfigVO>(content);
 
+            InitMessageExpress();
             //启动通信服务
             _core.server = new Server(_core.settings.port);
             _core.server.onNewSession += OnNewSession;
             _core.server.Start();
-            
-            Log.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);            
+
+            OneLog.I(ConsoleColor.DarkYellow, "WebSocket Server Start! Lisening... {0}:{1}", _core.server.host, _core.server.port);
 
             //日志控制
-            Log.isConsoleOutput = _core.settings.logConsoleEnable;
+            OneLog.isConsoleOutput = _core.settings.logConsoleEnable;
             if (_core.settings.logOutputEnable)
-            {                
-                Log.UseLogFile(_core.settings.logOutputDir, _core.settings.logKeepDays);
+            {
+                OneLog.UseLogFile(_core.settings.logOutputDir, _core.settings.logKeepDays);
             }                      
             
             RegisterMainLogicLoopCommand();
@@ -75,17 +79,27 @@ namespace OneServer
             }
         }
 
+        ProtobufExpress pe = new ProtobufExpress();
+
+        void InitMessageExpress()
+        {
+            //这部分是前后端通用的，因为收发都要用
+            pe.RegisterMsg(OneMsgId.ReqLogin, typeof(ReqLogin));
+            pe.RegisterMsg(OneMsgId.RspLogin, typeof(RspLogin));
+
+            //这部分是处理客户端发过来的协议
+            pe.RegisterReceiver(OneMsgId.ReqLogin, typeof(ReqLoginReceiver));
+        }
+
         private void OnNewSession(Session obj)
         {
-            obj.onMessage += (session, msg) => {
-                Log.W(MessageUtility.TransformData(msg));
-            };
+            obj.messageExpress = pe;
         }
 
         private void OnException(object sender, UnhandledExceptionEventArgs e)
         {
-            Log.E("捕获到异常:");
-            Log.E(e.ToString());
+            OneLog.E("捕获到异常:");
+            OneLog.E(e.ToString());
         }
 
         /// <summary>

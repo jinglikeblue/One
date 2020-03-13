@@ -46,17 +46,28 @@ namespace One.WebSocket
         /// <summary>
         /// 连接打开
         /// </summary>
-        public event Action onOpen;
+        public event Action<Client> onOpen;
 
         /// <summary>
         /// 连接关闭
         /// </summary>
-        public event Action onClose;
+        public event Action<Client> onClose;
 
         /// <summary>
-        /// 收到消息
+        /// 收到二进制消息
         /// </summary>
-        public event Action<byte[]> onMessage;
+        public event Action<Client, byte[]> onBytesMessage;
+
+        /// <summary>
+        /// 收到字符串消息
+        /// </summary>
+        public event Action<Client, string> onStringMessage;
+
+        /// <summary>
+        /// <para>通过实现接口来进行自定义数据处理</para>
+        /// 消息处理器，如果不为null,则收到消息时会调用IMessageExpress的Unpack方法。        
+        /// </summary>
+        public IMessageExpress messageExpress = null;
 
         /// <summary>
         /// 关闭连接
@@ -71,7 +82,7 @@ namespace One.WebSocket
                 _socket.OnMessage -= OnMessage;
                 _socket.CloseAsync();
                 _socket = null;
-                onClose?.Invoke();
+                onClose?.Invoke(this);
             }
         }
 
@@ -109,7 +120,7 @@ namespace One.WebSocket
         public void Reconnect()
         {
             CloseSliently();
-            Log.I("连接WebSocket服务 {0}", Url);
+            OneLog.I("连接WebSocket服务 {0}", Url);
             _socket = new WebSocketSharp.WebSocket(Url);
             _socket.OnOpen += OnOpen;
             _socket.OnClose += OnClose;
@@ -119,49 +130,91 @@ namespace One.WebSocket
         }
 
         /// <summary>
-        /// 发送数据
+        /// 发送二进制数据
         /// </summary>
         /// <param name="data"></param>
-        public void Send(byte[] data)
+        public void Send(byte[] bytes)
         {
             if (IsAlive)
             {
-                _socket.Send(data);
+                _socket.Send(bytes);
+            }
+        }
+
+        /// <summary>
+        /// 发送字符串数据
+        /// </summary>
+        /// <param name="str"></param>
+        public void Send(string str)
+        {
+            if (IsAlive)
+            {
+                _socket.Send(str);
+            }
+        }
+
+        /// <summary>
+        /// 发送消息，如果messageExpress存在，则会对数据进行Pack
+        /// </summary>
+        /// <param name="msgId"></param>
+        /// <param name="msg"></param>
+        public void SendPackage(object msg)
+        {
+            if(null == messageExpress)
+            {
+                throw new Exception("必须有messageExpress对象才能使用该方法");
+            }
+
+            var data = messageExpress.Pack(msg);
+
+            if(data is string)
+            {
+                Send((string)data);
+            }
+            else if(data is byte[])
+            {
+                Send((byte[])data);
+            }
+            else
+            {
+                throw new Exception(data.GetType().FullName + "数据类型无法发送");
             }
         }
 
         private void OnOpen(object sender, EventArgs e)
         {
-            One.Log.I(ConsoleColor.DarkGreen, "连接打开");
-            onOpen?.Invoke();
+            OneLog.I(ConsoleColor.DarkGreen, "连接打开");
+            onOpen?.Invoke(this);
         }
 
         private void OnClose(object sender, CloseEventArgs e)
         {
-            One.Log.I(ConsoleColor.DarkGreen, "连接关闭");
+            OneLog.I(ConsoleColor.DarkGreen, "连接关闭");
             Close();
         }
 
         private void OnError(object sender, ErrorEventArgs e)
         {
-            One.Log.I(ConsoleColor.DarkGreen, "连接出错");
+            OneLog.I(ConsoleColor.DarkGreen, "连接出错");
             Close();
         }
 
         private void OnMessage(object sender, MessageEventArgs e)
         {
-            byte[] data = null;
             if (e.IsText)
             {
-                One.Log.I(ConsoleColor.DarkGreen, string.Format("收到文本消息: {0}", e.Data));
-                data = MessageUtility.TransformData(e.Data);
+                OneLog.I(ConsoleColor.DarkGreen, string.Format("收到文本消息: {0}", e.Data));
+
+                messageExpress?.Unpack(this, e.Data);
+                onStringMessage?.Invoke(this, e.Data);
             }
             else if (e.IsBinary)
             {
-                One.Log.I(ConsoleColor.DarkGreen, string.Format("收到二进制消息: {0}", e.RawData.ToString()));
-                data = e.RawData;
+                OneLog.I(ConsoleColor.DarkGreen, string.Format("收到二进制消息: size[{0}]", e.RawData.Length));
+
+                messageExpress?.Unpack(this, e.RawData);
+                onBytesMessage?.Invoke(this, e.RawData);
             }
-            onMessage?.Invoke(data);
         }
     }
 }
