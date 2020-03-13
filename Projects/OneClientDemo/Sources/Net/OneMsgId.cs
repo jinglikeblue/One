@@ -8,22 +8,22 @@ namespace One
     {
 
         //消息协议包
-        public const int  ProtoPackage = 1;
+        public const int ProtoPackage = 1;
 
         //请求登录
-        public const int  ReqLogin = 2;
+        public const int ReqLogin = 2;
 
         //登录回复
-        public const int  RspLogin = 3;
+        public const int RspLogin = 3;
 
         //推送角色状态
-        public const int  PushRole = 4;
+        public const int PushRole = 4;
 
         //发送消息
-        public const int  ReqMsg = 5;
+        public const int ReqMsg = 5;
 
         //推送消息
-        public const int  PushMsg = 6;
+        public const int PushMsg = 6;
 
     }
 }

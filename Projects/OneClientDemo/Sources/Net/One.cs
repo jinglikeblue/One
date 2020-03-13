@@ -99,19 +99,8 @@ namespace One {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<ReqLogin> Parser { get { return _parser; } }
 
-    /// <summary>Field number for the "account" field.</summary>
-    public const int AccountFieldNumber = 1;
-    private string account_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Account {
-      get { return account_; }
-      set {
-        account_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
     /// <summary>Field number for the "nickname" field.</summary>
-    public const int NicknameFieldNumber = 2;
+    public const int NicknameFieldNumber = 1;
     private string nickname_ = "";
     /// <summary>
     ///昵称	
@@ -126,12 +115,8 @@ namespace One {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (Account.Length != 0) {
-        output.WriteRawTag(10);
-        output.WriteString(Account);
-      }
       if (Nickname.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteString(Nickname);
       }
     }
@@ -139,9 +124,6 @@ namespace One {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (Account.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Account);
-      }
       if (Nickname.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Nickname);
       }
@@ -157,10 +139,6 @@ namespace One {
             input.SkipLastField();
             break;
           case 10: {
-            Account = input.ReadString();
-            break;
-          }
-          case 18: {
             Nickname = input.ReadString();
             break;
           }
@@ -271,19 +249,8 @@ namespace One {
       }
     }
 
-    /// <summary>Field number for the "account" field.</summary>
-    public const int AccountFieldNumber = 2;
-    private string account_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Account {
-      get { return account_; }
-      set {
-        account_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
     /// <summary>Field number for the "nickname" field.</summary>
-    public const int NicknameFieldNumber = 3;
+    public const int NicknameFieldNumber = 2;
     private string nickname_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Nickname {
@@ -299,12 +266,8 @@ namespace One {
         output.WriteRawTag(8);
         output.WriteInt32(Id);
       }
-      if (Account.Length != 0) {
-        output.WriteRawTag(18);
-        output.WriteString(Account);
-      }
       if (Nickname.Length != 0) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(18);
         output.WriteString(Nickname);
       }
     }
@@ -314,9 +277,6 @@ namespace One {
       int size = 0;
       if (Id != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
-      }
-      if (Account.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Account);
       }
       if (Nickname.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Nickname);
@@ -337,10 +297,6 @@ namespace One {
             break;
           }
           case 18: {
-            Account = input.ReadString();
-            break;
-          }
-          case 26: {
             Nickname = input.ReadString();
             break;
           }

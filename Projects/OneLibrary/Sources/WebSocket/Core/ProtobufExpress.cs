@@ -21,6 +21,42 @@ namespace One.WebSocket
         }
 
         /// <summary>
+        /// 自动分析并注册协议结构体以及
+        /// <para>msgIdType程序域需要和协议接收器代码(baseReceiverType的子类)的程序域相同</para>
+        /// </summary>
+        /// <param name="msgIdType"></param>
+        public void AutoRegister(Type msgIdType, Type baseReceiverType)
+        {
+            Dictionary<Type, Type> receiverDic = new Dictionary<Type, Type>();
+            var types = msgIdType.Assembly.GetTypes();
+            foreach (var type in types)
+            {
+                var baseType = type.BaseType;
+                if (baseType != null && baseType.IsGenericType && baseType.GetGenericTypeDefinition() == baseReceiverType)
+                {
+                    var pbType = baseType.GenericTypeArguments[0];
+                    receiverDic[pbType] = type;
+                }
+            }
+
+            var nameSpace = msgIdType.Namespace;
+            var fields = msgIdType.GetFields();
+            foreach (var field in fields)
+            {
+                var pbTypeName = nameSpace + "." + field.Name;
+                Type pbType = msgIdType.Assembly.GetType(pbTypeName);
+                var msgId = (int)field.GetValue(null);
+                RegisterMsg(msgId, pbType);
+
+                //如果这个数据还有对应的接收器，则注册
+                if (receiverDic.ContainsKey(pbType))
+                {
+                    RegisterReceiver(msgId, receiverDic[pbType]);
+                }
+            }
+        }
+
+        /// <summary>
         /// 注册协议Id和对应的结构体
         /// </summary>
         /// <param name="msgId"></param>

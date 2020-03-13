@@ -83,12 +83,7 @@ namespace OneServer
 
         void InitMessageExpress()
         {
-            //这部分是前后端通用的，因为收发都要用
-            pe.RegisterMsg(OneMsgId.ReqLogin, typeof(ReqLogin));
-            pe.RegisterMsg(OneMsgId.RspLogin, typeof(RspLogin));
-
-            //这部分是处理客户端发过来的协议
-            pe.RegisterReceiver(OneMsgId.ReqLogin, typeof(ReqLoginReceiver));
+            pe.AutoRegister(typeof(OneMsgId), typeof(BaseServerProtobufReceiver<>));
         }
 
         private void OnNewSession(Session obj)

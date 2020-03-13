@@ -1,8 +1,5 @@
 ﻿using One;
 using One.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace OneServer
@@ -13,7 +10,7 @@ namespace OneServer
         {
             OneLog.D("[T:{0} S:{1}],登录请求：{2}", Thread.CurrentThread.ManagedThreadId, session.id, pbObj.Nickname);
             RspLogin rsp = new RspLogin();
-            var account = pbObj.Account;
+            //var account = pbObj.Account;
             rsp.Id = 1;
             session.SendPackage(rsp);
             

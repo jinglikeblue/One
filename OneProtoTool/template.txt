@@ -1,0 +1,14 @@
+//命名空间和proto文件一致
+namespace [namespace_name]
+{
+    /// <summary>
+    /// push:推送消息(S2C) req:请求消息(C2S) resp:回复消息(S2C)
+    /// </summary>
+    class [class_name] //proto文件名 + "MsgId"
+    {
+[msg_field]
+    }
+}
+-split-
+        [proto_explain]
+        public const int [proto_name] = [msg_id];

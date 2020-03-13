@@ -17,12 +17,7 @@ namespace OneClient
 
         public Program()
         {
-            //这部分是前后端通用的，因为收发都要用
-            pe.RegisterMsg(OneMsgId.ReqLogin, typeof(ReqLogin));
-            pe.RegisterMsg(OneMsgId.RspLogin, typeof(RspLogin));            
-
-            //这部分是处理服务器发过来的协议
-            pe.RegisterReceiver(OneMsgId.RspLogin, typeof(RspLoginReceiver));
+            pe.AutoRegister(typeof(OneMsgId), typeof(BaseClientProtobufReceiver<>));
 
             //new InitMsgInfoTableCommand().Excute();
             client = new Client();
