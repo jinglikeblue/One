@@ -80,7 +80,7 @@ namespace One.WebSocket
                 _socket.OnClose -= OnClose;
                 _socket.OnError -= OnError;
                 _socket.OnMessage -= OnMessage;
-                _socket.CloseAsync();
+                _socket.Close();
                 _socket = null;
                 onClose?.Invoke(this);
             }
@@ -97,7 +97,7 @@ namespace One.WebSocket
                 _socket.OnClose -= OnClose;
                 _socket.OnError -= OnError;
                 _socket.OnMessage -= OnMessage;
-                _socket.CloseAsync();
+                _socket.Close();
                 _socket = null;
             }
         }

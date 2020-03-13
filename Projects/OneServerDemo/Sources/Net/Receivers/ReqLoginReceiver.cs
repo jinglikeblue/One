@@ -30,6 +30,12 @@ namespace OneServer
             //rsp.RoomId = ;
             session.SendPackage(rsp);
 
+            PushRole pushRole = new PushRole();
+            pushRole.Id = role.id;
+            pushRole.Nickname = role.nickname;
+
+            session.sessionManager.PushPackage(pushRole);
+
 
             //TODO 收到登录请求，判断account是否有匹配的数据，如果有则关联，没有则创建
         }

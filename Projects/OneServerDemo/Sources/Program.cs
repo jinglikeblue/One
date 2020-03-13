@@ -89,11 +89,11 @@ namespace OneServer
         {            
             obj.messageExpress = pe;
             obj.onOpen += (session) => {
-                OneLog.W("连接用户数：{0}", session.sessionManager.Count);
+                OneLog.W("Open 连接用户数：{0}", session.sessionManager.Count);
             };
 
             obj.onClose += (session) => {
-                OneLog.W("连接用户数：{0}", session.sessionManager.Count);
+                OneLog.W("Close 连接用户数：{0}", session.sessionManager.Count);
             };
         }
 
